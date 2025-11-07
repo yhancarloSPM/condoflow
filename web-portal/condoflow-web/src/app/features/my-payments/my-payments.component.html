@@ -1,0 +1,229 @@
+<div class="payments-layout">
+  <app-navbar></app-navbar>
+
+  @if (showMessage()) {
+    <div class="notification-overlay" [class]="messageType()" (click)="closeMessage()">
+      <div class="notification-content">
+        <div class="notification-icon">
+          @if (messageType() === 'success') {
+            <i class="pi pi-check-circle"></i>
+          } @else {
+            <i class="pi pi-exclamation-triangle"></i>
+          }
+        </div>
+        <div class="notification-text">
+          <h4>{{ messageType() === 'success' ? '¡Éxito!' : 'Atención' }}</h4>
+          <p>{{ messageText() }}</p>
+        </div>
+        <button class="notification-close" (click)="closeMessage()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </div>
+  }
+
+  <div class="main-content">
+    <div class="payments-container">
+      <div class="payment-form-section">
+        <div class="section-header">
+          <h3>Realizar Pago</h3>
+        </div>
+        <div class="payment-form-card" style="height: fit-content;">
+          <form [formGroup]="paymentForm" (ngSubmit)="onSubmitPayment()">
+            <div class="form-group">
+              <label>Tipo de Pago *</label>
+              <div class="payment-type-options">
+                <label class="radio-option">
+                  <input type="radio" name="paymentType" value="debt" [(ngModel)]="paymentType" (change)="onPaymentTypeChange()" [ngModelOptions]="{standalone: true}">
+                  <span class="radio-label">Pagar Deuda Pendiente</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="paymentType" value="free" [(ngModel)]="paymentType" (change)="onPaymentTypeChange()" [ngModelOptions]="{standalone: true}">
+                  <span class="radio-label">Pago Libre</span>
+                </label>
+              </div>
+            </div>
+            
+            @if (paymentType === 'debt') {
+              <div class="form-group">
+                <label for="selectedDebt">Seleccionar Deuda *</label>
+                <select id="selectedDebt" [(ngModel)]="selectedDebtId" (change)="onDebtSelected()" class="form-control" name="selectedDebt" [ngModelOptions]="{standalone: true}">
+                  <option value="">Seleccionar deuda a pagar...</option>
+                  @for (debt of availableDebts(); track debt.id) {
+                    <option [value]="debt.id">
+                      {{ debt.concept }}
+                    </option>
+                  }
+                </select>
+              </div>
+            }
+            
+            @if (paymentType === 'free') {
+              <div class="form-group">
+                <label for="concept">Concepto de Pago *</label>
+                <select id="concept" formControlName="concept" class="form-control">
+                  <option value="">Seleccionar concepto...</option>
+                  @for (concept of paymentConcepts(); track concept.value) {
+                    <option [value]="concept.value">{{ concept.label }}</option>
+                  }
+                </select>
+              </div>
+            }
+            
+            <div class="form-group">
+              <label for="paymentDate">Fecha del Comprobante *</label>
+              <input type="date" id="paymentDate" formControlName="paymentDate" class="form-control">
+            </div>
+            
+            <div class="form-group">
+              <label for="amount">Monto *</label>
+              <input type="number" id="amount" formControlName="amount" class="form-control" placeholder="0.00" step="0.01" min="0">
+            </div>
+            
+            <div class="form-group">
+              <label for="paymentMethod">Método de Pago *</label>
+              <select id="paymentMethod" formControlName="paymentMethod" class="form-control">
+                <option value="" disabled selected>Seleccionar método...</option>
+                <option value="Transferencia">Transferencia Bancaria</option>
+                <option value="Efectivo">Efectivo</option>
+                <option value="Cheque">Cheque</option>
+                <option value="Tarjeta">Tarjeta de Crédito/Débito</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Comprobante (Opcional)</label>
+              <div class="modern-file-upload" [class.has-file]="selectedFile">
+                <div class="file-drop-zone" (click)="triggerFileInput()">
+                  @if (!selectedFile) {
+                    <div class="upload-placeholder">
+                      <i class="pi pi-cloud-upload"></i>
+                      <span class="upload-text">Arrastra tu archivo aquí o <strong>haz clic para seleccionar</strong></span>
+                      <span class="upload-hint">JPG, PNG - Máx. 5MB</span>
+                    </div>
+                  } @else {
+                    <div class="file-preview">
+                      <i class="pi pi-file"></i>
+                      <div class="file-info">
+                        <span class="file-name">{{ selectedFile.name }}</span>
+                        <span class="file-size">{{ getFileSize(selectedFile.size) }}</span>
+                      </div>
+                      <button type="button" class="remove-file" (click)="removeFile($event)">
+                        <i class="pi pi-times"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
+                <input type="file" #fileInput id="receipt" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+              </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" [disabled]="!isFormValid() || submitting()">
+              @if (submitting()) {
+                <div class="spinner-sm"></div>
+                Enviando...
+              } @else {
+                Enviar Pago
+              }
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="payments-history-section">
+        <div class="section-header">
+          <h3>Historial de Pagos</h3>
+        </div>
+        <div class="payments-history-card">
+          @if (loading()) {
+            <div class="loading-state">
+              <div class="spinner"></div>
+              <p>Cargando pagos...</p>
+            </div>
+          } @else if (payments().length === 0) {
+            <div class="empty-state">
+              <i class="pi pi-credit-card"></i>
+              <p>No tienes pagos registrados</p>
+            </div>
+          } @else {
+            <div class="payments-list">
+              @for (payment of payments(); track payment.id) {
+                <div class="payment-item" [class]="payment.status">
+                  @if (payment.status === 'pending') {
+                    <div class="status-indicator pending">
+                      <i class="pi pi-clock"></i>
+                      <span>EN REVISIÓN</span>
+                    </div>
+                  } @else if (payment.status === 'approved') {
+                    <div class="status-indicator approved">
+                      <i class="pi pi-check"></i>
+                      <span>APROBADO</span>
+                    </div>
+                  } @else if (payment.status === 'rejected') {
+                    <div class="status-indicator rejected">
+                      <i class="pi pi-times"></i>
+                      <span>RECHAZADO</span>
+                    </div>
+                  }
+                  <div class="payment-info">
+                    <h4>{{ payment.description }}</h4>
+                    <p class="payment-details">{{ payment.paymentMethod }} - {{ payment.date | date:'dd/MM/yyyy' }}</p>
+                  </div>
+                  <div class="payment-meta">
+                    <small class="payment-created">Comprobante enviado: {{ payment.createdAt | date:'short' }}</small>
+                    @if (payment.receiptUrl) {
+                      <button type="button" class="btn-receipt-compact" (click)="viewReceipt(payment)" title="Ver comprobante">
+                        <i class="pi pi-file"></i>
+                      </button>
+                    }
+                  </div>
+                  <div class="payment-fixed-right">
+                    <div class="payment-details-section">
+                      <div class="payment-amount">
+                        {{ '$' + payment.amount?.toFixed(2) }}
+                        <small>DOP</small>
+                      </div>
+                    </div>
+                  </div>
+                  @if (payment.status === 'rejected' && payment.rejectionReason) {
+                    <div class="rejection-message-info">
+                      <span class="rejection-label">Motivo de rechazo:</span>
+                      <div class="rejection-reason" [title]="payment.rejectionReason">
+                        "{{ payment.rejectionReason.length > 150 ? payment.rejectionReason.substring(0, 150) + '...' : payment.rejectionReason }}"
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+            
+            @if (totalPages() > 1) {
+              <div class="pagination-container">
+                <div class="pagination-info">
+                  <span>Mostrando {{ (currentPage() - 1) * pageSize + 1 }} - {{ Math.min(currentPage() * pageSize, filteredPayments().length) }} de {{ filteredPayments().length }} pagos</span>
+                </div>
+                <div class="pagination">
+                  <button class="pagination-btn" [disabled]="currentPage() === 1" (click)="prevPage()">
+                    <i class="pi pi-chevron-left"></i>
+                  </button>
+                  @for (page of getPageNumbers(); track page) {
+                    @if (page === '...') {
+                      <span class="pagination-dots">...</span>
+                    } @else {
+                      <button class="pagination-btn" [class.active]="page === currentPage()" (click)="goToPage($any(page))">
+                        {{ page }}
+                      </button>
+                    }
+                  }
+                  <button class="pagination-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()">
+                    <i class="pi pi-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

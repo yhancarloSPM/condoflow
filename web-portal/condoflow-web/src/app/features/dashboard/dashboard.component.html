@@ -1,0 +1,110 @@
+<div class="dashboard-layout">
+  <app-navbar></app-navbar>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div class="header-content">
+        <h1>Dashboard Financiero</h1>
+        <p>Análisis general de deudas y pagos del condominio</p>
+      </div>
+    </div>
+
+    <!-- Cards de resumen -->
+    <div class="summary-cards">
+      <div class="summary-card overdue clickable" (click)="navigateToPaymentsByStatus('pending')">
+        <div class="card-icon">
+          <i class="pi pi-times"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ getTotalRequirePayment() }}</h3>
+          <p>Requieren Pago</p>
+        </div>
+      </div>
+      
+      <div class="summary-card pending clickable" (click)="navigateToPaymentsByStatus('review')">
+        <div class="card-icon">
+          <i class="pi pi-clock"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ getPaymentsInReview() }}</h3>
+          <p>En Revisión</p>
+        </div>
+      </div>
+      
+      <div class="summary-card paid clickable" (click)="navigateToPaymentsByStatus('paid')">
+        <div class="card-icon">
+          <i class="pi pi-check"></i>
+        </div>
+        <div class="card-content">
+          <h3>{{ totalPaid() }}</h3>
+          <p>Pagadas</p>
+        </div>
+      </div>
+      
+      <div class="summary-card expected">
+        <div class="card-icon">
+          <i class="pi pi-dollar"></i>
+        </div>
+        <div class="card-content">
+          <h3>$75K</h3>
+          <p>Ingreso Esperado</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-card">
+      <div class="filters-row">
+        <select [(ngModel)]="selectedBlock" (change)="onBlockChange()" class="filter-select">
+          <option value="">Todos los bloques</option>
+          @for (block of blocks(); track block.id) {
+            <option [value]="block.name">Bloque {{ block.name }}</option>
+          }
+        </select>
+        <select [(ngModel)]="selectedApartment" (change)="applyFilters()" class="filter-select">
+          <option value="">Todos los apartamentos</option>
+          @for (apt of getFilteredApartments(); track apt.id) {
+            <option [value]="apt.number">{{ apt.number }}</option>
+          }
+        </select>
+        <select [(ngModel)]="selectedPeriod" (change)="applyFilters()" class="filter-select">
+          <option value="all">Todo el período</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+        </select>
+      </div>
+    </div>
+
+
+
+
+
+    <!-- Gráficos -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Estado de Deudas</h3>
+        <div class="chart-container">
+          <canvas #pieChart></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Flujo de Pagos Mensuales</h3>
+        <div class="chart-container">
+          <canvas #incomeChart></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Morosidad por Bloque</h3>
+        <div class="chart-container">
+          <canvas #blockChart></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Morosidad por Apartamento (%)</h3>
+        <div class="chart-container">
+          <canvas #complianceChart></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

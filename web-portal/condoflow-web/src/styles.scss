@@ -1,0 +1,312 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'primeicons/primeicons.css';
+
+/* Variables CondoFlow */
+:root {
+  /* Colores principales */
+  --primary: #2563EB;           /* Azul profesional */
+  --primary-dark: #1d4ed8;      /* Azul más oscuro para hover */
+  --secondary: #10B981;         /* Verde jade */
+  --secondary-dark: #059669;    /* Verde más oscuro para hover */
+  
+  /* Colores neutrales */
+  --neutral-light: #F3F4F6;     /* Gris claro */
+  --neutral-dark: #374151;      /* Gris profundo */
+  --text: #374151;              /* Texto principal */
+  --text-light: #6B7280;        /* Texto secundario */
+  
+  /* Feedback */
+  --danger: #EF4444;            /* Rojo suave */
+  --success: #10B981;           /* Verde jade (mismo que secondary) */
+  
+  /* Utilidades */
+  --border: #E5E7EB;
+  --background: #FFFFFF;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Reset y base */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* Auth Layout */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+.auth-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  width: 100%;
+  max-width: 480px;
+  backdrop-filter: blur(10px);
+}
+
+/* PrimeNG Card Override */
+.p-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.p-card .p-card-header {
+  background: var(--primary);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+  border-bottom: none;
+}
+
+.p-card .p-card-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.p-card .p-card-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0.5rem 0 0 0;
+}
+
+.p-card .p-card-content {
+  padding: 2rem;
+}
+
+/* Form Styles */
+.form-label {
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.form-control, .form-select {
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  outline: none;
+}
+
+/* PrimeNG Input Override */
+.p-inputtext {
+  border: 2px solid var(--border) !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1rem !important;
+  font-size: 1rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-inputtext:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+
+/* Password Input */
+.p-password {
+  width: 100%;
+}
+
+.p-password .p-inputtext {
+  width: 100% !important;
+}
+
+/* Button Styles */
+.p-button {
+  background: var(--primary) !important;
+  border: 2px solid var(--primary) !important;
+  color: white !important;
+  padding: 0.875rem 1.5rem !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.p-button:hover:not(:disabled) {
+  background: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  transform: translateY(-1px);
+}
+
+.p-button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+/* Messages */
+.p-message {
+  border-radius: 8px !important;
+  border: none !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.p-message.p-message-error {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: var(--danger) !important;
+}
+
+/* Links */
+a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .auth-container {
+    padding: 0.5rem;
+  }
+  
+  .p-card .p-card-header {
+    padding: 1.5rem;
+  }
+  
+  .p-card .p-card-content {
+    padding: 1.5rem;
+  }
+  
+  .p-card .p-card-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Loading Animation */
+.p-button .p-button-loading-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* PrimeNG Toast Styles */
+.p-toast {
+  z-index: 9999 !important;
+}
+
+.p-toast .p-toast-message {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border: none !important;
+  margin: 0.5rem !important;
+  min-width: 300px !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-success {
+  background: #10B981 !important;
+  color: white !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-error {
+  background: #EF4444 !important;
+  color: white !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-warn {
+  background: #F59E0B !important;
+  color: white !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-info {
+  background: #2563EB !important;
+  color: white !important;
+}
+
+.p-toast .p-toast-message-content {
+  padding: 1rem 1.25rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+}
+
+.p-toast .p-toast-message-icon {
+  font-size: 1.25rem !important;
+}
+
+.p-toast .p-toast-message-text {
+  flex: 1 !important;
+}
+
+.p-toast .p-toast-summary {
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  margin: 0 0 0.25rem 0 !important;
+}
+
+.p-toast .p-toast-detail {
+  font-size: 0.8rem !important;
+  opacity: 0.9 !important;
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+
+.p-toast .p-toast-icon-close {
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  opacity: 0.8 !important;
+  cursor: pointer !important;
+  padding: 0.25rem !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-toast .p-toast-icon-close:hover {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Responsive Toast */
+@media (max-width: 768px) {
+  .p-toast .p-toast-message {
+    min-width: 280px !important;
+    margin: 0.25rem !important;
+  }
+  
+  .p-toast .p-toast-message-content {
+    padding: 0.875rem 1rem !important;
+  }
+  
+  .p-toast .p-toast-summary {
+    font-size: 0.8rem !important;
+  }
+  
+  .p-toast .p-toast-detail {
+    font-size: 0.75rem !important;
+  }
+}

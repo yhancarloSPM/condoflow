@@ -1,0 +1,67 @@
+<div class="dashboard-layout">
+  <app-navbar></app-navbar>
+
+  <div class="main-content">
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando deudas...</p>
+      </div>
+    } @else {
+      <!-- Calendario de Mantenimiento -->
+      <div class="calendar-section">
+        <div class="calendar-header">
+          <h3>Calendario de Incidencias</h3>
+          <div class="year-selector">
+            <label for="yearSelect">Año:</label>
+            <select id="yearSelect" [(ngModel)]="selectedYear" (change)="onYearChange()">
+              @for (year of availableYears; track year) {
+                <option [value]="year">{{ year }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        
+        <div class="calendar-grid">
+          @for (month of months; track $index) {
+            @if ($index > 0) {
+              <div class="month-card" [class]="getMonthStatus($index)">
+                <div class="month-header">
+                  <h4>{{ month }}</h4>
+                  <span class="month-number">{{ $index.toString().padStart(2, '0') }}</span>
+                </div>
+                <div class="month-content">
+                  @if (getDebtForMonth($index); as debt) {
+                    <div class="debt-info">
+                      <div class="amount">DOP ${{ debt.amount?.toFixed(2) }}</div>
+                      <div class="status">{{ getDebtStatusText(debt) }}</div>
+                      <div class="date">Vence: {{ debt.dueDate | date:'dd/MM' }}</div>
+                      @if (debt.status === 'Paid') {
+                        <a href="#" class="action-link view" (click)="viewReceipt(debt); $event.preventDefault()">
+                          Ver Comprobante
+                        </a>
+                      } @else if (debt.status === 'PaymentSubmitted') {
+                        <a href="#" class="action-link review" (click)="viewPaymentStatus(debt); $event.preventDefault()">
+                          Ver Estado
+                        </a>
+                      } @else {
+                        <a href="#" class="action-link pay" (click)="payDebt(debt); $event.preventDefault()">
+                          Pagar Ahora
+                        </a>
+                      }
+                    </div>
+                  } @else {
+                    <div class="no-debt">
+                      <i class="pi pi-calendar"></i>
+                      <span>Sin deuda</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

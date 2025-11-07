@@ -1,0 +1,74 @@
+@CondoFlow.WebApi_HostAddress = http://localhost:5181
+@token = 
+
+### 1. Register new user
+POST {{CondoFlow.WebApi_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test123!@#",
+  "firstName": "John",
+  "lastName": "Doe",
+  "role": "Owner"
+}
+
+### 2. Login user
+POST {{CondoFlow.WebApi_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test123!@#"
+}
+
+### 3. Get user profile (requires token)
+GET {{CondoFlow.WebApi_HostAddress}}/api/owners/profile
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4. Admin only endpoint (requires Admin role)
+GET {{CondoFlow.WebApi_HostAddress}}/api/owners/admin-only
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 5. Register Admin user
+POST {{CondoFlow.WebApi_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "Admin123!@#",
+  "firstName": "Admin",
+  "lastName": "User",
+  "role": "Admin"
+}
+
+### 6. Login Admin
+POST {{CondoFlow.WebApi_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "Admin123!@#"
+}
+
+### 7. Refresh Token
+POST {{CondoFlow.WebApi_HostAddress}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "REFRESH_TOKEN_AQUI"
+}
+
+### 8. Get Pending Users (Admin only)
+GET {{CondoFlow.WebApi_HostAddress}}/api/auth/pending-users
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 9. Approve User (Admin only)
+POST {{CondoFlow.WebApi_HostAddress}}/api/auth/approve-user/USER_ID_AQUI
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###

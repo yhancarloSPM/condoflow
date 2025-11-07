@@ -1,0 +1,141 @@
+.dashboard-layout { min-height: 100vh; background: #f8fafc; display: flex; flex-direction: column; }
+.top-nav { background: white; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+.nav-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 4rem; }
+.brand { display: flex; align-items: center; gap: 0.75rem; }
+.brand-icon { width: 2.5rem; height: 2.5rem; background: linear-gradient(135deg, #2563EB, #1d4ed8); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.25rem; }
+.brand-name { font-size: 1.5rem; font-weight: 700; color: #1f2937; }
+.user-section { display: flex; align-items: center; gap: 1.5rem; padding: 0.5rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e5e7eb; }
+.user-info { display: flex; align-items: center; gap: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 8px; }
+.user-avatar { background: linear-gradient(135deg, #10B981, #059669); color: white; font-weight: 600; width: 2.25rem; height: 2.25rem; font-size: 0.875rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.user-details { display: flex; flex-direction: column; align-items: flex-start; }
+.user-name { font-weight: 600; color: #1f2937; font-size: 0.875rem; line-height: 1.2; }
+.user-role { font-size: 0.75rem; color: #6b7280; line-height: 1.2; }
+.logout-button { background: white; border: 1px solid #e5e7eb; color: #6b7280; width: 2.5rem; height: 2.5rem; border-radius: 8px; padding: 0; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+.logout-button:hover { border-color: #fca5a5; color: #ef4444; background: #fef2f2; }
+
+.main-content { flex: 1; padding: 1rem; width: 100%; }
+.page-header { margin-bottom: 2rem; }
+.page-header h1 { font-size: 2rem; font-weight: 700; color: #1f2937; margin: 0 0 0.5rem 0; }
+.page-header p { color: #6b7280; margin: 0; }
+
+.loading-state { text-align: center; padding: 4rem 1rem; color: #6b7280; }
+.spinner { width: 2rem; height: 2rem; border: 2px solid #e5e7eb; border-top: 2px solid #2563EB; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem auto; }
+
+
+
+.calendar-section { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #f3f4f6; }
+.calendar-header h3 { font-size: 1.5rem; font-weight: 600; color: #1f2937; margin: 0; }
+.year-selector { display: flex; align-items: center; gap: 0.75rem; background: linear-gradient(135deg, #f8fafc, #ffffff); padding: 0.75rem 1.25rem; border-radius: 10px; border: 1px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); }
+.year-selector label { font-size: 0.875rem; font-weight: 600; color: #374151; }
+.year-selector select { padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; background: white; color: #1f2937; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; min-width: 85px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+.year-selector select:hover { border-color: #2563EB; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1); }
+.year-selector select:focus { outline: none; border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+
+.calendar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.75rem; }
+
+/* Laptop: 6 columns for smaller cards */
+@media (max-width: 1366px) and (min-width: 1024px) {
+  .calendar-grid {
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+}
+.month-card { background: white; border-radius: 12px; padding: 0.75rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; min-height: 100px; transition: all 0.2s ease; }
+.month-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+.month-card.paid { border-left: 4px solid #10B981; background: linear-gradient(135deg, #f0fdf4, #ffffff); }
+.month-card.pending { border-left: 4px solid #F59E0B; background: linear-gradient(135deg, #fffbeb, #ffffff); }
+.month-card.overdue { border-left: 4px solid #EF4444; background: linear-gradient(135deg, #fef2f2, #ffffff); }
+.month-card.payment-submitted { border-left: 4px solid #f97316; background: linear-gradient(135deg, #fff7ed, #ffffff); }
+.month-card.no-debt { border-left: 4px solid #e5e7eb; }
+
+.month-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #f3f4f6; }
+.month-header h4 { font-size: 1.125rem; font-weight: 600; color: #1f2937; margin: 0; }
+.month-number { font-size: 0.75rem; color: #6b7280; background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 4px; }
+
+.month-content { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 60px; }
+.debt-info { text-align: center; width: 100%; }
+.debt-info .amount { font-size: 1.5rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem; }
+.debt-info .status { font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; }
+.debt-info .date { font-size: 0.75rem; color: #6b7280; margin-bottom: 1rem; }
+.month-card.paid .debt-info .status { color: #10B981; }
+.month-card.pending .debt-info .status { color: #F59E0B; }
+.month-card.overdue .debt-info .status { color: #EF4444; }
+.month-card.payment-submitted .debt-info .status { color: #f97316; }
+
+.no-debt { display: flex; flex-direction: column; align-items: center; color: #9ca3af; }
+.no-debt i { font-size: 2rem; margin-bottom: 0.5rem; }
+.no-debt span { font-size: 0.875rem; }
+
+.action-link { color: #6b7280; text-decoration: none; font-size: 0.875rem; font-weight: 500; padding: 0.5rem 0; display: inline-block; transition: all 0.2s ease; }
+.action-link:hover { text-decoration: underline; color: #374151; }
+
+
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Laptop Styles (1024px - 1366px) */
+@media (max-width: 1366px) and (min-width: 1024px) {
+  .calendar-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .month-card {
+    padding: 0.4rem;
+    min-height: 100px;
+  }
+  
+  .month-header h4 {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .month-number {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .debt-info .amount {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .debt-info .status {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .debt-info .date {
+    font-size: 0.65rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .action-link {
+    padding: 0.3rem 0;
+    font-size: 0.75rem;
+  }
+  
+  .no-debt {
+    font-size: 0.75rem;
+  }
+  
+  .no-debt i {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .calendar-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .calendar-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .main-content { padding: 1rem; }
+  .calendar-grid { grid-template-columns: 1fr; }
+  .calendar-section { padding: 1rem; }
+}

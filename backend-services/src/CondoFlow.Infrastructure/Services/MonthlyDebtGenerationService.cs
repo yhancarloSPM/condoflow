@@ -1,0 +1,211 @@
+using CondoFlow.Domain.Entities;
+using CondoFlow.Domain.ValueObjects;
+using CondoFlow.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace CondoFlow.Infrastructure.Services;
+
+public class MonthlyDebtGenerationService : BackgroundService
+{
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<MonthlyDebtGenerationService> _logger;
+
+    public MonthlyDebtGenerationService(
+        IServiceProvider serviceProvider,
+        ILogger<MonthlyDebtGenerationService> logger)
+    {
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                var now = DateTime.Now;
+                var nextRun = new DateTime(now.Year, now.Month, 1).AddMonths(1).AddMinutes(1);
+                var delay = nextRun - now;
+
+                _logger.LogInformation("Próxima generación de deudas programada para: {NextRun}", nextRun);
+                
+                await Task.Delay(delay, stoppingToken);
+                
+                if (!stoppingToken.IsCancellationRequested)
+                {
+                    await GenerateMonthlyDebts();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en el servicio de generación de deudas mensuales");
+                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+            }
+        }
+    }
+
+    public async Task GenerateDebtsForYear(int year, int? specificMonth = null)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
+        _logger.LogInformation("Iniciando generación de deudas para el año {Year}", year);
+
+        try
+        {
+            var apartments = await context.Apartments
+                .Where(a => a.IsActive && a.OwnerId != null)
+                .ToListAsync();
+
+            var debtsCreated = 0;
+            var startMonth = specificMonth ?? 1;
+            var endMonth = specificMonth ?? 12;
+
+            for (int month = startMonth; month <= endMonth; month++)
+            {
+                foreach (var apartment in apartments)
+                {
+                    var existingDebt = await context.Debts
+                        .FirstOrDefaultAsync(d => d.OwnerId == apartment.OwnerId && 
+                                                 d.Month == month && 
+                                                 d.Year == year &&
+                                                 d.Concept.Contains("Mantenimiento"));
+
+                    if (existingDebt == null)
+                    {
+                        var maintenanceConcept = await context.PaymentConcepts
+                            .FirstOrDefaultAsync(c => c.Code == "maintenance" && c.IsActive);
+                        
+                        if (maintenanceConcept == null)
+                        {
+                            _logger.LogError("Concepto de mantenimiento no encontrado");
+                            continue;
+                        }
+                        
+                        var isRoofApartment = apartment.Number == "501" || apartment.Number == "502";
+                        var amount = isRoofApartment ? maintenanceConcept.RoofAmount!.Value : maintenanceConcept.DefaultAmount!.Value;
+                        
+                        var debt = new Debt();
+                        debt.Id = Guid.NewGuid();
+                        debt.OwnerId = apartment.OwnerId!.Value;
+                        debt.Amount = new Money(amount, "DOP");
+                        debt.PaidAmount = new Money(0, "DOP");
+                        debt.Month = month;
+                        debt.Year = year;
+                        debt.DueDate = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                        debt.Concept = $"Mantenimiento {GetMonthName(month)} {year}";
+                        debt.Status = "Pending";
+                        debt.CreatedAt = DateTime.UtcNow;
+
+                        context.Debts.Add(debt);
+                        debtsCreated++;
+                    }
+                }
+            }
+
+            if (debtsCreated > 0)
+            {
+                await context.SaveChangesAsync();
+                _logger.LogInformation("Generación completada: {Count} deudas creadas para el año {Year}", debtsCreated, year);
+            }
+            else
+            {
+                _logger.LogInformation("No se crearon nuevas deudas - ya existen para el año {Year}", year);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generando deudas para el año {Year}", year);
+            throw;
+        }
+    }
+
+    private async Task GenerateMonthlyDebts()
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
+        var currentMonth = DateTime.Now.Month;
+        var currentYear = DateTime.Now.Year;
+        
+        _logger.LogInformation("Iniciando generación de deudas para {Month}/{Year}", currentMonth, currentYear);
+
+        try
+        {
+            var apartments = await context.Apartments
+                .Where(a => a.IsActive && a.OwnerId != null)
+                .ToListAsync();
+
+            var debtsCreated = 0;
+
+            foreach (var apartment in apartments)
+            {
+                var existingDebt = await context.Debts
+                    .FirstOrDefaultAsync(d => d.OwnerId == apartment.OwnerId && 
+                                             d.Month == currentMonth && 
+                                             d.Year == currentYear &&
+                                             d.Concept.Contains("Mantenimiento"));
+
+                if (existingDebt == null)
+                {
+                    var maintenanceConcept = await context.PaymentConcepts
+                        .FirstOrDefaultAsync(c => c.Code == "maintenance" && c.IsActive);
+                    
+                    if (maintenanceConcept == null)
+                    {
+                        _logger.LogError("Concepto de mantenimiento no encontrado");
+                        continue;
+                    }
+                    
+                    var isRoofApartment = apartment.Number == "501" || apartment.Number == "502";
+                    var amount = isRoofApartment ? maintenanceConcept.RoofAmount!.Value : maintenanceConcept.DefaultAmount!.Value;
+                    
+                    var debt = new Debt();
+                    debt.Id = Guid.NewGuid();
+                    debt.OwnerId = apartment.OwnerId!.Value;
+                    debt.Amount = new Money(amount, "DOP");
+                    debt.PaidAmount = new Money(0, "DOP");
+                    debt.Month = currentMonth;
+                    debt.Year = currentYear;
+                    debt.DueDate = new DateTime(currentYear, currentMonth, DateTime.DaysInMonth(currentYear, currentMonth));
+                    debt.Concept = $"Mantenimiento {GetMonthName(currentMonth)} {currentYear}";
+                    debt.Status = "Pending";
+                    debt.CreatedAt = DateTime.UtcNow;
+
+                    context.Debts.Add(debt);
+                    debtsCreated++;
+                }
+            }
+
+            if (debtsCreated > 0)
+            {
+                await context.SaveChangesAsync();
+                _logger.LogInformation("Generación completada: {Count} deudas creadas", debtsCreated);
+            }
+            else
+            {
+                _logger.LogInformation("No se crearon nuevas deudas - ya existen para este mes");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generando deudas mensuales");
+            throw;
+        }
+    }
+
+    private static string GetMonthName(int month)
+    {
+        return month switch
+        {
+            1 => "Enero", 2 => "Febrero", 3 => "Marzo", 4 => "Abril",
+            5 => "Mayo", 6 => "Junio", 7 => "Julio", 8 => "Agosto",
+            9 => "Septiembre", 10 => "Octubre", 11 => "Noviembre", 12 => "Diciembre",
+            _ => month.ToString()
+        };
+    }
+}

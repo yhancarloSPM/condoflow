@@ -1,0 +1,78 @@
+<div class="dashboard-layout">
+  <app-navbar></app-navbar>
+
+  <div class="main-content">
+    <div class="page-header">
+      <h1>¡Hola, {{ currentUser()?.firstName }}!</h1>
+      <p>Aquí tienes el resumen de tus deudas y pagos del condominio</p>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando dashboard...</p>
+      </div>
+    } @else {
+      <!-- Cards de resumen -->
+      <div class="summary-cards">
+        <div class="summary-card overdue clickable" (click)="navigateToDebts()">
+          <div class="card-icon">
+            <i class="pi pi-times"></i>
+          </div>
+          <div class="card-content">
+            <h3>{{ totalRequirePayment() }}</h3>
+            <p>Requieren Pago</p>
+          </div>
+        </div>
+        
+        <div class="summary-card pending clickable" (click)="navigateToDebts()">
+          <div class="card-icon">
+            <i class="pi pi-clock"></i>
+          </div>
+          <div class="card-content">
+            <h3>{{ totalInReview() }}</h3>
+            <p>En Revisión</p>
+          </div>
+        </div>
+        
+        <div class="summary-card paid clickable" (click)="navigateToDebts()">
+          <div class="card-icon">
+            <i class="pi pi-check"></i>
+          </div>
+          <div class="card-content">
+            <h3>{{ totalPaid() }}</h3>
+            <p>Pagadas</p>
+          </div>
+        </div>
+        
+        <div class="summary-card expected">
+          <div class="card-icon">
+            <i class="pi pi-dollar"></i>
+          </div>
+          <div class="card-content">
+            <h3>${{ getMonthlyAmount() }}</h3>
+            <p>Pago Mensual</p>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- Gráficos -->
+      <div class="charts-section">
+        <div class="chart-card">
+          <h3>Estado de Mis Deudas</h3>
+          <div class="chart-container">
+            <canvas #pieChart></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Estado de Cumplimiento Mensual</h3>
+          <div class="chart-container">
+            <canvas #lineChart></canvas>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,28 @@
+// CondoFlow Color Palette
+// Colores principales
+$primary: #2563EB;           // Azul profesional
+$primary-dark: #1d4ed8;      // Azul más oscuro para hover
+$secondary: #10B981;         // Verde jade
+$secondary-dark: #059669;    // Verde más oscuro para hover
+
+// Colores neutrales
+$neutral-light: #F3F4F6;     // Gris claro
+$neutral-dark: #374151;      // Gris profundo
+$text: #374151;              // Texto principal
+$text-light: #6B7280;        // Texto secundario
+
+// Feedback
+$danger: #EF4444;            // Rojo suave
+$success: #10B981;           // Verde jade (mismo que secondary)
+
+// Utilidades
+$border: #E5E7EB;
+$background: #FFFFFF;
+$shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+// Breakpoints
+$mobile: 576px;
+$tablet: 768px;
+$desktop: 992px;
+$large: 1200px;
