@@ -9,14 +9,15 @@ public class IncidentTests
     {
         // Arrange & Act
         var ownerId = Guid.NewGuid();
-        var incident = new Incident(ownerId, "Water leak", "Leak in bathroom", "High", "image.jpg");
+        var incident = new Incident(ownerId, "Water leak", "Leak in bathroom", "plumbing", "high", "image.jpg");
 
         // Assert
         Assert.Equal(ownerId, incident.OwnerId);
         Assert.Equal("Water leak", incident.Title);
         Assert.Equal("Leak in bathroom", incident.Description);
-        Assert.Equal("Open", incident.Status);
-        Assert.Equal("High", incident.Priority);
+        Assert.Equal("reported", incident.Status);
+        Assert.Equal("high", incident.Priority);
+        Assert.Equal("plumbing", incident.Category);
         Assert.Equal("image.jpg", incident.ImageUrl);
     }
 
@@ -24,20 +25,20 @@ public class IncidentTests
     public void ChangeStatus_ShouldUpdateStatus()
     {
         // Arrange
-        var incident = new Incident(Guid.NewGuid(), "Test", "Test description");
+        var incident = new Incident(Guid.NewGuid(), "Test", "Test description", "general");
 
         // Act
-        incident.ChangeStatus("In Progress");
+        incident.ChangeStatus("in_progress");
 
         // Assert
-        Assert.Equal("In Progress", incident.Status);
+        Assert.Equal("in_progress", incident.Status);
     }
 
     [Fact]
     public void AddImage_ShouldUpdateImageUrl()
     {
         // Arrange
-        var incident = new Incident(Guid.NewGuid(), "Test", "Test description");
+        var incident = new Incident(Guid.NewGuid(), "Test", "Test description", "general");
 
         // Act
         incident.AddImage("new-image.jpg");

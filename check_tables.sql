@@ -1,0 +1,6 @@
+-- Verificar qué tablas existen en la base de datos
+SELECT TABLE_NAME 
+FROM INFORMATION_SCHEMA.TABLES 
+WHERE TABLE_TYPE = 'BASE TABLE' 
+AND TABLE_NAME LIKE '%Incident%' OR TABLE_NAME LIKE '%Catalog%'
+ORDER BY TABLE_NAME;

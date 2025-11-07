@@ -159,11 +159,12 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
 
-// Seed roles
+// Seed roles and catalogs
 try
 {
     using var scope = app.Services.CreateScope();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     
     if (!await roleManager.RoleExistsAsync("Admin"))
     {
@@ -178,11 +179,14 @@ try
         if (!result.Succeeded)
             throw new InvalidOperationException("Failed to create Owner role");
     }
+    
+    // Seed catalog data
+    await CatalogSeeder.SeedAsync(context);
 }
 catch (Exception ex)
 {
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex, "Failed to seed roles");
+    logger.LogError(ex, "Failed to seed roles or catalogs");
     if (!app.Environment.IsEnvironment("Testing"))
         throw;
 }

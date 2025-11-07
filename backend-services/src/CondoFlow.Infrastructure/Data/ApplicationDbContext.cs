@@ -20,6 +20,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<ReservationSlot> ReservationSlots { get; set; }
     public DbSet<Incident> Incidents { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Priority> Priorities { get; set; }
+    public DbSet<Status> Statuses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

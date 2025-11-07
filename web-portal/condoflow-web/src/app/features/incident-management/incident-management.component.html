@@ -1,0 +1,281 @@
+<div class="management-layout">
+  <app-navbar></app-navbar>
+
+  <div class="main-content">
+    <div class="container-fluid">
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="header-card">
+            <div class="header-content">
+              <div class="header-info">
+                <div class="header-icon">
+                  <i class="pi pi-wrench"></i>
+                </div>
+                <div class="header-text">
+                  <h2 class="header-title">Gestión de Incidencias</h2>
+                  <p class="header-subtitle">Administra incidencias reportadas en áreas comunes del condominio</p>
+                </div>
+              </div>
+              
+              <app-incident-filters
+                [statusCounts]="statusCounts()"
+                [priorities]="priorities()"
+                (filtersChanged)="onFiltersChanged($event)">
+              </app-incident-filters>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="incidents-card card">
+        <div class="card-header bg-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-dark"><i class="pi pi-wrench me-2" style="color: #f97316;"></i>Incidencias de Áreas Comunes</h5>
+            <div class="d-flex gap-2">
+              <div class="text-center">
+                <div class="badge bg-warning text-dark fw-bold">{{ statusCounts().reported }}</div>
+                <div><small class="text-muted">Reportadas</small></div>
+              </div>
+              <div class="text-center">
+                <div class="badge bg-info text-white fw-bold">{{ statusCounts().inProgress }}</div>
+                <div><small class="text-muted">En Proceso</small></div>
+              </div>
+              <div class="text-center">
+                <div class="badge bg-success text-white fw-bold">{{ statusCounts().resolved }}</div>
+                <div><small class="text-muted">Resueltas</small></div>
+              </div>
+              <div class="text-center">
+                <div class="badge bg-danger text-white fw-bold">{{ statusCounts().rejected }}</div>
+                <div><small class="text-muted">Rechazadas</small></div>
+              </div>
+              <div class="text-center">
+                <div class="badge bg-secondary text-white fw-bold">{{ statusCounts().cancelled }}</div>
+                <div><small class="text-muted">Canceladas</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column" style="height: calc(100vh - 450px);">
+          @if (loading()) {
+            <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
+              <div class="spinner"></div>
+              <p class="text-muted">Cargando incidencias...</p>
+            </div>
+          } @else if (paginatedIncidents().length === 0) {
+            <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
+              <i class="pi pi-wrench" style="font-size: 4rem; color: #6c757d;"></i>
+              <h6 class="text-muted mt-3">No hay incidencias</h6>
+              <p class="text-muted small">No hay incidencias reportadas en áreas comunes</p>
+            </div>
+          } @else {
+            <div class="table-responsive" style="flex: 1; overflow-y: auto; min-height: 0;">
+              <table class="table table-striped">
+                <thead class="sticky-top">
+                  <tr>
+                    <th style="width: 8%;">Fecha</th>
+                    <th style="width: 18%;">Propietario</th>
+                    <th style="width: 24%;">Título</th>
+                    <th style="width: 10%;">Prioridad</th>
+                    <th style="width: 10%;">Estado</th>
+                    <th style="width: 24%;">Comentarios</th>
+                    <th style="width: 6%; text-align: right; padding-right: 1.5rem;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (incident of paginatedIncidents(); track incident.id) {
+                    <tr>
+                      <td>{{ incident.createdAt | date:'dd/MM/yyyy' }}</td>
+                      <td>
+                        <div>{{ incident.ownerName }}</div>
+                        <small class="text-muted">{{ incident.apartment }}</small>
+                      </td>
+                      <td>
+                        <div style="word-break: break-word; white-space: normal;">{{ incident.title }}</div>
+                      </td>
+                      <td>
+                        <span class="badge priority-badge" [class]="'bg-' + getPrioritySeverity(incident.priority)" style="font-size: 0.7rem;">
+                          {{ getPriorityLabel(incident.priority) }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge status-badge" [class]="'bg-' + getStatusSeverity(incident.status)" style="font-size: 0.7rem;">
+                          {{ getStatusLabel(incident.status) }}
+                        </span>
+                      </td>
+                      <td>
+                        @if (incident.status === 'rejected' && incident.adminComment) {
+                          <div style="word-break: break-word; white-space: normal; display: block; font-weight: inherit;">{{ incident.adminComment }}</div>
+                        } @else if (incident.status === 'cancelled') {
+                          <span>Anulada por propietario →</span>
+                        } @else {
+                          <span class="text-muted">—</span>
+                        }
+                      </td>
+                      <td style="padding-right: 1.5rem;">
+                        <div class="d-flex gap-1 justify-content-end">
+                          <button class="btn-receipt-compact" (click)="viewIncidentDetail(incident)" title="Ver detalle">
+                            <i class="pi pi-eye"></i>
+                          </button>
+                          @if (incident.status === 'reported') {
+                            <button class="btn-edit-reported" (click)="openStatusModal(incident)" title="Cambiar estado">
+                              <i class="pi pi-pencil"></i>
+                            </button>
+                          } @else if (incident.status === 'in_progress') {
+                            <button class="btn-edit-progress" (click)="openStatusModal(incident)" title="Cambiar estado">
+                              <i class="pi pi-pencil"></i>
+                            </button>
+                          } @else if (incident.status === 'resolved') {
+                            <div class="status-icon-simple resolved" title="Incidencia resuelta">
+                              <i class="pi pi-check-circle"></i>
+                            </div>
+                          } @else if (incident.status === 'rejected') {
+                            <div class="status-icon-simple cancelled-admin" title="Rechazada por administrador">
+                              <i class="pi pi-times-circle"></i>
+                            </div>
+                          } @else if (incident.status === 'cancelled') {
+                            <div class="status-icon-simple cancelled-owner" title="Cancelada por propietario">
+                              <i class="pi pi-ban"></i>
+                            </div>
+                          } @else {
+                            <span class="text-muted">—</span>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            
+            @if (totalPages() > 1) {
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;">
+                <div>
+                  <small class="text-muted">
+                    Mostrando {{ (currentPage() - 1) * pageSize + 1 }} - {{ Math.min(currentPage() * pageSize, filteredIncidents().length) }} de {{ filteredIncidents().length }} incidencias
+                  </small>
+                </div>
+                <nav>
+                  <div class="pagination">
+                    <button class="pagination-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
+                      <i class="pi pi-chevron-left"></i>
+                    </button>
+                    @for (page of getPageNumbers(); track page) {
+                      @if (page === '...') {
+                        <span class="pagination-dots">...</span>
+                      } @else {
+                        <button class="pagination-btn" [class.active]="page === currentPage()" (click)="goToPage($any(page))">
+                          {{ page }}
+                        </button>
+                      }
+                    }
+                    <button class="pagination-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">
+                      <i class="pi pi-chevron-right"></i>
+                    </button>
+                  </div>
+                </nav>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalle -->
+@if (showDetailModal()) {
+  <div class="modal-backdrop" (click)="showDetailModal.set(false)">
+    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="pi pi-info-circle me-2" style="color: #6c757d;"></i>
+            Detalle de Incidencia
+          </h5>
+          <button type="button" class="btn-close" (click)="showDetailModal.set(false)">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          @if (selectedIncident()) {
+            <div class="incident-detail-card">
+              <div class="detail-header">
+                <h5 class="incident-title">{{ selectedIncident()?.title }}</h5>
+                <div class="incident-badges mt-3">
+                  <span class="badge" [class]="'bg-' + getStatusSeverity(selectedIncident()?.status)">{{ getStatusLabel(selectedIncident()?.status) }}</span>
+                  <span class="badge" [class]="'bg-' + getPrioritySeverity(selectedIncident()?.priority)">{{ getPriorityLabel(selectedIncident()?.priority) }}</span>
+                  <span class="badge bg-secondary">{{ getCategoryLabel(selectedIncident()?.category) }}</span>
+                </div>
+              </div>
+              
+              <div class="detail-body">
+                <div class="owner-section">
+                  <label class="detail-label">Propietario</label>
+                  <div class="owner-info">
+                    <strong>{{ selectedIncident()?.ownerName }}</strong> | {{ selectedIncident()?.apartment }}
+                  </div>
+                </div>
+                
+                <div class="description-section">
+                  <label class="detail-label">Descripción</label>
+                  <div class="description-content">{{ selectedIncident()?.description }}</div>
+                </div>
+                
+                @if (selectedIncident()?.imageUrl) {
+                  <div class="image-section">
+                    <label class="detail-label">Imagen adjunta</label>
+                    <button class="btn btn-outline-primary btn-sm" (click)="selectedIncident() && viewImage(selectedIncident()!)">
+                      <i class="pi pi-image me-2"></i>Ver imagen
+                    </button>
+                  </div>
+                }
+                
+                @if (selectedIncident()?.status === 'rejected' && selectedIncident()?.adminComment) {
+                  <div class="admin-comment-section">
+                    <label class="detail-label">Motivo de Rechazo del Administrador</label>
+                    <div class="admin-comment-content">{{ selectedIncident()?.adminComment }}</div>
+                  </div>
+                }
+                
+                @if (selectedIncident()?.status === 'cancelled') {
+                  <div class="admin-comment-section">
+                    <label class="detail-label">Motivo de Cancelación del Propietario</label>
+                    <div class="admin-comment-content">{{ selectedIncident()?.adminComment || 'El propietario canceló esta incidencia sin especificar motivo.' }}</div>
+                  </div>
+                }
+                
+                <div class="incident-date-footer">
+                  <small class="text-muted"><i class="pi pi-calendar me-1" style="color: #f59e0b;"></i>Reportado el {{ selectedIncident()?.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                  @if (selectedIncident()?.status === 'rejected' && selectedIncident()?.updatedAt) {
+                    <br><small class="text-muted">
+                      <i class="pi pi-times me-1" style="color: #dc2626;"></i>
+                      Rechazado por administrador el {{ selectedIncident()?.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+                    </small>
+                  }
+                  @if (selectedIncident()?.status === 'cancelled' && selectedIncident()?.updatedAt) {
+                    <br><small class="text-muted">
+                      <i class="pi pi-ban me-1" style="color: #64748b;"></i>
+                      Cancelado por propietario el {{ selectedIncident()?.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+                    </small>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="showDetailModal.set(false)">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<app-incident-status-modal
+  [show]="showStatusModal()"
+  [incident]="incidentToUpdate()"
+  (statusUpdated)="onStatusUpdated($event)"
+  (modalClosed)="onStatusModalClosed()">
+</app-incident-status-modal>
