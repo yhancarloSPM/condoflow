@@ -187,79 +187,123 @@
   <div class="modal-backdrop" (click)="showDetailModal.set(false)">
     <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">
-            <i class="pi pi-info-circle me-2" style="color: #6c757d;"></i>
+        <div class="modal-header" style="background-color: #f97316; border-bottom: 1px solid #f97316;">
+          <h5 class="modal-title" style="color: white;">
+            <i class="pi pi-info-circle me-2"></i>
             Detalle de Incidencia
           </h5>
-          <button type="button" class="btn-close" (click)="showDetailModal.set(false)">
+          <button type="button" class="btn-close" (click)="showDetailModal.set(false)" style="filter: brightness(0) invert(1);">
             <i class="pi pi-times"></i>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body p-0">
           @if (selectedIncident()) {
-            <div class="incident-detail-card">
-              <div class="detail-header">
-                <h5 class="incident-title">{{ selectedIncident()?.title }}</h5>
-                <div class="incident-badges mt-3">
-                  <span class="badge" [class]="'bg-' + getStatusSeverity(selectedIncident()?.status)">{{ getStatusLabel(selectedIncident()?.status) }}</span>
-                  <span class="badge" [class]="'bg-' + getPrioritySeverity(selectedIncident()?.priority)">{{ getPriorityLabel(selectedIncident()?.priority) }}</span>
-                  <span class="badge bg-secondary">{{ getCategoryLabel(selectedIncident()?.category) }}</span>
+            <!-- Header con título y badges -->
+            <div class="p-4 border-bottom">
+              <h4 class="mb-3 fw-bold text-dark">{{ selectedIncident()?.title }}</h4>
+              <div class="d-flex gap-2 flex-wrap">
+                <span class="badge fs-6 px-3 py-2" [class]="'bg-' + getStatusSeverity(selectedIncident()?.status)">
+                  {{ getStatusLabel(selectedIncident()?.status) }}
+                </span>
+                <span class="badge fs-6 px-3 py-2" [class]="'bg-' + getPrioritySeverity(selectedIncident()?.priority)">
+                  {{ getPriorityLabel(selectedIncident()?.priority) }}
+                </span>
+                <span class="badge bg-secondary fs-6 px-3 py-2">
+                  {{ getCategoryLabel(selectedIncident()?.category) }}
+                </span>
+              </div>
+            </div>
+            
+            <!-- Información del propietario -->
+            <div class="p-4 border-bottom bg-light">
+              <div class="d-flex align-items-center">
+                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; background-color: #f97316;">
+                  <i class="pi pi-user text-white" style="font-size: 0.8rem;"></i>
+                </div>
+                <div>
+                  <h6 class="mb-1 fw-bold">{{ selectedIncident()?.ownerName }}</h6>
+                  <small class="text-muted">{{ selectedIncident()?.apartment }}</small>
                 </div>
               </div>
-              
-              <div class="detail-body">
-                <div class="owner-section">
-                  <label class="detail-label">Propietario</label>
-                  <div class="owner-info">
-                    <strong>{{ selectedIncident()?.ownerName }}</strong> | {{ selectedIncident()?.apartment }}
+            </div>
+            
+            <!-- Descripción -->
+            <div class="p-4 border-bottom">
+              <div class="d-flex align-items-start">
+                <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 32px; height: 32px; background-color: #f97316;">
+                  <i class="pi pi-file-edit text-white" style="font-size: 0.8rem;"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-2 fw-semibold text-dark">Descripción</h6>
+                  <p class="mb-0 text-muted lh-base">{{ selectedIncident()?.description }}</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Imagen adjunta -->
+            @if (selectedIncident()?.imageUrl) {
+              <div class="p-4 border-bottom">
+                <div class="d-flex align-items-center">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; background-color: #f97316;">
+                    <i class="pi pi-image text-white" style="font-size: 0.8rem;"></i>
                   </div>
-                </div>
-                
-                <div class="description-section">
-                  <label class="detail-label">Descripción</label>
-                  <div class="description-content">{{ selectedIncident()?.description }}</div>
-                </div>
-                
-                @if (selectedIncident()?.imageUrl) {
-                  <div class="image-section">
-                    <label class="detail-label">Imagen adjunta</label>
-                    <button class="btn btn-outline-primary btn-sm" (click)="selectedIncident() && viewImage(selectedIncident()!)">
-                      <i class="pi pi-image me-2"></i>Ver imagen
+                  <div class="flex-grow-1">
+                    <h6 class="mb-2 fw-semibold text-dark">Imagen adjunta</h6>
+                    <button class="btn btn-outline-success btn-sm" (click)="selectedIncident() && viewImage(selectedIncident()!)">
+                      <i class="pi pi-eye me-2"></i>Ver imagen
                     </button>
                   </div>
-                }
-                
-                @if (selectedIncident()?.status === 'rejected' && selectedIncident()?.adminComment) {
-                  <div class="admin-comment-section">
-                    <label class="detail-label">Motivo de Rechazo del Administrador</label>
-                    <div class="admin-comment-content">{{ selectedIncident()?.adminComment }}</div>
-                  </div>
-                }
-                
-                @if (selectedIncident()?.status === 'cancelled') {
-                  <div class="admin-comment-section">
-                    <label class="detail-label">Motivo de Cancelación del Propietario</label>
-                    <div class="admin-comment-content">{{ selectedIncident()?.adminComment || 'El propietario canceló esta incidencia sin especificar motivo.' }}</div>
-                  </div>
-                }
-                
-                <div class="incident-date-footer">
-                  <small class="text-muted"><i class="pi pi-calendar me-1" style="color: #f59e0b;"></i>Reportado el {{ selectedIncident()?.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
-                  @if (selectedIncident()?.status === 'rejected' && selectedIncident()?.updatedAt) {
-                    <br><small class="text-muted">
-                      <i class="pi pi-times me-1" style="color: #dc2626;"></i>
-                      Rechazado por administrador el {{ selectedIncident()?.updatedAt | date:'dd/MM/yyyy HH:mm' }}
-                    </small>
-                  }
-                  @if (selectedIncident()?.status === 'cancelled' && selectedIncident()?.updatedAt) {
-                    <br><small class="text-muted">
-                      <i class="pi pi-ban me-1" style="color: #64748b;"></i>
-                      Cancelado por propietario el {{ selectedIncident()?.updatedAt | date:'dd/MM/yyyy HH:mm' }}
-                    </small>
-                  }
                 </div>
               </div>
+            }
+            
+            <!-- Comentarios del administrador -->
+            @if (selectedIncident()?.status === 'rejected' && selectedIncident()?.adminComment) {
+              <div class="p-4 border-bottom bg-danger bg-opacity-10">
+                <div class="d-flex align-items-start">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 32px; height: 32px; background-color: #f97316;">
+                    <i class="pi pi-times text-white" style="font-size: 0.8rem;"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-2 fw-semibold text-danger">Motivo de Rechazo</h6>
+                    <p class="mb-0 text-dark lh-base">{{ selectedIncident()?.adminComment }}</p>
+                  </div>
+                </div>
+              </div>
+            }
+            
+            @if (selectedIncident()?.status === 'cancelled') {
+              <div class="p-4 border-bottom bg-secondary bg-opacity-10">
+                <div class="d-flex align-items-start">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 32px; height: 32px; background-color: #f97316;">
+                    <i class="pi pi-info-circle text-white" style="font-size: 0.8rem;"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-2 fw-semibold text-secondary">Motivo de Cancelación</h6>
+                    <p class="mb-0 text-dark lh-base">{{ selectedIncident()?.adminComment || 'El propietario canceló esta incidencia sin especificar motivo.' }}</p>
+                  </div>
+                </div>
+              </div>
+            }
+            
+            <!-- Footer con fechas -->
+            <div class="p-4 bg-light">
+              <div class="d-flex align-items-center text-muted">
+                <i class="pi pi-calendar me-2" style="color: #f97316;"></i>
+                <small>Reportado el {{ selectedIncident()?.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+              </div>
+              @if (selectedIncident()?.status === 'rejected' && selectedIncident()?.updatedAt) {
+                <div class="d-flex align-items-center text-muted mt-2">
+                  <i class="pi pi-times me-2" style="color: #dc2626;"></i>
+                  <small>Rechazado el {{ selectedIncident()?.updatedAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                </div>
+              }
+              @if (selectedIncident()?.status === 'cancelled' && selectedIncident()?.updatedAt) {
+                <div class="d-flex align-items-center text-muted mt-2">
+                  <i class="pi pi-ban me-2" style="color: #64748b;"></i>
+                  <small>Cancelado el {{ selectedIncident()?.updatedAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                </div>
+              }
             </div>
           }
         </div>

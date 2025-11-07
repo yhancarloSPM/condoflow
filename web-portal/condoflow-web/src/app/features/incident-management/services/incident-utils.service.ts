@@ -60,7 +60,19 @@ export class IncidentUtilsService {
   
   getCategoryLabel(category: IncidentCategory): string {
     const cat = this.categoriesCache.find(c => c.value === category);
-    return cat ? cat.label : category;
+    if (cat) return cat.label;
+    
+    // Fallback si el cache no está disponible
+    const fallbackMap: Record<string, string> = {
+      'plumbing': 'Plomería',
+      'electrical': 'Eléctrico', 
+      'maintenance': 'Mantenimiento',
+      'security': 'Seguridad',
+      'cleaning': 'Limpieza',
+      'common_areas': 'Áreas Comunes',
+      'other': 'Otros'
+    };
+    return fallbackMap[category] || category;
   }
 
   getPriorityLabel(priority: IncidentPriority): string {
