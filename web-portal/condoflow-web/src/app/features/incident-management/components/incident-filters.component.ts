@@ -13,11 +13,11 @@ import { IncidentCategoryOption, IncidentPriorityOption, IncidentStatusCounts, I
         <label class="form-label">Estado</label>
         <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
           <option value="">Todos los estados</option>
-          <option [value]="IncidentStatus.REPORTED">Reportadas ({{statusCounts.reported}})</option>
-          <option [value]="IncidentStatus.IN_PROGRESS">En Proceso ({{statusCounts.inProgress}})</option>
-          <option [value]="IncidentStatus.RESOLVED">Resueltas ({{statusCounts.resolved}})</option>
-          <option [value]="IncidentStatus.REJECTED">Rechazadas ({{statusCounts.rejected}})</option>
-          <option [value]="IncidentStatus.CANCELLED">Canceladas ({{statusCounts.cancelled}})</option>
+          <option [value]="IncidentStatus.REPORTED">Reportadas</option>
+          <option [value]="IncidentStatus.IN_PROGRESS">En Proceso</option>
+          <option [value]="IncidentStatus.RESOLVED">Resueltas</option>
+          <option [value]="IncidentStatus.REJECTED">Rechazadas</option>
+          <option [value]="IncidentStatus.CANCELLED">Canceladas</option>
         </select>
       </div>
       
