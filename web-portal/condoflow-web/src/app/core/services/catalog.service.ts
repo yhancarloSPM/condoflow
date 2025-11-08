@@ -8,8 +8,8 @@ export interface CatalogItem {
   code: string;
   name: string;
   description?: string;
-  isActive: boolean;
   order?: number;
+  isActive: boolean;
 }
 
 export interface ApiResponse<T> {
@@ -22,24 +22,27 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class CatalogService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl = `${environment.apiUrl}/api/catalogs`;
 
   constructor(private http: HttpClient) {}
 
+  getEventTypes(): Observable<ApiResponse<CatalogItem[]>> {
+    return this.http.get<ApiResponse<CatalogItem[]>>(`${environment.apiUrl}/eventtypes`);
+  }
+
+  getReservationStatuses(): Observable<ApiResponse<CatalogItem[]>> {
+    return this.http.get<ApiResponse<CatalogItem[]>>(`${environment.apiUrl}/statuses/reservation`);
+  }
+
+  getIncidentStatuses(): Observable<ApiResponse<CatalogItem[]>> {
+    return this.http.get<ApiResponse<CatalogItem[]>>(`${environment.apiUrl}/statuses/incident`);
+  }
+
   getCategories(): Observable<ApiResponse<CatalogItem[]>> {
-    return this.http.get<ApiResponse<CatalogItem[]>>(`${this.apiUrl}/catalogs/categories`);
+    return this.http.get<ApiResponse<CatalogItem[]>>(`${environment.apiUrl}/categories`);
   }
 
   getPriorities(): Observable<ApiResponse<CatalogItem[]>> {
-    return this.http.get<ApiResponse<CatalogItem[]>>(`${this.apiUrl}/catalogs/priorities`);
-  }
-
-  getStatuses(): Observable<ApiResponse<CatalogItem[]>> {
-    return this.http.get<ApiResponse<CatalogItem[]>>(`${this.apiUrl}/catalogs/statuses`);
-  }
-
-  // Método genérico para obtener cualquier catálogo
-  getCatalog(catalogType: string): Observable<ApiResponse<CatalogItem[]>> {
-    return this.http.get<ApiResponse<CatalogItem[]>>(`${this.apiUrl}/catalogs/${catalogType}`);
+    return this.http.get<ApiResponse<CatalogItem[]>>(`${environment.apiUrl}/priorities`);
   }
 }

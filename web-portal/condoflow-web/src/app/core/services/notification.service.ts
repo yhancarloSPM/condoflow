@@ -38,23 +38,10 @@ export class NotificationService {
 
     try {
       await this.hubConnection.start();
-      console.log('SignalR Connected');
       
-      const user = this.authService.currentUser();
-      console.log('[SIGNALR] Conectado como:', user?.role);
-
       this.hubConnection.on('NewNotification', (notification: any) => {
-        console.log('[SIGNALR] Nueva notificación recibida:', {
-          title: notification.title,
-          type: notification.type,
-          createdAt: notification.createdAt
-        });
-        
         if (this.shouldShowNotification(notification)) {
-          console.log('[SIGNALR] Notificación agregada a la lista');
           this.addNotification(notification);
-        } else {
-          console.log('[SIGNALR] Notificación filtrada (no mostrada)');
         }
       });
 
@@ -172,14 +159,11 @@ export class NotificationService {
       
       if (response?.success && response.data) {
         const notifications = response.data;
-        console.log('[FRONTEND] Notificaciones recibidas del backend:', notifications.length);
-        console.log('[FRONTEND] Últimas 3 notificaciones:', notifications.slice(0, 3).map((n: any) => ({ title: n.title, createdAt: n.createdAt })));
         
         const filteredNotifications = notifications.filter((notification: any) => 
           this.shouldShowNotification(notification)
         );
         
-        console.log('[FRONTEND] Notificaciones después del filtro:', filteredNotifications.length);
         this.notifications.set(filteredNotifications);
         this.updateUnreadCount();
       }

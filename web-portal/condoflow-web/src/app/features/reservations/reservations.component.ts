@@ -862,7 +862,8 @@ export class ReservationsComponent implements OnInit {
       reservationDate: this.selectedDateStr,
       startTime: this.startTime + ':00',
       endTime: this.endTime + ':00',
-      notes: fullNotes
+      eventTypeCode: this.selectedEventType,
+      notes: this.notes
     };
     
     this.reservationService.createReservation(reservation).subscribe({

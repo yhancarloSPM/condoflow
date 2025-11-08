@@ -4,6 +4,7 @@ using CondoFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CondoFlow.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251107202532_RemoveCatalogsAddEventTypes")]
+    partial class RemoveCatalogsAddEventTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,7 +57,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Announcements", (string)null);
+                    b.ToTable("Announcements");
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Apartment", b =>
@@ -92,7 +95,7 @@ namespace CondoFlow.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Apartment_Block_Number_Unique");
 
-                    b.ToTable("Apartments", (string)null);
+                    b.ToTable("Apartments");
 
                     b.HasData(
                         new
@@ -462,7 +465,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Blocks", (string)null);
+                    b.ToTable("Blocks");
 
                     b.HasData(
                         new
@@ -530,7 +533,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Debt", b =>
@@ -569,7 +572,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Debts", (string)null);
+                    b.ToTable("Debts");
 
                     b.HasData(
                         new
@@ -657,39 +660,7 @@ namespace CondoFlow.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_EventTypes_Code_Unique");
 
-                    b.ToTable("EventTypes", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("e5e5e5e5-e5e5-e5e5-e5e5-e5e5e5e5e5e5"),
-                            Code = "birthday",
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Celebración de cumpleaños",
-                            IsActive = true,
-                            Name = "Cumpleaños",
-                            Order = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("f6f6f6f6-f6f6-f6f6-f6f6-f6f6f6f6f6f6"),
-                            Code = "meeting",
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Reunión familiar o de trabajo",
-                            IsActive = true,
-                            Name = "Reunión",
-                            Order = 2
-                        },
-                        new
-                        {
-                            Id = new Guid("a7a7a7a7-a7a7-a7a7-a7a7-a7a7a7a7a7a7"),
-                            Code = "celebration",
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Celebración general",
-                            IsActive = true,
-                            Name = "Celebración",
-                            Order = 3
-                        });
+                    b.ToTable("EventTypes");
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Incident", b =>
@@ -741,7 +712,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Incidents", (string)null);
+                    b.ToTable("Incidents");
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Notification", b =>
@@ -788,7 +759,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.NotificationHistory", b =>
@@ -825,7 +796,7 @@ namespace CondoFlow.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_NotificationHistory_Debt_Type_Unique");
 
-                    b.ToTable("NotificationHistories", (string)null);
+                    b.ToTable("NotificationHistories");
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Payment", b =>
@@ -873,7 +844,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasIndex("DebtId");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.PaymentConcept", b =>
@@ -914,7 +885,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PaymentConcepts", (string)null);
+                    b.ToTable("PaymentConcepts");
 
                     b.HasData(
                         new
@@ -976,7 +947,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Priorities", (string)null);
+                    b.ToTable("Priorities");
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Reservation", b =>
@@ -1029,7 +1000,7 @@ namespace CondoFlow.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Reservation_DateTime_Unique");
 
-                    b.ToTable("Reservations", (string)null);
+                    b.ToTable("Reservations");
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.ReservationSlot", b =>
@@ -1060,7 +1031,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ReservationSlots", (string)null);
+                    b.ToTable("ReservationSlots");
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Status", b =>
@@ -1091,45 +1062,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Statuses", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1"),
-                            Code = "Pending",
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Reserva pendiente de aprobación",
-                            IsActive = true,
-                            Name = "Pendiente"
-                        },
-                        new
-                        {
-                            Id = new Guid("b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2"),
-                            Code = "Confirmed",
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Reserva confirmada",
-                            IsActive = true,
-                            Name = "Confirmada"
-                        },
-                        new
-                        {
-                            Id = new Guid("c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3"),
-                            Code = "Rejected",
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Reserva rechazada",
-                            IsActive = true,
-                            Name = "Rechazada"
-                        },
-                        new
-                        {
-                            Id = new Guid("d4d4d4d4-d4d4-d4d4-d4d4-d4d4d4d4d4d4"),
-                            Code = "Cancelled",
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Reserva cancelada",
-                            IsActive = true,
-                            Name = "Cancelada"
-                        });
+                    b.ToTable("Statuses");
                 });
 
             modelBuilder.Entity("CondoFlow.Infrastructure.Identity.ApplicationUser", b =>
@@ -1411,7 +1344,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                             b1.HasKey("DebtId");
 
-                            b1.ToTable("Debts", (string)null);
+                            b1.ToTable("Debts");
 
                             b1.WithOwner()
                                 .HasForeignKey("DebtId");
@@ -1461,7 +1394,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                             b1.HasKey("DebtId");
 
-                            b1.ToTable("Debts", (string)null);
+                            b1.ToTable("Debts");
 
                             b1.WithOwner()
                                 .HasForeignKey("DebtId");
@@ -1524,7 +1457,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                             b1.HasKey("PaymentId");
 
-                            b1.ToTable("Payments", (string)null);
+                            b1.ToTable("Payments");
 
                             b1.WithOwner()
                                 .HasForeignKey("PaymentId");

@@ -59,6 +59,7 @@ export class IncidentManagementComponent implements OnInit {
   
   categories = signal<any[]>([]);
   priorities = signal<any[]>([]);
+  statuses = signal<any[]>([]);
 
   constructor(
     private router: Router,
@@ -91,10 +92,24 @@ export class IncidentManagementComponent implements OnInit {
     });
 
     this.incidentUtils.getPriorities().subscribe({
-      next: (priorities) => this.priorities.set(priorities),
+      next: (priorities) => {
+        console.log('Priorities loaded in incidents:', priorities);
+        this.priorities.set(priorities);
+      },
       error: (error) => {
         console.error('Error loading priorities:', error);
         this.priorities.set([]);
+      }
+    });
+
+    this.incidentUtils.getStatuses().subscribe({
+      next: (statuses) => {
+        console.log('Statuses loaded in incidents:', statuses);
+        this.statuses.set(statuses);
+      },
+      error: (error) => {
+        console.error('Error loading statuses:', error);
+        this.statuses.set([]);
       }
     });
   }

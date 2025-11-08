@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, map, tap, of } from 'rxjs';
 import { IncidentCategoryOption, IncidentPriorityOption, IncidentPriority, IncidentStatus, IncidentCategory } from '../models/incident.models';
-import { CatalogService, CatalogItem } from '../../../core/services/catalog.service';
+import { CatalogService, CatalogItem, ApiResponse } from '../../../core/services/catalog.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +9,7 @@ import { CatalogService, CatalogItem } from '../../../core/services/catalog.serv
 export class IncidentUtilsService {
   private categoriesCache: IncidentCategoryOption[] = [];
   private prioritiesCache: IncidentPriorityOption[] = [];
+  private statusesCache: any[] = [];
   
   constructor(private catalogService: CatalogService) {}
   
@@ -18,12 +19,12 @@ export class IncidentUtilsService {
     }
     
     return this.catalogService.getCategories().pipe(
-      map(response => {
+      map((response: ApiResponse<CatalogItem[]>) => {
         if (response.success && response.data) {
           return response.data
-            .filter(item => item.isActive)
-            .sort((a, b) => (a.order || 0) - (b.order || 0))
-            .map(item => ({
+            .filter((item: CatalogItem) => item.isActive)
+            .sort((a: CatalogItem, b: CatalogItem) => (a.order || 0) - (b.order || 0))
+            .map((item: CatalogItem) => ({
               label: item.name,
               value: item.code as IncidentCategory
             }));
@@ -31,7 +32,7 @@ export class IncidentUtilsService {
         console.error('Error loading categories from database');
         return [];
       }),
-      tap(categories => this.categoriesCache = categories)
+      tap((categories: IncidentCategoryOption[]) => this.categoriesCache = categories)
     );
   }
 
@@ -41,12 +42,12 @@ export class IncidentUtilsService {
     }
     
     return this.catalogService.getPriorities().pipe(
-      map(response => {
+      map((response: ApiResponse<CatalogItem[]>) => {
         if (response.success && response.data) {
           return response.data
-            .filter(item => item.isActive)
-            .sort((a, b) => (a.order || 0) - (b.order || 0))
-            .map(item => ({
+            .filter((item: CatalogItem) => item.isActive)
+            .sort((a: CatalogItem, b: CatalogItem) => (a.order || 0) - (b.order || 0))
+            .map((item: CatalogItem) => ({
               label: item.name,
               value: item.code as IncidentPriority
             }));
@@ -54,7 +55,31 @@ export class IncidentUtilsService {
         console.error('Error loading priorities from database');
         return [];
       }),
-      tap(priorities => this.prioritiesCache = priorities)
+      tap((priorities: IncidentPriorityOption[]) => this.prioritiesCache = priorities)
+    );
+  }
+
+  getStatuses(): Observable<any[]> {
+    if (this.statusesCache.length > 0) {
+      return of(this.statusesCache);
+    }
+    
+    return this.catalogService.getIncidentStatuses().pipe(
+      map((response: ApiResponse<CatalogItem[]>) => {
+        if (response.success && response.data) {
+          return response.data
+            .filter((item: CatalogItem) => item.isActive)
+            .map((item: CatalogItem) => ({
+              label: item.name,
+              value: item.code,
+              code: item.code,
+              name: item.name
+            }));
+        }
+        console.error('Error loading statuses from database');
+        return [];
+      }),
+      tap((statuses: any[]) => this.statusesCache = statuses)
     );
   }
   
@@ -90,24 +115,28 @@ export class IncidentUtilsService {
     return severityMap[priority] || 'secondary';
   }
 
-  getStatusLabel(status: IncidentStatus): string {
-    const statusMap: Record<IncidentStatus, string> = {
-      [IncidentStatus.REPORTED]: 'Reportada',
-      [IncidentStatus.IN_PROGRESS]: 'En Proceso',
-      [IncidentStatus.RESOLVED]: 'Resuelta',
-      [IncidentStatus.CANCELLED]: 'Cancelada',
-      [IncidentStatus.REJECTED]: 'Rechazada'
+  getStatusLabel(status: string): string {
+    const statusItem = this.statusesCache.find(s => s.code === status);
+    if (statusItem) return statusItem.name;
+    
+    // Fallback si el cache no está disponible
+    const fallbackMap: Record<string, string> = {
+      'reported': 'Reportada',
+      'in_progress': 'En Proceso',
+      'resolved': 'Resuelta',
+      'cancelled': 'Cancelada',
+      'rejected': 'Rechazada'
     };
-    return statusMap[status] || status;
+    return fallbackMap[status] || status;
   }
 
-  getStatusSeverity(status: IncidentStatus): string {
-    const severityMap: Record<IncidentStatus, string> = {
-      [IncidentStatus.REPORTED]: 'warning',
-      [IncidentStatus.IN_PROGRESS]: 'info',
-      [IncidentStatus.RESOLVED]: 'success',
-      [IncidentStatus.CANCELLED]: 'secondary',
-      [IncidentStatus.REJECTED]: 'danger'
+  getStatusSeverity(status: string): string {
+    const severityMap: Record<string, string> = {
+      'reported': 'warning',
+      'in_progress': 'info',
+      'resolved': 'success',
+      'cancelled': 'secondary',
+      'rejected': 'danger'
     };
     return severityMap[status] || 'secondary';
   }

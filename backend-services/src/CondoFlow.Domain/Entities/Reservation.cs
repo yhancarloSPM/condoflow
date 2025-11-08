@@ -12,6 +12,7 @@ public class Reservation : BaseEntity
     public string? Notes { get; set; }
     public string? RejectionReason { get; set; }
     public string? CancellationReason { get; set; }
+    public string? EventTypeCode { get; set; }
 
     public bool IsOverdue => ReservationDate.Date < DateTime.Now.Date || 
                            (ReservationDate.Date == DateTime.Now.Date && EndTime < DateTime.Now.TimeOfDay);

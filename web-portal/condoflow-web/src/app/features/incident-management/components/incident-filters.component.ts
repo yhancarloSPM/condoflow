@@ -13,11 +13,9 @@ import { IncidentCategoryOption, IncidentPriorityOption, IncidentStatusCounts, I
         <label class="form-label">Estado</label>
         <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
           <option value="">Todos los estados</option>
-          <option [value]="IncidentStatus.REPORTED">Reportadas</option>
-          <option [value]="IncidentStatus.IN_PROGRESS">En Proceso</option>
-          <option [value]="IncidentStatus.RESOLVED">Resueltas</option>
-          <option [value]="IncidentStatus.REJECTED">Rechazadas</option>
-          <option [value]="IncidentStatus.CANCELLED">Canceladas</option>
+          <option *ngFor="let status of statuses" [value]="status.value">
+            {{status.label}}
+          </option>
         </select>
       </div>
       
@@ -57,13 +55,12 @@ import { IncidentCategoryOption, IncidentPriorityOption, IncidentStatusCounts, I
 export class IncidentFiltersComponent {
   @Input() statusCounts!: IncidentStatusCounts;
   @Input() priorities!: IncidentPriorityOption[];
+  @Input() statuses!: any[];
   @Output() filtersChanged = new EventEmitter<{status: string, priority: string, searchTerm: string}>();
 
   statusFilter = '';
   priorityFilter = '';
   searchTerm = '';
-  
-  IncidentStatus = IncidentStatus;
 
   onFilterChange(): void {
     this.filtersChanged.emit({

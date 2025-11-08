@@ -23,6 +23,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Category> Categories { get; set; }
     public DbSet<Priority> Priorities { get; set; }
     public DbSet<Status> Statuses { get; set; }
+    public DbSet<EventType> EventTypes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -165,10 +166,26 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.EndTime).IsRequired();
             entity.Property(e => e.Status).HasConversion<string>().IsRequired();
             entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.Property(e => e.EventTypeCode).HasMaxLength(50);
 
             entity.HasIndex(e => new { e.ReservationDate, e.StartTime, e.EndTime })
                   .IsUnique()
                   .HasDatabaseName("IX_Reservation_DateTime_Unique");
+        });
+        
+        // Configurar EventType
+        modelBuilder.Entity<EventType>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Code).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.IsActive).IsRequired();
+            entity.Property(e => e.Order).IsRequired();
+            
+            entity.HasIndex(e => e.Code)
+                  .IsUnique()
+                  .HasDatabaseName("IX_EventTypes_Code_Unique");
         });
         
         // Configurar ReservationSlot
@@ -333,6 +350,30 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             new { Id = concept1Id, Code = "maintenance", Name = "Pago de Mantenimiento", DefaultAmount = 2000m, RoofAmount = 1000m, IsAutoCalculated = true, IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
             new { Id = concept2Id, Code = "extraordinary", Name = "Cuota Extraordinaria", DefaultAmount = (decimal?)null, RoofAmount = (decimal?)null, IsAutoCalculated = false, IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
             new { Id = concept3Id, Code = "other", Name = "Otro", DefaultAmount = (decimal?)null, RoofAmount = (decimal?)null, IsAutoCalculated = false, IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+        );
+        
+        // Seed Status data
+        var status1Id = Guid.Parse("a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1");
+        var status2Id = Guid.Parse("b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2");
+        var status3Id = Guid.Parse("c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3");
+        var status4Id = Guid.Parse("d4d4d4d4-d4d4-d4d4-d4d4-d4d4d4d4d4d4");
+        
+        modelBuilder.Entity<Status>().HasData(
+            new { Id = status1Id, Code = "Pending", Name = "Pendiente", Description = "Reserva pendiente de aprobación", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = status2Id, Code = "Confirmed", Name = "Confirmada", Description = "Reserva confirmada", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = status3Id, Code = "Rejected", Name = "Rechazada", Description = "Reserva rechazada", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = status4Id, Code = "Cancelled", Name = "Cancelada", Description = "Reserva cancelada", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+        );
+        
+        // Seed EventType data
+        var eventType1Id = Guid.Parse("e5e5e5e5-e5e5-e5e5-e5e5-e5e5e5e5e5e5");
+        var eventType2Id = Guid.Parse("f6f6f6f6-f6f6-f6f6-f6f6-f6f6f6f6f6f6");
+        var eventType3Id = Guid.Parse("a7a7a7a7-a7a7-a7a7-a7a7-a7a7a7a7a7a7");
+        
+        modelBuilder.Entity<EventType>().HasData(
+            new { Id = eventType1Id, Code = "birthday", Name = "Cumpleaños", Description = "Celebración de cumpleaños", IsActive = true, Order = 1, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = eventType2Id, Code = "meeting", Name = "Reunión", Description = "Reunión familiar o de trabajo", IsActive = true, Order = 2, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = eventType3Id, Code = "celebration", Name = "Celebración", Description = "Celebración general", IsActive = true, Order = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
         );
     }
 }

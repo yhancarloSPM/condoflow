@@ -20,6 +20,7 @@
               <app-incident-filters
                 [statusCounts]="statusCounts()"
                 [priorities]="priorities()"
+                [statuses]="statuses()"
                 (filtersChanged)="onFiltersChanged($event)">
               </app-incident-filters>
             </div>
@@ -78,7 +79,7 @@
                     <th style="width: 10%;">Prioridad</th>
                     <th style="width: 10%;">Estado</th>
                     <th style="width: 24%;">Comentarios</th>
-                    <th style="width: 6%; text-align: right; padding-right: 1.5rem;">Acciones</th>
+                    <th style="width: 8%; text-align: right; padding-right: 1.5rem;">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
