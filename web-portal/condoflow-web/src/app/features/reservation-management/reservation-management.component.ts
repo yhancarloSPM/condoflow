@@ -7,16 +7,12 @@ import { ToastModule } from 'primeng/toast';
 import { AuthService } from '../../core/services/auth.service';
 import { ReservationService } from '../../core/services/reservation.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { CatalogService } from '../../core/services/catalog.service';
+import { CatalogService, CatalogItem } from '../../core/services/catalog.service';
 import { ReservationFiltersComponent } from './components/reservation-filters.component';
 import { ReservationStatus } from '../../shared/enums/reservation-status.enum';
 import { NavbarComponent } from '../../shared/components/navbar.component';
 
-interface CatalogItem {
-  code: string;
-  name: string;
-  description?: string;
-}
+
 
 interface FilterData {
   statusFilter: string;
@@ -97,11 +93,12 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
     // Cargar estados de reserva
     this.catalogService.getReservationStatuses().subscribe({
       next: (response) => {
-        // Filtrar solo los estados de reservas
-        const reservationStatuses = (response.data || []).filter(status => 
-          ['pending', 'confirmed', 'rejected', 'cancelled'].includes(status.code)
-        );
-        this.reservationStatuses.set(reservationStatuses);
+        if (response.success && response.data) {
+          const reservationStatuses = response.data
+            .filter((item: CatalogItem) => Object.values(ReservationStatus).includes(item.code as ReservationStatus))
+            .sort((a: CatalogItem, b: CatalogItem) => a.name.localeCompare(b.name));
+          this.reservationStatuses.set(reservationStatuses);
+        }
       },
       error: (error) => console.error('Error loading reservation statuses:', error)
     });
@@ -109,7 +106,12 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
     // Cargar tipos de evento
     this.catalogService.getEventTypes().subscribe({
       next: (response) => {
-        this.eventTypes.set(response.data || []);
+        if (response.success && response.data) {
+          const eventTypes = response.data
+            .filter((item: CatalogItem) => item.isActive)
+            .sort((a: CatalogItem, b: CatalogItem) => a.name.localeCompare(b.name));
+          this.eventTypes.set(eventTypes);
+        }
       },
       error: (error) => console.error('Error loading event types:', error)
     });
@@ -143,7 +145,15 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
     let filtered = [...this.reservations()];
     
     if (this.filterData.statusFilter) {
-      filtered = filtered.filter(r => r.status === this.filterData.statusFilter);
+      // Convert enum code to PascalCase for comparison
+      const statusMap: { [key: string]: string } = {
+        'pending': 'Pending',
+        'confirmed': 'Confirmed',
+        'rejected': 'Rejected',
+        'cancelled': 'Cancelled'
+      };
+      const actualStatus = statusMap[this.filterData.statusFilter] || this.filterData.statusFilter;
+      filtered = filtered.filter(r => r.status === actualStatus);
     }
     
     if (this.filterData.eventTypeFilter) {
@@ -167,10 +177,10 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
   updateCounts() {
     const reservations = this.reservations();
     
-    this.pendingCount.set(reservations.filter(r => r.status === ReservationStatus.PENDING).length);
-    this.confirmedCount.set(reservations.filter(r => r.status === ReservationStatus.CONFIRMED).length);
-    this.rejectedCount.set(reservations.filter(r => r.status === ReservationStatus.REJECTED).length);
-    this.cancelledCount.set(reservations.filter(r => r.status === ReservationStatus.CANCELLED).length);
+    this.pendingCount.set(reservations.filter(r => r.status === 'Pending').length);
+    this.confirmedCount.set(reservations.filter(r => r.status === 'Confirmed').length);
+    this.rejectedCount.set(reservations.filter(r => r.status === 'Rejected').length);
+    this.cancelledCount.set(reservations.filter(r => r.status === 'Cancelled').length);
   }
 
   showApprovalModal(reservation: any) {
@@ -291,6 +301,10 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
 
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
+      'Pending': 'Pendiente',
+      'Confirmed': 'Confirmada',
+      'Cancelled': 'Cancelada',
+      'Rejected': 'Rechazada',
       [ReservationStatus.PENDING]: 'Pendiente',
       [ReservationStatus.CONFIRMED]: 'Confirmada',
       [ReservationStatus.CANCELLED]: 'Cancelada',
@@ -301,6 +315,10 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
 
   getStatusSeverity(status: string): string {
     const severityMap: { [key: string]: string } = {
+      'Pending': 'warning',
+      'Confirmed': 'success',
+      'Cancelled': 'secondary',
+      'Rejected': 'danger',
       [ReservationStatus.PENDING]: 'warning',
       [ReservationStatus.CONFIRMED]: 'success',
       [ReservationStatus.CANCELLED]: 'secondary',

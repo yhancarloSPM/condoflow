@@ -93,9 +93,9 @@
                             </span>
                           </td>
                           <td>
-                            @if (reservation.status === reservationStatus.REJECTED && reservation.rejectionReason) {
+                            @if (reservation.status === 'Rejected' && reservation.rejectionReason) {
                               {{ reservation.rejectionReason }}
-                            } @else if (reservation.status === reservationStatus.CANCELLED) {
+                            } @else if (reservation.status === 'Cancelled') {
                               Anulada por propietario →
                             } @else {
                               <span class="text-muted">—</span>
@@ -103,30 +103,30 @@
                           </td>
                           <td style="padding-right: 1.5rem;">
                             <div class="d-flex gap-1 justify-content-end">
-                              <button class="btn-receipt-compact" (click)="viewReservationDetail(reservation)" title="Ver detalle">
-                                <i class="pi pi-eye"></i>
-                              </button>
-                              @if (reservation.status === reservationStatus.PENDING) {
+                              @if (reservation.status === 'Pending') {
                                 <button class="btn-edit-reported" (click)="showApprovalModal(reservation)" title="Confirmar">
                                   <i class="pi pi-check"></i>
                                 </button>
                                 <button class="btn-edit-progress" (click)="showRejectionModal(reservation)" title="Rechazar">
                                   <i class="pi pi-times"></i>
                                 </button>
-                              } @else if (reservation.status === reservationStatus.CONFIRMED) {
-                                <div class="status-icon-simple resolved" title="Reserva confirmada">
-                                  <i class="pi pi-check-circle"></i>
-                                </div>
-                              } @else if (reservation.status === reservationStatus.REJECTED) {
-                                <div class="status-icon-simple cancelled-admin" title="Rechazada por administrador">
-                                  <i class="pi pi-times-circle"></i>
-                                </div>
-                              } @else if (reservation.status === reservationStatus.CANCELLED) {
-                                <div class="status-icon-simple cancelled-owner" title="Cancelada por propietario">
-                                  <i class="pi pi-ban"></i>
-                                </div>
                               } @else {
-                                <span class="text-muted">—</span>
+                                <button class="btn-receipt-compact" (click)="viewReservationDetail(reservation)" title="Ver detalle">
+                                  <i class="pi pi-eye"></i>
+                                </button>
+                                @if (reservation.status === 'Confirmed') {
+                                  <div class="status-icon-simple resolved" title="Reserva confirmada">
+                                    <i class="pi pi-check-circle"></i>
+                                  </div>
+                                } @else if (reservation.status === 'Rejected') {
+                                  <div class="status-icon-simple cancelled-admin" title="Rechazada por administrador">
+                                    <i class="pi pi-times-circle"></i>
+                                  </div>
+                                } @else if (reservation.status === 'Cancelled') {
+                                  <div class="status-icon-simple cancelled-owner" title="Cancelada por propietario">
+                                    <i class="pi pi-ban"></i>
+                                  </div>
+                                }
                               }
                             </div>
                           </td>
@@ -365,7 +365,7 @@
               </div>
             </div>
             
-            @if (selectedReservationDetail()?.status === reservationStatus.REJECTED && selectedReservationDetail()?.rejectionReason) {
+            @if (selectedReservationDetail()?.status === 'Rejected' && selectedReservationDetail()?.rejectionReason) {
               <div class="p-4 border-bottom bg-danger bg-opacity-10">
                 <div class="d-flex align-items-start">
                   <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 32px; height: 32px; background-color: #84cc16;">

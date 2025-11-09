@@ -23,7 +23,7 @@ public class StatusesController : ControllerBase
         try
         {
             var statuses = await _context.Statuses
-                .Where(s => s.IsActive)
+                .Where(s => s.IsActive && (s.Code == "pending" || s.Code == "confirmed" || s.Code == "rejected" || s.Code == "cancelled"))
                 .Select(s => new
                 {
                     s.Id,
