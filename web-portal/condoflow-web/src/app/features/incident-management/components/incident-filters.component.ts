@@ -50,6 +50,11 @@ import { IncidentCategoryOption, IncidentPriorityOption, IncidentStatusCounts, I
       border-color: #ced4da !important;
       box-shadow: none !important;
     }
+    
+    .form-label {
+      color: white !important;
+      font-weight: 500;
+    }
   `]
 })
 export class IncidentFiltersComponent {

@@ -112,118 +112,119 @@ import { NotificationService } from '../../core/services/notification.service';
       </nav>
 
       <div class="main-content">
-        <div class="welcome-header">
-          <h1>¡Hola, {{ currentUser()?.firstName }}!</h1>
-          <p>¿Qué necesitas hacer hoy?</p>
-        </div>
-
-        <div class="actions-grid">
-          @if (isAdmin()) {
-            <div class="action-card" (click)="navigateTo('/user-management')">
-              <div class="action-icon admin">
-                <i class="pi pi-users"></i>
-              </div>
-              <h3>Gestión de Usuarios</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/payment-management')">
-              <div class="action-icon payments">
-                <i class="pi pi-credit-card"></i>
-              </div>
-              <h3>Gestión de Pagos</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/debt-management')">
-              <div class="action-icon debts">
-                <i class="pi pi-file"></i>
-              </div>
-              <h3>Gestión de Deudas</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/reports')">
-              <div class="action-icon reports">
-                <i class="pi pi-file-pdf"></i>
-              </div>
-              <h3>Reportes</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/incident-management')">
-              <div class="action-icon maintenance">
-                <i class="pi pi-wrench"></i>
-              </div>
-              <h3>Gestión de Incidencias</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/announcement-management')">
-              <div class="action-icon announcements">
-                <i class="pi pi-bell"></i>
-              </div>
-              <h3>Gestionar Comunicados</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/reservation-management')">
-              <div class="action-icon reservations">
-                <i class="pi pi-calendar"></i>
-              </div>
-              <h3>Gestión de Reservas</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/dashboard')">
-              <div class="action-icon dashboard">
-                <i class="pi pi-chart-bar"></i>
-              </div>
-              <h3>Dashboard</h3>
-            </div>
-          } @else {
-            <div class="action-card" (click)="navigateTo('/my-payments')">
-              <div class="action-icon payments">
-                <i class="pi pi-credit-card"></i>
-              </div>
-              <h3>Mis Pagos</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/my-debts')">
-              <div class="action-icon debts">
-                <i class="pi pi-file"></i>
-              </div>
-              <h3>Mis Deudas</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/my-incidents')">
-              <div class="action-icon maintenance">
-                <i class="pi pi-wrench"></i>
-              </div>
-              <h3>Reporte de Incidencias</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/announcements')">
-              <div class="action-icon announcements">
-                <i class="pi pi-bell"></i>
-              </div>
-              <h3>Leer Comunicados</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/reservations')">
-              <div class="action-icon reservations">
-                <i class="pi pi-calendar"></i>
-              </div>
-              <h3>Reservas de Gazebo</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/my-profile')">
-              <div class="action-icon profile">
-                <i class="pi pi-user"></i>
-              </div>
-              <h3>Mi Perfil</h3>
-            </div>
-            
-            <div class="action-card" (click)="navigateTo('/owner-dashboard')">
-              <div class="action-icon dashboard">
-                <i class="pi pi-chart-bar"></i>
-              </div>
-              <h3>Mi Dashboard</h3>
-            </div>
-          }
+        <div class="gradient-layout">
+          <div class="gradient-header">
+            <h1>Centro de Gestión</h1>
+            <p>Bienvenido al sistema de gestión de condominios</p>
+          </div>
+          <div class="gradient-grid">
+              @if (isAdmin()) {
+                <div class="action-card" (click)="navigateTo('/user-management')">
+                  <div class="action-icon admin">
+                    <i class="pi pi-users"></i>
+                  </div>
+                  <h3>Gestión de Usuarios</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/payment-management')">
+                  <div class="action-icon payments">
+                    <i class="pi pi-credit-card"></i>
+                  </div>
+                  <h3>Gestión de Pagos</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/debt-management')">
+                  <div class="action-icon debts">
+                    <i class="pi pi-file"></i>
+                  </div>
+                  <h3>Gestión de Deudas</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/reports')">
+                  <div class="action-icon reports">
+                    <i class="pi pi-file-pdf"></i>
+                  </div>
+                  <h3>Reportes</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/incident-management')">
+                  <div class="action-icon maintenance">
+                    <i class="pi pi-wrench"></i>
+                  </div>
+                  <h3>Gestión de Incidencias</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/announcement-management')">
+                  <div class="action-icon announcements">
+                    <i class="pi pi-bell"></i>
+                  </div>
+                  <h3>Gestionar Comunicados</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/reservation-management')">
+                  <div class="action-icon reservations">
+                    <i class="pi pi-calendar"></i>
+                  </div>
+                  <h3>Gestión de Reservas</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/dashboard')">
+                  <div class="action-icon dashboard">
+                    <i class="pi pi-chart-bar"></i>
+                  </div>
+                  <h3>Dashboard</h3>
+                </div>
+              } @else {
+                <div class="action-card" (click)="navigateTo('/my-payments')">
+                  <div class="action-icon payments">
+                    <i class="pi pi-credit-card"></i>
+                  </div>
+                  <h3>Mis Pagos</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/my-debts')">
+                  <div class="action-icon debts">
+                    <i class="pi pi-file"></i>
+                  </div>
+                  <h3>Mis Deudas</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/my-incidents')">
+                  <div class="action-icon maintenance">
+                    <i class="pi pi-wrench"></i>
+                  </div>
+                  <h3>Reporte de Incidencias</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/announcements')">
+                  <div class="action-icon announcements">
+                    <i class="pi pi-bell"></i>
+                  </div>
+                  <h3>Leer Comunicados</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/reservations')">
+                  <div class="action-icon reservations">
+                    <i class="pi pi-calendar"></i>
+                  </div>
+                  <h3>Reservas de Gazebo</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/my-profile')">
+                  <div class="action-icon profile">
+                    <i class="pi pi-user"></i>
+                  </div>
+                  <h3>Mi Perfil</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/owner-dashboard')">
+                  <div class="action-icon dashboard">
+                    <i class="pi pi-chart-bar"></i>
+                  </div>
+                  <h3>Mi Dashboard</h3>
+                </div>
+              }
+          </div>
         </div>
       </div>
     </div>
@@ -231,14 +232,14 @@ import { NotificationService } from '../../core/services/notification.service';
   styles: [`
     .welcome-layout {
       min-height: 100vh;
-      background: #f8fafc;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
       display: flex;
       flex-direction: column;
     }
 
     /* Top Navigation */
     .top-nav {
-      background: white;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
       border-bottom: 1px solid #e5e7eb;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
@@ -264,24 +265,20 @@ import { NotificationService } from '../../core/services/notification.service';
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #6b7280;
+      color: white;
       font-size: 1.5rem;
     }
 
     .brand-name {
       font-size: 1.5rem;
       font-weight: 700;
-      color: #1f2937;
+      color: white;
     }
 
     .user-section {
       display: flex;
       align-items: center;
       gap: 1.5rem;
-      padding: 0.5rem;
-      background: #f8fafc;
-      border-radius: 12px;
-      border: 1px solid #e5e7eb;
     }
 
     .user-info {
@@ -318,34 +315,30 @@ import { NotificationService } from '../../core/services/notification.service';
 
     .user-name {
       font-weight: 600;
-      color: #1f2937;
+      color: white;
       font-size: 0.875rem;
       line-height: 1.2;
     }
 
     .user-role {
       font-size: 0.75rem;
-      color: #6b7280;
+      color: rgba(255, 255, 255, 0.8);
       line-height: 1.2;
     }
 
     .logout-button {
-      background: white;
-      border: 1px solid #e5e7eb;
-      color: #6b7280;
+      background: transparent;
+      border: none;
+      color: white;
       width: 2.5rem;
       height: 2.5rem;
-      border-radius: 8px;
       padding: 0;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .logout-button:hover {
-      border-color: #fca5a5;
-      color: #ef4444;
-      background: #fef2f2;
+      color: rgba(255, 255, 255, 0.8);
     }
 
     /* Notifications */
@@ -356,20 +349,17 @@ import { NotificationService } from '../../core/services/notification.service';
 
     .notification-button {
       background: transparent;
-      border: 1px solid #e5e7eb;
-      color: #6b7280;
+      border: none;
+      color: white;
       width: 2.25rem;
       height: 2.25rem;
-      border-radius: 6px;
       padding: 0;
       position: relative;
       cursor: pointer;
     }
 
     .notification-button:hover {
-      border-color: #2563EB;
-      color: #2563EB;
-      background: #eff6ff;
+      color: rgba(255, 255, 255, 0.8);
     }
 
     .notification-badge {
@@ -428,70 +418,121 @@ import { NotificationService } from '../../core/services/notification.service';
     /* Main Content */
     .main-content {
       flex: 1;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 3rem 2rem;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
     }
 
-    .welcome-header {
+    .gradient-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    
+    .gradient-header {
+      text-align: center;
       margin-bottom: 3rem;
     }
-
-    .welcome-header h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #1f2937;
+    
+    .gradient-header h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #fff, #f0f9ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin: 0 0 0.5rem 0;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
-
-    .welcome-header p {
-      font-size: 1.125rem;
-      color: #6b7280;
+    
+    .gradient-header p {
+      color: rgba(255, 255, 255, 0.95);
       margin: 0;
+      font-size: 1.2rem;
+      font-weight: 300;
+    }
+    
+    .gradient-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      width: 100%;
+      padding: 0 2rem;
     }
 
     .actions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
       max-width: 1000px;
       margin: 0 auto;
     }
 
     .action-card {
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 3.5rem 1.5rem;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
       text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .action-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
     }
 
     .action-card:hover {
-      border-color: #2563EB;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
-      transform: translateY(-2px);
+      transform: translateY(-8px) rotateY(5deg);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255,255,255,0.4);
+    }
+    
+    .action-card:hover::before {
+      left: 100%;
     }
 
     .action-icon {
-      width: 3rem;
-      height: 3rem;
-      border-radius: 8px;
+      width: 4rem;
+      height: 4rem;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      font-size: 1.8rem;
       color: white;
-      margin: 0 auto 1rem auto;
+      margin: 0 auto 1.5rem auto;
+      flex-shrink: 0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: all 0.4s ease;
+      position: relative;
+    }
+    
+    .action-card:hover .action-icon {
+      transform: scale(1.15) rotateY(-5deg);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
     }
 
     .action-card h3 {
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-weight: 600;
-      color: #1f2937;
+      color: white;
       margin: 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      letter-spacing: 0.5px;
     }
 
     .action-icon.admin { background: linear-gradient(135deg, #10b981, #059669); }

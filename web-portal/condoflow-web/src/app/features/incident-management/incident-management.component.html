@@ -31,7 +31,7 @@
       <div class="incidents-card card">
         <div class="card-header bg-white">
           <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 text-dark"><i class="pi pi-wrench me-2" style="color: #f97316;"></i>Incidencias de Áreas Comunes</h5>
+            <h5 class="mb-0 text-dark">Incidencias de Áreas Comunes</h5>
             <div class="d-flex gap-2">
               <div class="text-center">
                 <div class="badge bg-warning text-dark fw-bold">{{ statusCounts().reported }}</div>
@@ -64,9 +64,8 @@
             </div>
           } @else if (paginatedIncidents().length === 0) {
             <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
-              <i class="pi pi-wrench" style="font-size: 4rem; color: #6c757d;"></i>
-              <h6 class="text-muted mt-3">No hay incidencias</h6>
-              <p class="text-muted small">No hay incidencias reportadas en áreas comunes</p>
+              <h6 class="text-white mt-3">No hay incidencias</h6>
+              <p class="text-white small">No hay incidencias reportadas en áreas comunes</p>
             </div>
           } @else {
             <div class="table-responsive" style="flex: 1; overflow-y: auto; min-height: 0;">

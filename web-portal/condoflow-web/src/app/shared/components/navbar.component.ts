@@ -109,23 +109,23 @@ import { NotificationService } from '../../core/services/notification.service';
     </nav>
   `,
   styles: [`
-    .top-nav { background: white; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+    .top-nav { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
     .nav-container { width: 100%; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 4rem; }
     .brand { display: flex; align-items: center; gap: 0.75rem; }
-    .brand-icon { width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 1.5rem; }
-    .brand-name { font-size: 1.5rem; font-weight: 700; color: #1f2937; }
-    .user-section { display: flex; align-items: center; gap: 1.5rem; padding: 0.5rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e5e7eb; }
+    .brand-icon { width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; }
+    .brand-name { font-size: 1.5rem; font-weight: 700; color: white; }
+    .user-section { display: flex; align-items: center; gap: 1.5rem; }
     .user-info { display: flex; align-items: center; gap: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 8px; transition: background 0.2s ease; }
     .user-avatar { background: linear-gradient(135deg, #10B981, #059669); color: white; font-weight: 600; width: 2.25rem; height: 2.25rem; font-size: 0.875rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
     .user-details { display: flex; flex-direction: column; }
-    .user-name { font-weight: 600; color: #1f2937; font-size: 0.875rem; }
-    .user-role { font-size: 0.75rem; color: #6b7280; }
-    .logout-button { background: white; border: 1px solid #e5e7eb; color: #6b7280; width: 2.5rem; height: 2.5rem; border-radius: 8px; padding: 0; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
-    .logout-button:hover { border-color: #fca5a5; color: #ef4444; background: #fef2f2; }
+    .user-name { font-weight: 600; color: white; font-size: 0.875rem; }
+    .user-role { font-size: 0.75rem; color: rgba(255, 255, 255, 0.8); }
+    .logout-button { background: transparent; border: none; color: white; width: 2.5rem; height: 2.5rem; padding: 0; cursor: pointer; transition: all 0.2s ease; }
+    .logout-button:hover { color: rgba(255, 255, 255, 0.8); }
     
     .notification-section { position: relative; padding: 0.25rem; }
-    .notification-button { background: transparent; border: 1px solid #e5e7eb; color: #6b7280; width: 2.25rem; height: 2.25rem; border-radius: 6px; padding: 0; position: relative; cursor: pointer; }
-    .notification-button:hover { border-color: #2563EB; color: #2563EB; background: #eff6ff; }
+    .notification-button { background: transparent; border: none; color: white; width: 2.25rem; height: 2.25rem; padding: 0; position: relative; cursor: pointer; }
+    .notification-button:hover { color: rgba(255, 255, 255, 0.8); }
     .notification-badge { position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
     .notification-panel { width: 350px; max-height: 450px; border-radius: 12px !important; z-index: 9999 !important; }
     .notification-list { max-height: 350px; overflow-y: auto; }
