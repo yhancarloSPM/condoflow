@@ -262,18 +262,18 @@
                             </div>
                           </td>
                           <td class="text-center">
-                            @if (reservation.status === 'pending' || reservation.status === 'confirmed') {
+                            @if (reservation.status === 'Pending' || reservation.status === 'Confirmed') {
                               <button 
                                 class="btn-action-compact reject"
                                 (click)="openCancelModal(reservation.id)"
                                 title="Cancelar reserva">
                                 <i class="pi pi-times"></i>
                               </button>
-                            } @else if (reservation.status === 'cancelled') {
+                            } @else if (reservation.status === 'Cancelled') {
                               <div class="status-icon-simple cancelled" title="Reserva cancelada">
                                 <i class="pi pi-ban"></i>
                               </div>
-                            } @else if (reservation.status === 'rejected') {
+                            } @else if (reservation.status === 'Rejected') {
                               <div class="status-icon-simple rejected" title="Reserva rechazada">
                                 <i class="pi pi-times-circle"></i>
                               </div>

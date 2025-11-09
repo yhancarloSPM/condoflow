@@ -365,15 +365,45 @@
               </div>
             </div>
             
+            @if (selectedReservationDetail()?.notes) {
+              <div class="p-4 border-bottom">
+                <div class="d-flex align-items-start">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 32px; height: 32px; background-color: #84cc16;">
+                    <i class="pi pi-file-edit text-white" style="font-size: 0.8rem;"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-2 fw-semibold text-dark">Descripción del Evento</h6>
+                    <p class="mb-0 text-muted lh-base">{{ selectedReservationDetail()?.notes }}</p>
+                  </div>
+                </div>
+              </div>
+            }
+            
+            @if (selectedReservationDetail()?.status === 'Cancelled' && selectedReservationDetail()?.cancellationReason) {
+              <div class="p-4 border-bottom bg-warning bg-opacity-10">
+                <div class="d-flex align-items-start">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 32px; height: 32px; background-color: #ffc107;">
+                    <i class="pi pi-ban text-white" style="font-size: 0.8rem;"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-2 fw-semibold text-warning">Motivo de Cancelación</h6>
+                    <p class="mb-0 text-dark lh-base">{{ selectedReservationDetail()?.cancellationReason }}</p>
+                    <small class="text-muted">Cancelada el {{ selectedReservationDetail()?.updatedAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                  </div>
+                </div>
+              </div>
+            }
+            
             @if (selectedReservationDetail()?.status === 'Rejected' && selectedReservationDetail()?.rejectionReason) {
               <div class="p-4 border-bottom bg-danger bg-opacity-10">
                 <div class="d-flex align-items-start">
-                  <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 32px; height: 32px; background-color: #84cc16;">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 32px; height: 32px; background-color: #dc3545;">
                     <i class="pi pi-times text-white" style="font-size: 0.8rem;"></i>
                   </div>
                   <div class="flex-grow-1">
                     <h6 class="mb-2 fw-semibold text-danger">Motivo de Rechazo</h6>
                     <p class="mb-0 text-dark lh-base">{{ selectedReservationDetail()?.rejectionReason }}</p>
+                    <small class="text-muted">Rechazada el {{ selectedReservationDetail()?.updatedAt | date:'dd/MM/yyyy HH:mm' }}</small>
                   </div>
                 </div>
               </div>

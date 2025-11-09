@@ -93,10 +93,12 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
     // Cargar estados de reserva
     this.catalogService.getReservationStatuses().subscribe({
       next: (response) => {
+        console.log('Reservation statuses response:', response);
         if (response.success && response.data) {
           const reservationStatuses = response.data
-            .filter((item: CatalogItem) => Object.values(ReservationStatus).includes(item.code as ReservationStatus))
+            .filter((item: CatalogItem) => ['pending', 'confirmed', 'rejected', 'cancelled'].includes(item.code))
             .sort((a: CatalogItem, b: CatalogItem) => a.name.localeCompare(b.name));
+          console.log('Filtered reservation statuses:', reservationStatuses);
           this.reservationStatuses.set(reservationStatuses);
         }
       },
@@ -145,14 +147,14 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
     let filtered = [...this.reservations()];
     
     if (this.filterData.statusFilter) {
-      // Convert enum code to PascalCase for comparison
+      // Convert code to PascalCase for data comparison
       const statusMap: { [key: string]: string } = {
         'pending': 'Pending',
-        'confirmed': 'Confirmed',
+        'confirmed': 'Confirmed', 
         'rejected': 'Rejected',
         'cancelled': 'Cancelled'
       };
-      const actualStatus = statusMap[this.filterData.statusFilter] || this.filterData.statusFilter;
+      const actualStatus = statusMap[this.filterData.statusFilter];
       filtered = filtered.filter(r => r.status === actualStatus);
     }
     
@@ -304,11 +306,7 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
       'Pending': 'Pendiente',
       'Confirmed': 'Confirmada',
       'Cancelled': 'Cancelada',
-      'Rejected': 'Rechazada',
-      [ReservationStatus.PENDING]: 'Pendiente',
-      [ReservationStatus.CONFIRMED]: 'Confirmada',
-      [ReservationStatus.CANCELLED]: 'Cancelada',
-      [ReservationStatus.REJECTED]: 'Rechazada'
+      'Rejected': 'Rechazada'
     };
     return statusMap[status] || status;
   }
@@ -318,11 +316,7 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
       'Pending': 'warning',
       'Confirmed': 'success',
       'Cancelled': 'secondary',
-      'Rejected': 'danger',
-      [ReservationStatus.PENDING]: 'warning',
-      [ReservationStatus.CONFIRMED]: 'success',
-      [ReservationStatus.CANCELLED]: 'secondary',
-      [ReservationStatus.REJECTED]: 'danger'
+      'Rejected': 'danger'
     };
     return severityMap[status] || 'secondary';
   }

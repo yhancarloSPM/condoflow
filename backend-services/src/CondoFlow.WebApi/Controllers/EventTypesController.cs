@@ -23,14 +23,13 @@ public class EventTypesController : ControllerBase
         {
             var eventTypes = await _context.EventTypes
                 .Where(et => et.IsActive)
-                .OrderBy(et => et.Order)
+                .OrderBy(et => et.Name)
                 .Select(et => new
                 {
                     et.Id,
                     et.Code,
                     et.Name,
                     et.Description,
-                    et.Order,
                     IsActive = et.IsActive
                 })
                 .ToListAsync();

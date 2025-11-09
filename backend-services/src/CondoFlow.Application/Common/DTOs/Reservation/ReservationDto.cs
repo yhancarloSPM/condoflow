@@ -12,6 +12,7 @@ public class ReservationDto
     public string? Notes { get; set; }
     public string? RejectionReason { get; set; }
     public string? CancellationReason { get; set; }
+    public string? EventTypeCode { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 
@@ -21,6 +22,7 @@ public class CreateReservationDto
     public string StartTime { get; set; } = string.Empty;
     public string EndTime { get; set; } = string.Empty;
     public string? Notes { get; set; }
+    public string? EventTypeCode { get; set; }
 }
 
 public class ReservationSlotDto

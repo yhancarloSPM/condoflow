@@ -40,10 +40,10 @@ export class ReservationsComponent implements OnInit {
   statusCounts = computed(() => {
     const reservations = this.reservations();
     return {
-      pending: reservations.filter(r => r.status === ReservationStatus.PENDING).length,
-      confirmed: reservations.filter(r => r.status === ReservationStatus.CONFIRMED).length,
-      cancelled: reservations.filter(r => r.status === ReservationStatus.CANCELLED).length,
-      rejected: reservations.filter(r => r.status === ReservationStatus.REJECTED).length
+      pending: reservations.filter(r => r.status === 'Pending').length,
+      confirmed: reservations.filter(r => r.status === 'Confirmed').length,
+      cancelled: reservations.filter(r => r.status === 'Cancelled').length,
+      rejected: reservations.filter(r => r.status === 'Rejected').length
     };
   });
   
@@ -125,6 +125,12 @@ export class ReservationsComponent implements OnInit {
       eventTypeCode: this.selectedEventType,
       notes: this.notes
     };
+    
+    console.log('=== RESERVATION DATA BEING SENT ===');
+    console.log('Reservation object:', reservation);
+    console.log('Selected event type:', this.selectedEventType);
+    console.log('Available event types:', this.eventTypes());
+    console.log('====================================');
     
     this.reservationService.createReservation(reservation).subscribe({
       next: (response) => {

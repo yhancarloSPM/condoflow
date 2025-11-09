@@ -119,13 +119,18 @@ export class IncidentUtilsService {
     const statusItem = this.statusesCache.find(s => s.code === status);
     if (statusItem) return statusItem.name;
     
-    // Fallback si el cache no está disponible
+    // Fallback si el cache no está disponible - handle both cases
     const fallbackMap: Record<string, string> = {
       'reported': 'Reportada',
-      'in_progress': 'En Proceso',
+      'in_progress': 'En Proceso', 
       'resolved': 'Resuelta',
       'cancelled': 'Cancelada',
-      'rejected': 'Rechazada'
+      'rejected': 'Rechazada',
+      'Reported': 'Reportada',
+      'InProgress': 'En Proceso',
+      'Resolved': 'Resuelta', 
+      'Cancelled': 'Cancelada',
+      'Rejected': 'Rechazada'
     };
     return fallbackMap[status] || status;
   }
@@ -134,9 +139,14 @@ export class IncidentUtilsService {
     const severityMap: Record<string, string> = {
       'reported': 'warning',
       'in_progress': 'info',
-      'resolved': 'success',
+      'resolved': 'success', 
       'cancelled': 'secondary',
-      'rejected': 'danger'
+      'rejected': 'danger',
+      'Reported': 'warning',
+      'InProgress': 'info',
+      'Resolved': 'success',
+      'Cancelled': 'secondary', 
+      'Rejected': 'danger'
     };
     return severityMap[status] || 'secondary';
   }

@@ -127,6 +127,7 @@ public class ReservationsController : ControllerBase
             StartTime = startTime,
             EndTime = endTime,
             Notes = dto.Notes,
+            EventTypeCode = dto.EventTypeCode,
             Status = ReservationStatus.Pending
         };
 
@@ -299,6 +300,7 @@ public class ReservationsController : ControllerBase
             Notes = reservation.Notes,
             RejectionReason = reservation.RejectionReason,
             CancellationReason = reservation.CancellationReason,
+            EventTypeCode = reservation.EventTypeCode,
             CreatedAt = reservation.CreatedAt
         };
     }
