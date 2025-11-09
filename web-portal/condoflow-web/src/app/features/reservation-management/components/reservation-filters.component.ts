@@ -57,9 +57,31 @@ interface FilterData {
     </div>
   `,
   styles: [`
+    .form-select, .form-control {
+      background: rgba(255,255,255,0.1) !important;
+      border: 1px solid rgba(255,255,255,0.3) !important;
+      color: white !important;
+    }
+    
     .form-select:focus, .form-control:focus {
-      border-color: #ced4da !important;
+      background: rgba(255,255,255,0.2) !important;
+      border-color: rgba(255,255,255,0.5) !important;
       box-shadow: none !important;
+      color: white !important;
+    }
+    
+    .form-select option {
+      background: #1e3c72 !important;
+      color: white !important;
+    }
+    
+    .form-label {
+      color: white !important;
+      font-weight: 500;
+    }
+    
+    .form-control::placeholder {
+      color: white !important;
     }
   `]
 })

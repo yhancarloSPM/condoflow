@@ -373,6 +373,8 @@
 
 .modal-body {
   color: white;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .modal-body h4,
@@ -423,7 +425,7 @@
 }
 
 .modal-body .bg-danger {
-  background: rgba(239, 68, 68, 0.8) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .modal-body .text-danger {
@@ -607,13 +609,22 @@
 }
 
 .btn-outline-secondary {
-  background: white;
-  color: #6c757d;
-  border: 1px solid #6c757d;
+  border: 1px solid #6b7280;
+  color: #6b7280;
+  min-width: 100px;
+  font-weight: 400;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  &:hover {
-    background: #6c757d;
+  &:hover:not(:disabled) {
+    background: #6b7280;
     color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
   }
 }
 

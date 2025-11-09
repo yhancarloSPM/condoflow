@@ -1,6 +1,6 @@
 .management-layout { 
-  height: 100vh; 
-  background: #f8fafc; 
+  min-height: 100vh; 
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
   overflow: hidden; 
 }
 
@@ -12,16 +12,53 @@
 }
 
 .reservations-card { 
-  background: white; 
-  border-radius: 12px; 
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-  border: 1px solid #e5e7eb; 
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); 
+  backdrop-filter: blur(15px); 
+  border: 1px solid rgba(255,255,255,0.2); 
+  border-radius: 24px; 
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3); 
+  overflow: hidden;
 }
 
 .card-header { 
-  background: #f8f9fa; 
-  border-bottom: 1px solid #dee2e6; 
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.2); 
   padding: 1rem; 
+  color: white;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+}
+
+.card-header h5 {
+  color: white !important;
+}
+
+.card-header .text-muted {
+  color: rgba(255,255,255,0.8) !important;
+}
+
+.card-header .badge {
+  color: white !important;
+}
+
+.card-header .badge.bg-warning {
+  background-color: rgba(245, 158, 11, 0.9) !important;
+  color: white !important;
+}
+
+.card-header .badge.bg-success {
+  background-color: rgba(16, 185, 129, 0.9) !important;
+  color: white !important;
+}
+
+.card-header .badge.bg-danger {
+  background-color: rgba(239, 68, 68, 0.9) !important;
+  color: white !important;
+}
+
+.card-header .badge.bg-secondary {
+  background-color: rgba(107, 114, 128, 0.9) !important;
+  color: white !important;
 }
 
 .card-body { 
@@ -37,6 +74,16 @@
   table-layout: fixed; 
   width: 100%; 
   min-width: 1200px; 
+  --bs-table-bg: transparent;
+}
+
+.table thead th {
+  background: #1e3c72 !important;
+  color: white !important;
+  border: none !important;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .table th, .table td { 
@@ -44,6 +91,28 @@
   font-size: 0.875rem; 
   overflow: hidden; 
   text-overflow: ellipsis; 
+  color: white;
+  border-color: rgba(255,255,255,0.2);
+}
+
+.table .text-muted {
+  color: rgba(255,255,255,0.7) !important;
+}
+
+.card-body small {
+  color: rgba(255,255,255,0.8) !important;
+}
+
+.card-body .text-muted {
+  color: rgba(255,255,255,0.9) !important;
+}
+
+.card-body h6.text-muted {
+  color: white !important;
+}
+
+.card-body p.text-muted {
+  color: rgba(255,255,255,0.8) !important;
 }
 
 .spinner { 
@@ -57,10 +126,11 @@
 }
 
 .header-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
   overflow: hidden;
 }
 
@@ -94,12 +164,13 @@
 .header-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1f2937;
+  color: white;
   margin: 0 0 0.25rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .header-subtitle {
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
   font-size: 0.875rem;
 }
@@ -125,31 +196,124 @@
 }
 
 .modal-content { 
-  background: white; 
-  border-radius: 8px; 
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  color: white;
 }
 
 .modal-header { 
   padding: 1rem 1.5rem; 
-  border-bottom: 1px solid #dee2e6; 
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  color: white;
 }
 
 .modal-title { 
   margin: 0; 
-  font-weight: 600; 
+  font-weight: 600;
+  color: white;
 }
 
 .modal-body { 
-  padding: 1.5rem; 
+  padding: 1.5rem;
+  color: white;
+}
+
+.modal-body h4,
+.modal-body h5,
+.modal-body h6,
+.modal-body p,
+.modal-body small,
+.modal-body .text-dark,
+.modal-body .text-muted {
+  color: white !important;
+}
+
+.modal-body .bg-light {
+  background: rgba(255,255,255,0.1) !important;
+}
+
+.modal-body {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-body .border-bottom {
+  border-color: rgba(255,255,255,0.2) !important;
+}
+
+.modal-header .btn-close {
+  background: rgba(255,255,255,0.2) !important;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  border: none;
+  padding: 0;
+}
+
+.modal-header .btn-close:hover {
+  background: rgba(255,255,255,0.3) !important;
+}
+
+.modal-body .bg-warning {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.modal-body .bg-danger {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.modal-body .text-warning {
+  color: white !important;
+}
+
+.modal-body .text-danger {
+  color: #f87171 !important;
+}
+
+.modal-body .badge {
+  color: white !important;
+  border: none !important;
+}
+
+.modal-body .badge.bg-warning {
+  background-color: rgba(245, 158, 11, 0.8) !important;
+}
+
+.modal-body .badge.bg-success {
+  background-color: rgba(16, 185, 129, 0.8) !important;
+}
+
+.modal-body .badge.bg-danger {
+  background-color: rgba(239, 68, 68, 0.8) !important;
+}
+
+.modal-body .badge.bg-secondary {
+  background-color: rgba(107, 114, 128, 0.8) !important;
+}
+
+.modal-body .badge.bg-info {
+  background-color: rgba(59, 130, 246, 0.8) !important;
 }
 
 .modal-footer { 
   padding: 1rem 1.5rem; 
-  border-top: 1px solid #dee2e6; 
+  border-top: 1px solid rgba(255,255,255,0.2); 
   display: flex; 
   gap: 0.5rem; 
-  justify-content: flex-end; 
+  justify-content: flex-end;
+  background: rgba(255,255,255,0.05);
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
 }
 
 .form-group { 
@@ -160,32 +324,53 @@
   display: block; 
   margin-bottom: 0.75rem; 
   font-weight: 600; 
-  color: #374151; 
+  color: white; 
   font-size: 0.875rem; 
 }
 
 .form-control { 
   width: 100%; 
   padding: 0.75rem; 
-  border: 1px solid #d1d5db; 
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.3); 
   border-radius: 8px; 
   font-size: 0.875rem; 
-  transition: border-color 0.2s ease, box-shadow 0.2s ease; 
+  color: white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  max-height: 120px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  resize: none;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
 }
 
 .form-control:focus { 
   outline: none; 
-  border-color: #d1d5db; 
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.5); 
   box-shadow: none; 
 }
 
+.form-control::placeholder {
+  color: white !important;
+}
+
+.text-success {
+  color: #34d399 !important;
+}
+
+.text-danger {
+  color: #f87171 !important;
+}
+
 .reservation-info-card {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 8px;
   padding: 1.25rem;
   margin-top: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .modal-btn {
@@ -239,10 +424,10 @@
 }
 
 .pagination-btn {
+  color: white !important;
+  border-color: rgba(255,255,255,0.3) !important;
+  background: rgba(255,255,255,0.1) !important;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #e5e7eb;
-  background: white;
-  color: #6b7280;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -254,15 +439,13 @@
 }
 
 .pagination-btn:hover:not(:disabled) {
-  border-color: #84cc16;
-  color: #84cc16;
-  background: #f7fee7;
+  background: rgba(255,255,255,0.2) !important;
+  color: white !important;
 }
 
 .pagination-btn.active {
-  background: #84cc16;
-  color: white;
-  border-color: #84cc16;
+  background: rgba(255,255,255,0.3) !important;
+  color: white !important;
 }
 
 @keyframes spin { 
@@ -276,8 +459,8 @@
 }
 
 .pagination-dots {
+  color: rgba(255,255,255,0.8) !important;
   padding: 0.5rem 0.75rem;
-  color: #6b7280;
   font-weight: 500;
 }
 
@@ -288,12 +471,11 @@
 }
 
 .btn-receipt-compact {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: transparent;
+  color: white;
   border: none;
   min-width: 2.5rem;
   height: 2.5rem;
-  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -301,18 +483,16 @@
   transition: all 0.2s ease;
 
   &:hover {
-    background: #e5e7eb;
-    color: #374151;
+    color: rgba(255,255,255,0.7);
   }
 }
 
 .btn-edit-reported {
   background: transparent;
   color: #10b981;
-  border: 1px solid #10b981;
+  border: none;
   width: 2.2rem;
   height: 2.2rem;
-  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -320,8 +500,7 @@
   transition: all 0.2s ease;
 
   &:hover {
-    background: #10b981;
-    color: white;
+    color: #059669;
     transform: translateY(-1px);
   }
 }
@@ -329,10 +508,9 @@
 .btn-edit-progress {
   background: transparent;
   color: #ef4444;
-  border: 1px solid #ef4444;
+  border: none;
   width: 2.2rem;
   height: 2.2rem;
-  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -340,8 +518,7 @@
   transition: all 0.2s ease;
 
   &:hover {
-    background: #ef4444;
-    color: white;
+    color: #dc2626;
     transform: translateY(-1px);
   }
 }
@@ -378,31 +555,26 @@
 }
 
 :host ::ng-deep .bg-warning {
-  background-color: #fef3c7 !important;
-  color: #92400e !important;
-  border: 1px solid #f59e0b;
+  background-color: rgba(245, 158, 11, 0.8) !important;
+  color: white !important;
 }
 
 :host ::ng-deep .bg-success {
-  background-color: #d1fae5 !important;
-  color: #065f46 !important;
-  border: 1px solid #10b981;
+  background-color: rgba(16, 185, 129, 0.8) !important;
+  color: white !important;
 }
 
 :host ::ng-deep .bg-danger {
-  background-color: #fee2e2 !important;
-  color: #991b1b !important;
-  border: 1px solid #ef4444;
+  background-color: rgba(239, 68, 68, 0.8) !important;
+  color: white !important;
 }
 
 :host ::ng-deep .bg-secondary {
-  background-color: #f1f5f9 !important;
-  color: #475569 !important;
-  border: 1px solid #94a3b8;
+  background-color: rgba(107, 114, 128, 0.8) !important;
+  color: white !important;
 }
 
 :host ::ng-deep .bg-info {
-  background-color: #dbeafe !important;
-  color: #1e40af !important;
-  border: 1px solid #3b82f6;
+  background-color: rgba(59, 130, 246, 0.8) !important;
+  color: white !important;
 }
