@@ -95,9 +95,10 @@ export class IncidentUtilsService {
       'security': 'Seguridad',
       'cleaning': 'Limpieza',
       'common_areas': 'Áreas Comunes',
+      'suggestions': 'Sugerencias',
       'other': 'Otros'
     };
-    return fallbackMap[category] || category;
+    return fallbackMap[category] || 'Áreas Comunes';
   }
 
   getPriorityLabel(priority: IncidentPriority): string {
