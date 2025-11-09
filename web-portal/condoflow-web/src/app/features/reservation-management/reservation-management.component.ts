@@ -201,7 +201,7 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
     const reservation = this.selectedReservation();
     if (!reservation) return;
     
-    this.reservationService.updateReservationStatus(reservation.id, ReservationStatus.CONFIRMED).subscribe({
+    this.reservationService.updateReservationStatus(reservation.id, 'Confirmed').subscribe({
       next: () => {
         this.closeApprovalModal();
         this.messageService.add({
@@ -248,7 +248,7 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
       return;
     }
     
-    this.reservationService.updateReservationStatus(id, ReservationStatus.REJECTED, reason).subscribe({
+    this.reservationService.updateReservationStatus(id, 'Rejected', reason).subscribe({
       next: () => {
         this.closeRejectModal();
         this.messageService.add({

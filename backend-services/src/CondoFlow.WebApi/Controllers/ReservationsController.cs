@@ -301,7 +301,8 @@ public class ReservationsController : ControllerBase
             RejectionReason = reservation.RejectionReason,
             CancellationReason = reservation.CancellationReason,
             EventTypeCode = reservation.EventTypeCode,
-            CreatedAt = reservation.CreatedAt
+            CreatedAt = reservation.CreatedAt,
+            UpdatedAt = reservation.UpdatedAt
         };
     }
     

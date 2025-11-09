@@ -14,6 +14,7 @@ public class ReservationDto
     public string? CancellationReason { get; set; }
     public string? EventTypeCode { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }
 
 public class CreateReservationDto
