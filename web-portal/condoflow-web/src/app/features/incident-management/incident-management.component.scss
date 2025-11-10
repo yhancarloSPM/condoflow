@@ -282,7 +282,7 @@
 
 .btn-edit-reported {
   background: transparent;
-  color: #fbbf24;
+  color: #ffdd44;
   border: none;
   width: 2.2rem;
   height: 2.2rem;
@@ -291,29 +291,29 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 1.2rem;
 
   &:hover {
-    color: #f59e0b;
+    color: #ffcc00;
     transform: translateY(-1px);
   }
 }
 
 .btn-edit-progress {
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.5);
+  background: transparent;
+  color: #66bbff;
+  border: none;
   width: 2.2rem;
   height: 2.2rem;
-  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 1.2rem;
 
   &:hover {
-    background: #3b82f6;
-    color: white;
+    color: #4499ff;
     transform: translateY(-1px);
   }
 }
@@ -327,11 +327,11 @@
   font-size: 1.2rem;
 
   &.resolved {
-    color: #34d399;
+    color: #00ff88;
   }
 
   &.cancelled-admin {
-    color: #f87171;
+    color: #ff6b6b;
   }
 
   &.cancelled-owner {
