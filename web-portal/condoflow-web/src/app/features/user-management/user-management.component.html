@@ -20,7 +20,7 @@
               <div class="row mb-4">
                 <div class="col-md-3">
                   <label class="form-label">Estado</label>
-                  <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()">
+                  <select class="form-select" [(ngModel)]="filters.status" (ngModelChange)="applyFilters()">
                     <option value="">Todos los estados</option>
                     <option [value]="UserStatus.PENDING">Pendientes</option>
                     <option [value]="UserStatus.APPROVED">Aprobados</option>
@@ -34,7 +34,7 @@
                     type="text" 
                     class="form-control" 
                     placeholder="Buscar por nombre o email..."
-                    [(ngModel)]="searchTerm"
+                    [(ngModel)]="filters.searchTerm"
                     (ngModelChange)="applyFilters()"
                   >
                 </div>

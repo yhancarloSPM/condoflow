@@ -85,20 +85,7 @@ export class IncidentUtilsService {
   
   getCategoryLabel(category: IncidentCategory): string {
     const cat = this.categoriesCache.find(c => c.value === category);
-    if (cat) return cat.label;
-    
-    // Fallback si el cache no está disponible
-    const fallbackMap: Record<string, string> = {
-      'plumbing': 'Plomería',
-      'electrical': 'Eléctrico', 
-      'maintenance': 'Mantenimiento',
-      'security': 'Seguridad',
-      'cleaning': 'Limpieza',
-      'common_areas': 'Áreas Comunes',
-      'suggestions': 'Sugerencias',
-      'other': 'Otros'
-    };
-    return fallbackMap[category] || 'Áreas Comunes';
+    return cat ? cat.label : category;
   }
 
   getPriorityLabel(priority: IncidentPriority): string {
@@ -118,22 +105,7 @@ export class IncidentUtilsService {
 
   getStatusLabel(status: string): string {
     const statusItem = this.statusesCache.find(s => s.code === status);
-    if (statusItem) return statusItem.name;
-    
-    // Fallback si el cache no está disponible - handle both cases
-    const fallbackMap: Record<string, string> = {
-      'reported': 'Reportada',
-      'in_progress': 'En Proceso', 
-      'resolved': 'Resuelta',
-      'cancelled': 'Cancelada',
-      'rejected': 'Rechazada',
-      'Reported': 'Reportada',
-      'InProgress': 'En Proceso',
-      'Resolved': 'Resuelta', 
-      'Cancelled': 'Cancelada',
-      'Rejected': 'Rechazada'
-    };
-    return fallbackMap[status] || status;
+    return statusItem ? statusItem.name : status;
   }
 
   getStatusSeverity(status: string): string {

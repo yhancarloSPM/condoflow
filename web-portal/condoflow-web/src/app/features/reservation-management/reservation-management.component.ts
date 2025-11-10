@@ -9,10 +9,8 @@ import { ReservationService } from '../../core/services/reservation.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { CatalogService, CatalogItem } from '../../core/services/catalog.service';
 import { ReservationFiltersComponent } from './components/reservation-filters.component';
-import { ReservationStatus } from '../../shared/enums/reservation-status.enum';
 import { NavbarComponent } from '../../shared/components/navbar.component';
-
-
+import { Reservation, ReservationStatus, ReservationStatusCounts, ReservationFilters } from './models/reservation.models';
 
 interface FilterData {
   statusFilter: string;
@@ -32,34 +30,45 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
   reservationStatus = ReservationStatus;
   currentUser = signal<any>(null);
   loading = signal(false);
-  reservations = signal<any[]>([]);
-  
-  pendingCount = signal(0);
-  confirmedCount = signal(0);
-  rejectedCount = signal(0);
-  cancelledCount = signal(0);
+  reservations = signal<Reservation[]>([]);
   
   showRejectModal = signal(false);
   showApprovalModalVisible = signal(false);
-  selectedReservation = signal<any>(null);
+  selectedReservation = signal<Reservation | null>(null);
   selectedReservationId = signal('');
   rejectionReason = signal('');
   
   showCancellationModal = signal(false);
-  selectedCancellation = signal<any>(null);
+  selectedCancellation = signal<Reservation | null>(null);
   
   showDetailModal = signal(false);
-  selectedReservationDetail = signal<any>(null);
+  selectedReservationDetail = signal<Reservation | null>(null);
   
   currentPage = signal(1);
   pageSize = 10;
   
-  filteredReservations = signal<any[]>([]);
+  filteredReservations = signal<Reservation[]>([]);
   filterData: FilterData = {
     statusFilter: '',
     eventTypeFilter: '',
     searchTerm: ''
   };
+  
+  statusCounts = computed((): ReservationStatusCounts => {
+    const reservations = this.reservations();
+    console.log('Computing status counts for reservations:', reservations);
+    console.log('Sample reservation status:', reservations[0]?.status);
+    
+    const counts = {
+      pending: reservations.filter(r => r.status as string === 'Pending' || r.status === ReservationStatus.PENDING).length,
+      confirmed: reservations.filter(r => r.status as string === 'Confirmed' || r.status === ReservationStatus.CONFIRMED).length,
+      rejected: reservations.filter(r => r.status as string === 'Rejected' || r.status === ReservationStatus.REJECTED).length,
+      cancelled: reservations.filter(r => r.status as string === 'Cancelled' || r.status === ReservationStatus.CANCELLED).length
+    };
+    
+    console.log('Computed counts:', counts);
+    return counts;
+  });
   
   // Catálogos
   reservationStatuses = signal<CatalogItem[]>([]);
@@ -125,14 +134,12 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.reservations.set(response.data || []);
         this.applyFilters();
-        this.updateCounts();
         this.loading.set(false);
       },
       error: (error) => {
         console.error('Error loading reservations:', error);
         this.reservations.set([]);
         this.applyFilters();
-        this.updateCounts();
         this.loading.set(false);
       }
     });
@@ -147,15 +154,16 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
     let filtered = [...this.reservations()];
     
     if (this.filterData.statusFilter) {
-      // Convert code to PascalCase for data comparison
-      const statusMap: { [key: string]: string } = {
-        'pending': 'Pending',
-        'confirmed': 'Confirmed', 
-        'rejected': 'Rejected',
-        'cancelled': 'Cancelled'
+      // Mapear el código del filtro al valor real del status
+      const statusMap: { [key: string]: string[] } = {
+        'pending': ['Pending', ReservationStatus.PENDING],
+        'confirmed': ['Confirmed', ReservationStatus.CONFIRMED],
+        'rejected': ['Rejected', ReservationStatus.REJECTED],
+        'cancelled': ['Cancelled', ReservationStatus.CANCELLED]
       };
-      const actualStatus = statusMap[this.filterData.statusFilter];
-      filtered = filtered.filter(r => r.status === actualStatus);
+      
+      const validStatuses = statusMap[this.filterData.statusFilter] || [this.filterData.statusFilter];
+      filtered = filtered.filter(r => validStatuses.includes(r.status as string));
     }
     
     if (this.filterData.eventTypeFilter) {
@@ -176,14 +184,7 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
     this.currentPage.set(1);
   }
 
-  updateCounts() {
-    const reservations = this.reservations();
-    
-    this.pendingCount.set(reservations.filter(r => r.status === 'Pending').length);
-    this.confirmedCount.set(reservations.filter(r => r.status === 'Confirmed').length);
-    this.rejectedCount.set(reservations.filter(r => r.status === 'Rejected').length);
-    this.cancelledCount.set(reservations.filter(r => r.status === 'Cancelled').length);
-  }
+
 
   showApprovalModal(reservation: any) {
     this.selectedReservation.set(reservation);
@@ -295,10 +296,10 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
   getEventTypeName(eventTypeCode: string): string {
     if (!eventTypeCode) {
       console.log('Event type code is null/undefined for table column');
-      return 'No especificado';
+      return eventTypeCode;
     }
     const eventType = this.eventTypes().find(et => et.code === eventTypeCode);
-    return eventType ? eventType.name : 'No especificado';
+    return eventType ? eventType.name : eventTypeCode;
   }
 
   getStatusText(status: string): string {

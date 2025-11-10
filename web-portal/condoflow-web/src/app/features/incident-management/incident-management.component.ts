@@ -6,7 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { IncidentService } from '../../core/services/incident.service';
 import { NavbarComponent } from '../../shared/components/navbar.component';
 import { IncidentUtilsService } from './services/incident-utils.service';
-import { ToastService } from './services/toast.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { PaginationService } from './services/pagination.service';
 import { IncidentFiltersComponent } from './components/incident-filters.component';
 import { IncidentStatusModalComponent } from './components/incident-status-modal.component';

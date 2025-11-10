@@ -15,8 +15,8 @@ import { MenuItem, MessageService } from 'primeng/api';
 import { AuthService } from '../../core/services/auth.service';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { UserStatus } from '../../shared/enums/user-status.enum';
 import { NavbarComponent } from '../../shared/components/navbar.component';
+import { User, UserStatus, UserStatusCounts, UserFilters } from './models/user.models';
 
 @Component({
   selector: 'app-user-management',
@@ -39,16 +39,19 @@ import { NavbarComponent } from '../../shared/components/navbar.component';
   styleUrls: ['./user-management.component.scss']
 })
 export class UserManagementComponent implements OnInit, OnDestroy {
-  allUsers = signal<any[]>([]);
-  filteredUsers = signal<any[]>([]);
+  allUsers = signal<User[]>([]);
+  filteredUsers = signal<User[]>([]);
   loading = signal(false);
   approvingUser = signal<string | null>(null);
   rejectingUser = signal<string | null>(null);
   currentUser = signal<any>(null);
   currentPage = signal(1);
   pageSize = 10;
-  statusFilter = '';
-  searchTerm = '';
+  
+  filters: UserFilters = {
+    status: '',
+    searchTerm: ''
+  };
   
   paginatedUsers = computed(() => {
     const start = (this.currentPage() - 1) * this.pageSize;
@@ -58,7 +61,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   
   totalPages = computed(() => Math.ceil(this.filteredUsers().length / this.pageSize));
   
-  statusCounts = computed(() => {
+  statusCounts = computed((): UserStatusCounts => {
     const users = this.allUsers();
     return {
       pending: users.filter(u => !u.isApproved && !u.isRejected).length,
@@ -127,18 +130,18 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   applyFilters() {
     let filtered = [...this.allUsers()];
     
-    if (this.statusFilter) {
-      if (this.statusFilter === UserStatus.PENDING) {
+    if (this.filters.status) {
+      if (this.filters.status === UserStatus.PENDING) {
         filtered = filtered.filter(u => !u.isApproved && !u.isRejected);
-      } else if (this.statusFilter === UserStatus.APPROVED) {
+      } else if (this.filters.status === UserStatus.APPROVED) {
         filtered = filtered.filter(u => u.isApproved);
-      } else if (this.statusFilter === UserStatus.REJECTED) {
+      } else if (this.filters.status === UserStatus.REJECTED) {
         filtered = filtered.filter(u => u.isRejected);
       }
     }
     
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
+    if (this.filters.searchTerm) {
+      const term = this.filters.searchTerm.toLowerCase();
       filtered = filtered.filter(u => 
         u.firstName.toLowerCase().includes(term) || 
         u.lastName.toLowerCase().includes(term) ||
