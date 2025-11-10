@@ -156,7 +156,7 @@ import { NotificationService } from '../../core/services/notification.service';
                 
                 <div class="action-card" (click)="navigateTo('/announcement-management')">
                   <div class="action-icon announcements">
-                    <i class="pi pi-bell"></i>
+                    <i class="pi pi-megaphone"></i>
                   </div>
                   <h3>Gestionar Comunicados</h3>
                 </div>
