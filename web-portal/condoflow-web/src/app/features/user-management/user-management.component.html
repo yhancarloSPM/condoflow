@@ -1,0 +1,292 @@
+<div class="management-layout">
+  <app-navbar></app-navbar>
+
+  <div class="main-content">
+    <div class="container-fluid">
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="header-card">
+            <div class="header-content">
+              <div class="header-info">
+                <div class="header-icon">
+                  <i class="pi pi-users"></i>
+                </div>
+                <div class="header-text">
+                  <h2 class="header-title">Gestión de Usuarios</h2>
+                  <p class="header-subtitle">Administra y supervisa todos los usuarios del sistema</p>
+                </div>
+              </div>
+              
+              <div class="filters-section">
+                <div class="filter-group">
+                  <div class="filter-item">
+                    <label class="filter-label">Estado</label>
+                    <select [(ngModel)]="statusFilter" (change)="applyFilters()" class="filter-select">
+                      <option value="">Todos</option>
+                      <option [value]="UserStatus.PENDING">Pendientes</option>
+                      <option [value]="UserStatus.APPROVED">Aprobados</option>
+                      <option [value]="UserStatus.REJECTED">Rechazados</option>
+                    </select>
+                  </div>
+                  
+                  <div class="filter-item search-item">
+                    <label class="filter-label">Buscar</label>
+                    <div class="search-input-wrapper">
+                      <i class="pi pi-search search-icon"></i>
+                      <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" 
+                             class="search-input" placeholder="Nombre o email...">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="users-card card">
+        <div class="card-header bg-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-white">Usuarios del Sistema</h5>
+            <div class="d-flex gap-2">
+              <div class="text-center">
+                <div class="badge bg-warning text-dark fw-bold">{{ statusCounts().pending }}</div>
+                <div><small class="text-white">Pendientes</small></div>
+              </div>
+              <div class="text-center">
+                <div class="badge bg-success text-white fw-bold">{{ statusCounts().approved }}</div>
+                <div><small class="text-white">Aprobados</small></div>
+              </div>
+              <div class="text-center">
+                <div class="badge bg-danger text-white fw-bold">{{ statusCounts().rejected }}</div>
+                <div><small class="text-white">Rechazados</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column" style="height: calc(100vh - 450px);">
+          @if (loading()) {
+            <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+              <p class="text-white mt-2">Cargando usuarios...</p>
+            </div>
+          } @else if (paginatedUsers().length === 0) {
+            <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
+              <h6 class="text-white mt-3">No hay usuarios</h6>
+              <p class="text-white small">No se encontraron usuarios con los filtros aplicados</p>
+            </div>
+          } @else {
+            <div class="table-responsive" style="flex: 1; overflow-y: auto; min-height: 0;">
+              <table class="table table-striped">
+                <thead class="sticky-top">
+                  <tr>
+                    <th>Usuario</th>
+                    <th>Teléfono</th>
+                    <th>Ubicación</th>
+                    <th>Fecha</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (user of paginatedUsers(); track user.id) {
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="avatar-circle me-3">
+                            {{ getInitials(user.firstName, user.lastName) }}
+                          </div>
+                          <div>
+                            <div class="fw-semibold">{{ user.firstName }} {{ user.lastName }}</div>
+                            <small class="text-muted">{{ user.email }}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="text-muted">{{ user.phoneNumber || 'N/A' }}</span>
+                      </td>
+                      <td>
+                        <span class="text-muted">{{ (user.block && user.apartment) ? user.block + '-' + user.apartment : 'N/A' }}</span>
+                      </td>
+                      <td>
+                        <span class="text-muted">{{ user.createdAt | date:'short' }}</span>
+                      </td>
+                      <td class="text-center">
+                        @if (user.isApproved) {
+                          <span class="status-badge status-approved">
+                            Aprobado
+                          </span>
+                        } @else if (user.isRejected) {
+                          <span class="status-badge status-rejected">
+                            Rechazado
+                          </span>
+                        } @else {
+                          <span class="status-badge status-pending">
+                            Pendiente
+                          </span>
+                        }
+                      </td>
+                      <td class="text-center">
+                        @if (user.isApproved) {
+                          <div class="d-flex justify-content-center">
+                            <button 
+                              type="button"
+                              class="btn-action-compact reject"
+                              (click)="rejectUser(user.id)"
+                              [disabled]="rejectingUser() === user.id"
+                              title="Rechazar Usuario"
+                            >
+                              @if (rejectingUser() === user.id) {
+                                <span class="spinner-border spinner-border-sm"></span>
+                              } @else {
+                                <i class="pi pi-user-minus"></i>
+                              }
+                            </button>
+                          </div>
+                        } @else if (user.isRejected) {
+                          <div class="d-flex justify-content-center">
+                            <button 
+                              type="button"
+                              class="btn-action-compact approve"
+                              (click)="approveUser(user.id)"
+                              [disabled]="approvingUser() === user.id"
+                              title="Aprobar Usuario"
+                            >
+                              @if (approvingUser() === user.id) {
+                                <span class="spinner-border spinner-border-sm"></span>
+                              } @else {
+                                <i class="pi pi-user-plus"></i>
+                              }
+                            </button>
+                          </div>
+                        } @else {
+                          <div class="d-flex gap-1 justify-content-center">
+                            <button 
+                              type="button"
+                              class="btn-action-compact approve"
+                              (click)="approveUser(user.id)"
+                              [disabled]="approvingUser() === user.id || rejectingUser() === user.id"
+                              title="Aprobar"
+                            >
+                              @if (approvingUser() === user.id) {
+                                <span class="spinner-border spinner-border-sm"></span>
+                              } @else {
+                                <i class="pi pi-user-plus"></i>
+                              }
+                            </button>
+                            <button 
+                              type="button"
+                              class="btn-action-compact reject"
+                              (click)="rejectUser(user.id)"
+                              [disabled]="approvingUser() === user.id || rejectingUser() === user.id"
+                              title="Rechazar"
+                            >
+                              @if (rejectingUser() === user.id) {
+                                <span class="spinner-border spinner-border-sm"></span>
+                              } @else {
+                                <i class="pi pi-user-minus"></i>
+                              }
+                            </button>
+                          </div>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            
+            @if (totalPages() > 1) {
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;">
+                <div>
+                  <small class="text-muted">
+                    Mostrando {{ (currentPage() - 1) * pageSize + 1 }} - {{ Math.min(currentPage() * pageSize, filteredUsers().length) }} de {{ filteredUsers().length }} usuarios
+                  </small>
+                </div>
+                <nav>
+                  <div class="pagination">
+                    <button class="pagination-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
+                      <i class="pi pi-chevron-left"></i>
+                    </button>
+                    @for (page of getPageNumbers(); track page) {
+                      @if (page === '...') {
+                        <span class="pagination-dots">...</span>
+                      } @else {
+                        <button class="pagination-btn" [class.active]="page === currentPage()" (click)="goToPage($any(page))">
+                          {{ page }}
+                        </button>
+                      }
+                    }
+                    <button class="pagination-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">
+                      <i class="pi pi-chevron-right"></i>
+                    </button>
+                  </div>
+                </nav>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+@if (showConfirmDialog()) {
+  <div class="modal-backdrop" (click)="cancelConfirmation()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            @if (confirmAction() === 'approve') {
+              <i class="pi pi-user-plus me-2" style="color: #10b981;"></i>
+              Aprobar Usuario
+            } @else {
+              <i class="pi pi-user-minus me-2" style="color: #ef4444;"></i>
+              Rechazar Usuario
+            }
+          </h5>
+          <button type="button" class="btn-close" (click)="cancelConfirmation()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>{{ confirmMessage() }}</p>
+          @if (pendingUserInfo()) {
+            <div class="user-info-card">
+              <div class="d-flex align-items-center">
+                <div class="avatar-circle me-3">
+                  {{ getInitials(pendingUserInfo().firstName, pendingUserInfo().lastName) }}
+                </div>
+                <div>
+                  <div class="fw-semibold">{{ pendingUserInfo().firstName }} {{ pendingUserInfo().lastName }}</div>
+                  <small class="text-muted">{{ pendingUserInfo().email }}</small>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button 
+            type="button" 
+            class="btn btn-outline-secondary modal-btn"
+            (click)="cancelConfirmation()">
+            Cancelar
+          </button>
+          <button 
+            type="button" 
+            [class]="confirmAction() === 'approve' ? 'btn btn-outline-success modal-btn' : 'btn btn-outline-danger modal-btn'"
+            (click)="executeConfirmation()"
+            [disabled]="executingAction()">
+            @if (executingAction()) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            {{ confirmAction() === 'approve' ? 'Aprobar' : 'Rechazar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
