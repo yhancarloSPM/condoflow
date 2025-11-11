@@ -20,6 +20,16 @@
               <div class="filters-section">
                 <div class="d-flex gap-3 align-items-end flex-wrap">
                   <div class="filter-group">
+                    <label class="filter-label">Buscar</label>
+                    <input 
+                      type="text" 
+                      class="form-control filter-input" 
+                      placeholder="Buscar propietario..."
+                      [value]="searchTerm()"
+                      (input)="updateSearchTerm($event)"
+                    />
+                  </div>
+                  <div class="filter-group">
                     <label class="filter-label">Estado</label>
                     <select 
                       class="form-select filter-select" 
@@ -58,16 +68,6 @@
                       <option value="amount-desc">Mayor monto</option>
                       <option value="amount-asc">Menor monto</option>
                     </select>
-                  </div>
-                  <div class="filter-group">
-                    <label class="filter-label">Buscar</label>
-                    <input 
-                      type="text" 
-                      class="form-control filter-input" 
-                      placeholder="Buscar propietario..."
-                      [value]="searchTerm()"
-                      (input)="updateSearchTerm($event)"
-                    />
                   </div>
                 </div>
               </div>

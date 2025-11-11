@@ -20,16 +20,6 @@
               <div class="filters-section">
                 <div class="d-flex gap-3 align-items-end flex-wrap">
                   <div class="filter-group">
-                    <label class="filter-label">Estado</label>
-                    <select class="filter-select" [(ngModel)]="filters.status" (ngModelChange)="applyFilters()">
-                      <option value="">Todos los estados</option>
-                      <option [value]="UserStatus.PENDING">Pendientes</option>
-                      <option [value]="UserStatus.APPROVED">Aprobados</option>
-                      <option [value]="UserStatus.REJECTED">Rechazados</option>
-                    </select>
-                  </div>
-                  
-                  <div class="filter-group">
                     <label class="filter-label">Buscar</label>
                     <input 
                       type="text" 
@@ -38,6 +28,16 @@
                       [(ngModel)]="filters.searchTerm"
                       (ngModelChange)="applyFilters()"
                     >
+                  </div>
+                  
+                  <div class="filter-group">
+                    <label class="filter-label">Estado</label>
+                    <select class="filter-select" [(ngModel)]="filters.status" (ngModelChange)="applyFilters()">
+                      <option value="">Todos los estados</option>
+                      <option [value]="UserStatus.PENDING">Pendientes</option>
+                      <option [value]="UserStatus.APPROVED">Aprobados</option>
+                      <option [value]="UserStatus.REJECTED">Rechazados</option>
+                    </select>
                   </div>
                 </div>
               </div>

@@ -18,4 +18,12 @@ export class AdminDebtService {
   getAllDebts(): Observable<any> {
     return this.http.get(`${environment.apiUrl}/admin/debts`);
   }
+
+  getOwnersSummary(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/owners/debts-summary`);
+  }
+
+  getOwnerDebtsDetail(ownerId: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${ownerId}/debts-detail`);
+  }
 }

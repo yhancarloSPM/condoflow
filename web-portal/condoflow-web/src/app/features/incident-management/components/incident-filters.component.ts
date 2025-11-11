@@ -11,6 +11,17 @@ import { IncidentPriorityOption, IncidentStatusCounts, IncidentStatus } from '..
     <div class="filters-section">
       <div class="d-flex gap-3 align-items-end flex-wrap">
         <div class="filter-group">
+          <label class="filter-label">Buscar</label>
+          <input 
+            type="text" 
+            class="form-control filter-input" 
+            placeholder="Buscar por título o propietario..."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onFilterChange()"
+          >
+        </div>
+        
+        <div class="filter-group">
           <label class="filter-label">Estado</label>
           <select class="form-select filter-select" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
             <option value="">Todos los estados</option>
@@ -39,17 +50,6 @@ import { IncidentPriorityOption, IncidentStatusCounts, IncidentStatus } from '..
             <option value="last-6-months">Últimos 6 meses</option>
             <option value="current-year">Este año</option>
           </select>
-        </div>
-        
-        <div class="filter-group">
-          <label class="filter-label">Buscar</label>
-          <input 
-            type="text" 
-            class="form-control filter-input" 
-            placeholder="Buscar por título o propietario..."
-            [(ngModel)]="searchTerm"
-            (ngModelChange)="onFilterChange()"
-          >
         </div>
       </div>
     </div>

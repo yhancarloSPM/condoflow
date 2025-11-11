@@ -135,7 +135,7 @@ import { NotificationService } from '../../core/services/notification.service';
                 
                 <div class="action-card" (click)="navigateTo('/debt-management')">
                   <div class="action-icon debts">
-                    <i class="pi pi-file"></i>
+                    <i class="pi pi-money-bill"></i>
                   </div>
                   <h3>Gestión de Deudas</h3>
                 </div>
@@ -184,7 +184,7 @@ import { NotificationService } from '../../core/services/notification.service';
                 
                 <div class="action-card" (click)="navigateTo('/my-debts')">
                   <div class="action-icon debts">
-                    <i class="pi pi-file"></i>
+                    <i class="pi pi-money-bill"></i>
                   </div>
                   <h3>Mis Deudas</h3>
                 </div>

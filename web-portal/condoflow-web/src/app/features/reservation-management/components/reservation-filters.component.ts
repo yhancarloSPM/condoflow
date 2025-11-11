@@ -23,6 +23,17 @@ interface FilterData {
     <div class="filters-section">
       <div class="d-flex gap-3 align-items-end flex-wrap">
         <div class="filter-group">
+          <label class="filter-label">Buscar</label>
+          <input 
+            type="text" 
+            class="form-control filter-input" 
+            placeholder="Buscar por propietario..."
+            [(ngModel)]="filters.searchTerm"
+            (ngModelChange)="onFiltersChange()"
+          >
+        </div>
+        
+        <div class="filter-group">
           <label class="filter-label">Estado</label>
           <select class="form-select filter-select" [(ngModel)]="filters.statusFilter" (ngModelChange)="onFiltersChange()">
             <option value="">Todos los estados</option>
@@ -51,17 +62,6 @@ interface FilterData {
             <option value="last-6-months">Últimos 6 meses</option>
             <option value="current-year">Este año</option>
           </select>
-        </div>
-        
-        <div class="filter-group">
-          <label class="filter-label">Buscar</label>
-          <input 
-            type="text" 
-            class="form-control filter-input" 
-            placeholder="Buscar por propietario..."
-            [(ngModel)]="filters.searchTerm"
-            (ngModelChange)="onFiltersChange()"
-          >
         </div>
       </div>
     </div>

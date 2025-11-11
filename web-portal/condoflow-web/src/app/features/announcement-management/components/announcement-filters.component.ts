@@ -10,6 +10,17 @@ import { AnnouncementFilters, AnnouncementType } from '../models/announcement.mo
   template: `
     <div class="d-flex gap-3 align-items-end flex-wrap">
       <div class="filter-group">
+        <label class="filter-label">Buscar</label>
+        <input 
+          type="text" 
+          class="filter-input" 
+          placeholder="Buscar por título o contenido..."
+          [(ngModel)]="filters.searchTerm"
+          (ngModelChange)="onFiltersChange()"
+        >
+      </div>
+      
+      <div class="filter-group">
         <label class="filter-label">Tipo de Comunicado</label>
         <select class="filter-select" [(ngModel)]="filters.type" (ngModelChange)="onFiltersChange()">
           <option value="">Todos los tipos</option>
@@ -28,17 +39,6 @@ import { AnnouncementFilters, AnnouncementType } from '../models/announcement.mo
           <option value="last-6-months">Últimos 6 meses</option>
           <option value="current-year">Este año</option>
         </select>
-      </div>
-      
-      <div class="filter-group">
-        <label class="filter-label">Buscar</label>
-        <input 
-          type="text" 
-          class="filter-input" 
-          placeholder="Buscar por título o contenido..."
-          [(ngModel)]="filters.searchTerm"
-          (ngModelChange)="onFiltersChange()"
-        >
       </div>
     </div>
   `,
