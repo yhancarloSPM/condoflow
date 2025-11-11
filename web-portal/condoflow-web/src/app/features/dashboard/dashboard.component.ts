@@ -149,7 +149,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom' },
+          legend: { 
+            position: 'bottom',
+            labels: { color: 'white' }
+          },
           tooltip: {
             enabled: hasData
           }
@@ -202,18 +205,25 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         plugins: {
           legend: { 
             display: true,
-            position: 'top'
+            position: 'top',
+            labels: { color: 'white' }
           }
         },
         scales: {
+          x: {
+            ticks: { color: 'white' },
+            grid: { color: 'rgba(255,255,255,0.1)' }
+          },
           y: { 
             beginAtZero: true,
             max: 75000,
             ticks: {
+              color: 'white',
               callback: function(value) {
                 return '$' + value.toLocaleString();
               }
-            }
+            },
+            grid: { color: 'rgba(255,255,255,0.1)' }
           }
         }
       }
@@ -350,9 +360,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           legend: { display: false }
         },
         scales: {
+          x: {
+            ticks: { color: 'white' },
+            grid: { color: 'rgba(255,255,255,0.1)' }
+          },
           y: { 
             beginAtZero: true,
-            ticks: { stepSize: 1 }
+            ticks: { 
+              stepSize: 1,
+              color: 'white'
+            },
+            grid: { color: 'rgba(255,255,255,0.1)' }
           }
         }
       }
@@ -391,10 +409,16 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             beginAtZero: true,
             max: 100,
             ticks: {
+              color: 'white',
               callback: function(value) {
                 return value + '%';
               }
-            }
+            },
+            grid: { color: 'rgba(255,255,255,0.1)' }
+          },
+          y: {
+            ticks: { color: 'white' },
+            grid: { color: 'rgba(255,255,255,0.1)' }
           }
         }
       }
