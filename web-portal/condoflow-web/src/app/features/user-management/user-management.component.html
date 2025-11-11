@@ -17,30 +17,28 @@
                 </div>
               </div>
               
-              <div class="row mb-4">
-                <div class="col-md-3">
-                  <label class="form-label">Estado</label>
-                  <select class="form-select" [(ngModel)]="filters.status" (ngModelChange)="applyFilters()">
-                    <option value="">Todos los estados</option>
-                    <option [value]="UserStatus.PENDING">Pendientes</option>
-                    <option [value]="UserStatus.APPROVED">Aprobados</option>
-                    <option [value]="UserStatus.REJECTED">Rechazados</option>
-                  </select>
-                </div>
-                
-                <div class="col-md-3">
-                  <label class="form-label">Buscar</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
-                    placeholder="Buscar por nombre o email..."
-                    [(ngModel)]="filters.searchTerm"
-                    (ngModelChange)="applyFilters()"
-                  >
-                </div>
-                
-                <div class="col-md-6">
-                  <!-- Columna vacía para mantener el layout -->
+              <div class="filters-section">
+                <div class="d-flex gap-3 align-items-end flex-wrap">
+                  <div class="filter-group">
+                    <label class="filter-label">Estado</label>
+                    <select class="filter-select" [(ngModel)]="filters.status" (ngModelChange)="applyFilters()">
+                      <option value="">Todos los estados</option>
+                      <option [value]="UserStatus.PENDING">Pendientes</option>
+                      <option [value]="UserStatus.APPROVED">Aprobados</option>
+                      <option [value]="UserStatus.REJECTED">Rechazados</option>
+                    </select>
+                  </div>
+                  
+                  <div class="filter-group">
+                    <label class="filter-label">Buscar</label>
+                    <input 
+                      type="text" 
+                      class="filter-input" 
+                      placeholder="Buscar por nombre o email..."
+                      [(ngModel)]="filters.searchTerm"
+                      (ngModelChange)="applyFilters()"
+                    >
+                  </div>
                 </div>
               </div>
             </div>

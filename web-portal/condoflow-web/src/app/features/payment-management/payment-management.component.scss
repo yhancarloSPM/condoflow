@@ -71,6 +71,8 @@
   gap: 0.5rem;
 }
 
+
+
 .filter-label {
   font-size: 0.75rem;
   font-weight: 600;
@@ -107,6 +109,10 @@
   color: white !important;
 }
 
+.form-control::placeholder {
+  color: white !important;
+}
+
 .filter-input:focus, .filter-select:focus {
   outline: none;
   border-color: rgba(255, 255, 255, 0.5);
@@ -118,36 +124,7 @@
   color: white;
 }
 
-
-
-.form-select, .form-control {
-  background: rgba(255,255,255,0.1) !important;
-  border: 1px solid rgba(255,255,255,0.3) !important;
-  color: white !important;
-}
-
-.form-select:focus, .form-control:focus {
-  background: rgba(255,255,255,0.2) !important;
-  border-color: rgba(255,255,255,0.5) !important;
-  box-shadow: none !important;
-  color: white !important;
-}
-
-.form-select option {
-  background: #1e3c72 !important;
-  color: white !important;
-}
-
-.form-label {
-  color: white !important;
-  font-weight: 500;
-}
-
-.form-control::placeholder {
-  color: white !important;
-}
-
-.users-card { 
+.payments-card { 
   background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); 
   backdrop-filter: blur(15px); 
   border: 1px solid rgba(255,255,255,0.2); 
@@ -182,11 +159,6 @@
   color: white !important;
 }
 
-.card-header .badge.bg-info {
-  background-color: rgba(59, 130, 246, 0.9) !important;
-  color: white !important;
-}
-
 .card-header .badge.bg-success {
   background-color: rgba(16, 185, 129, 0.9) !important;
   color: white !important;
@@ -197,11 +169,6 @@
   color: white !important;
 }
 
-.card-header .badge.bg-secondary {
-  background-color: rgba(107, 114, 128, 0.9) !important;
-  color: white !important;
-}
-
 .card-body { 
   padding: 1rem; 
 }
@@ -209,12 +176,14 @@
 .table-responsive { 
   overflow-x: auto; 
   max-width: 100%; 
+  height: 100%;
+  overflow-y: auto;
 }
 
 .table { 
   table-layout: fixed; 
   width: 100%; 
-  min-width: 1000px; 
+  min-width: 1200px; 
   --bs-table-bg: transparent;
 }
 
@@ -240,26 +209,6 @@
   color: rgba(255,255,255,0.7) !important;
 }
 
-.pagination-btn {
-  color: white !important;
-  border-color: rgba(255,255,255,0.3) !important;
-  background: rgba(255,255,255,0.1) !important;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: rgba(255,255,255,0.2) !important;
-  color: white !important;
-}
-
-.pagination-btn.active {
-  background: rgba(255,255,255,0.3) !important;
-  color: white !important;
-}
-
-.pagination-dots {
-  color: rgba(255,255,255,0.8) !important;
-}
-
 .card-body small {
   color: rgba(255,255,255,0.8) !important;
 }
@@ -268,36 +217,22 @@
   color: rgba(255,255,255,0.9) !important;
 }
 
-.card-body h6.text-muted {
-  color: white !important;
+.payment-amount-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.card-body p.text-muted {
-  color: rgba(255,255,255,0.8) !important;
+.currency {
+  color: rgba(255,255,255,0.6) !important;
+  font-size: 0.75rem;
 }
 
-.table th:nth-child(1) { width: 30%; }
-.table th:nth-child(2) { width: 15%; }
-.table th:nth-child(3) { width: 15%; }
-.table th:nth-child(4) { width: 15%; }
-.table th:nth-child(5) { width: 15%; }
-.table th:nth-child(6) { width: 10%; }
-
-.spinner { 
-  width: 2rem; 
-  height: 2rem; 
-  border: 2px solid #e5e7eb; 
-  border-top: 2px solid #2563EB; 
-  border-radius: 50%; 
-  animation: spin 1s linear infinite; 
-  margin: 0 auto 1rem auto; 
-}
-
-:host ::ng-deep .badge {
-  font-weight: 400 !important;
-  font-size: 0.75rem !important;
-  padding: 0.35rem 0.65rem !important;
-  border-radius: 0.5rem !important;
+.rejection-reason {
+  color: rgba(255, 107, 107, 0.8) !important;
+  font-style: italic;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
 }
 
 .status-badge {
@@ -311,37 +246,7 @@
   letter-spacing: 0.5px !important;
 }
 
-:host ::ng-deep .bg-warning {
-  background-color: rgba(245, 158, 11, 0.8) !important;
-  color: white !important;
-}
-
-:host ::ng-deep .bg-info {
-  background-color: rgba(59, 130, 246, 0.8) !important;
-  color: white !important;
-}
-
-:host ::ng-deep .bg-success {
-  background-color: rgba(16, 185, 129, 0.8) !important;
-  color: white !important;
-}
-
-:host ::ng-deep .bg-danger {
-  background-color: rgba(239, 68, 68, 0.8) !important;
-  color: white !important;
-}
-
-:host ::ng-deep .bg-secondary {
-  background-color: rgba(107, 114, 128, 0.8) !important;
-  color: white !important;
-}
-
-:host ::ng-deep .bg-primary {
-  background-color: rgba(59, 130, 246, 0.8) !important;
-  color: white !important;
-}
-
-.btn-action {
+.btn-receipt-compact {
   background: transparent;
   color: white;
   border: none;
@@ -358,44 +263,54 @@
   }
 }
 
-.btn-action-compact {
+.btn-edit-reported {
+  background: transparent;
+  color: #10b981;
+  border: none;
   width: 2.2rem;
   height: 2.2rem;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.875rem;
-}
-
-.btn-action-compact.approve {
-  color: #10b981;
   font-size: 1.2rem;
+
+  &:hover:not(:disabled) {
+    color: #059669;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
 }
 
-.btn-action-compact.approve:hover:not(:disabled) {
-  color: #059669;
-  transform: translateY(-1px);
-}
-
-.btn-action-compact.reject {
-  color: #f87171;
+.btn-edit-progress {
+  background: transparent;
+  color: #ff6b6b;
+  border: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
   font-size: 1.2rem;
-}
 
-.btn-action-compact.reject:hover:not(:disabled) {
-  color: #ef4444;
-  transform: translateY(-1px);
-}
+  &:hover:not(:disabled) {
+    color: #ff4444;
+    transform: translateY(-1px);
+  }
 
-.btn-action-compact:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
 }
 
 .spinner-border-sm {
@@ -404,62 +319,27 @@
   border-width: 0.125rem;
 }
 
-.avatar-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 0.875rem;
+// Badge overrides
+:host ::ng-deep .badge {
+  font-weight: 400 !important;
+  font-size: 0.75rem !important;
+  padding: 0.35rem 0.65rem !important;
+  border-radius: 0.5rem !important;
 }
 
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: none;
+:host ::ng-deep .bg-warning {
+  background-color: rgba(245, 158, 11, 0.8) !important;
+  color: white !important;
 }
 
-.btn-outline-primary {
-  background: white;
-  color: #2563EB;
-  border: 1px solid #2563EB;
-
-  &:hover:not(:disabled) {
-    background: #2563EB;
-    color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
-  }
+:host ::ng-deep .bg-success {
+  background-color: rgba(16, 185, 129, 0.8) !important;
+  color: white !important;
 }
 
-.btn-outline-secondary {
-  border: 1px solid #6b7280;
-  color: #6b7280;
-  min-width: 100px;
-  font-weight: 400;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover:not(:disabled) {
-    background: #6b7280;
-    color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
-  }
+:host ::ng-deep .bg-danger {
+  background-color: rgba(239, 68, 68, 0.8) !important;
+  color: white !important;
 }
 
 .pagination {
@@ -469,10 +349,10 @@
 }
 
 .pagination-btn {
+  color: white !important;
+  border-color: rgba(255,255,255,0.3) !important;
+  background: rgba(255,255,255,0.1) !important;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #e5e7eb;
-  background: white;
-  color: #6b7280;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -481,31 +361,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
 
-  &:hover:not(:disabled) {
-    border-color: #f97316;
-    color: #f97316;
-    background: #fff7ed;
-  }
+.pagination-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.2) !important;
+  color: white !important;
+}
 
-  &.active {
-    background: #f97316;
-    color: white;
-    border-color: #f97316;
-  }
+.pagination-btn.active {
+  background: rgba(255,255,255,0.3) !important;
+  color: white !important;
+}
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .pagination-dots {
+  color: rgba(255,255,255,0.8) !important;
   padding: 0.5rem 0.75rem;
-  color: #6b7280;
   font-weight: 500;
 }
 
+// Modal
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -520,8 +399,9 @@
 }
 
 .modal-dialog {
-  max-width: 400px;
+  max-width: 500px;
   width: 90%;
+  word-wrap: break-word;
 }
 
 .modal-content {
@@ -551,8 +431,6 @@
 .modal-body {
   padding: 1.5rem;
   color: white;
-  max-height: 80vh;
-  overflow-y: auto;
 }
 
 .modal-body h4,
@@ -580,7 +458,7 @@
   border-bottom-right-radius: 24px;
 }
 
-.modal-header .btn-close {
+.btn-close {
   background: rgba(255,255,255,0.2) !important;
   border-radius: 50%;
   width: 32px;
@@ -588,20 +466,54 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
   border: none;
-  padding: 0;
+  color: white;
+  cursor: pointer;
 }
 
-.modal-header .btn-close:hover {
+.btn-close:hover {
   background: rgba(255,255,255,0.3) !important;
 }
 
-.user-info-card {
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: white;
+  font-size: 0.875rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.5);
+  box-shadow: none;
+}
+
+.form-control::placeholder {
+  color: white !important;
+}
+
+.payment-info-card {
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 6px;
-  padding: 1rem;
+  border-radius: 8px;
+  padding: 1.25rem;
   margin-top: 1rem;
 }
 
@@ -611,13 +523,22 @@
   padding: 0.5rem 1rem;
   border-radius: 6px;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+}
+
+.btn-outline-secondary {
+  border-color: #6b7280;
+  color: #6b7280;
+}
+
+.btn-outline-secondary:hover:not(:disabled) {
+  background: #6b7280;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
 }
 
 .btn-outline-success {
-  border: 1px solid #10b981;
+  border-color: #10b981;
   color: #10b981;
 }
 
@@ -629,7 +550,7 @@
 }
 
 .btn-outline-danger {
-  border: 1px solid #ef4444;
+  border-color: #ef4444;
   color: #ef4444;
 }
 
@@ -640,7 +561,36 @@
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
 }
 
-@keyframes spin { 
-  0% { transform: rotate(0deg); } 
-  100% { transform: rotate(360deg); } 
+.text-success {
+  color: #10b981 !important;
+}
+
+.text-danger {
+  color: #ef4444 !important;
+}
+
+.fw-semibold {
+  font-weight: 600 !important;
+}
+
+.me-1 {
+  margin-right: 0.25rem !important;
+}
+
+.me-2 {
+  margin-right: 0.5rem !important;
+}
+
+.spinner-border {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

@@ -26,6 +26,7 @@ export class AnnouncementManagementComponent implements OnInit {
   // Filtros
   filterData: AnnouncementFilters = {
     type: '',
+    dateFilter: '',
     searchTerm: ''
   };
   
@@ -114,6 +115,32 @@ export class AnnouncementManagementComponent implements OnInit {
           case 'event': return !!a.eventDate && !a.isUrgent;
           case 'info': return !a.isUrgent && !a.eventDate;
           default: return true;
+        }
+      });
+    }
+    
+    if (this.filterData.dateFilter) {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      
+      filtered = filtered.filter(a => {
+        const announcementDate = new Date(a.createdAt);
+        
+        switch (this.filterData.dateFilter) {
+          case 'current-month':
+            return announcementDate.getFullYear() === currentYear && 
+                   announcementDate.getMonth() === currentMonth;
+          case 'last-3-months':
+            const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+            return announcementDate >= threeMonthsAgo;
+          case 'last-6-months':
+            const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+            return announcementDate >= sixMonthsAgo;
+          case 'current-year':
+            return announcementDate.getFullYear() === currentYear;
+          default:
+            return true;
         }
       });
     }

@@ -37,6 +37,7 @@ export class IncidentManagementComponent implements OnInit {
   filters: IncidentFilters = {
     status: '',
     priority: '',
+    dateFilter: '',
     searchTerm: ''
   };
   
@@ -147,6 +148,32 @@ export class IncidentManagementComponent implements OnInit {
     
     if (this.filters.priority) {
       filtered = filtered.filter(i => i.priority === this.filters.priority);
+    }
+    
+    if (this.filters.dateFilter) {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      
+      filtered = filtered.filter(i => {
+        const incidentDate = new Date(i.createdAt);
+        
+        switch (this.filters.dateFilter) {
+          case 'current-month':
+            return incidentDate.getFullYear() === currentYear && 
+                   incidentDate.getMonth() === currentMonth;
+          case 'last-3-months':
+            const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+            return incidentDate >= threeMonthsAgo;
+          case 'last-6-months':
+            const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+            return incidentDate >= sixMonthsAgo;
+          case 'current-year':
+            return incidentDate.getFullYear() === currentYear;
+          default:
+            return true;
+        }
+      });
     }
     
     if (this.filters.searchTerm) {

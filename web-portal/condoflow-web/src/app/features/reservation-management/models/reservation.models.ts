@@ -12,7 +12,7 @@ export interface Reservation {
   startTime: string;
   endTime: string;
   eventTypeCode: string;
-  status: ReservationStatus;
+  status: string;
   notes?: string;
   rejectionReason?: string;
   cancellationReason?: string;

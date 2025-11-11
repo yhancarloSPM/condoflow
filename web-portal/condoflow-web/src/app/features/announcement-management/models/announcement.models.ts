@@ -17,6 +17,7 @@ export interface CreateAnnouncementRequest {
 
 export interface AnnouncementFilters {
   type: string;
+  dateFilter: string;
   searchTerm: string;
 }
 

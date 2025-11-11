@@ -1,0 +1,375 @@
+<div class="management-layout">
+  <app-navbar></app-navbar>
+
+  <div class="main-content">
+    <div class="container-fluid">
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="header-card">
+            <div class="header-content">
+              <div class="header-info">
+                <div class="header-icon">
+                  <i class="pi pi-credit-card"></i>
+                </div>
+                <div class="header-text">
+                  <h2 class="header-title">Gestión de Pagos</h2>
+                  <p class="header-subtitle">Aprobar o rechazar pagos de propietarios</p>
+                </div>
+              </div>
+              
+              <div class="filters-section">
+                <div class="d-flex gap-3 align-items-end flex-wrap">
+                  <div class="filter-group">
+                    <label class="filter-label">Estado</label>
+                    <select 
+                      class="form-select filter-select" 
+                      [value]="statusFilter()"
+                      (change)="updateStatusFilter($event)"
+                    >
+                      <option value="">Todos los estados</option>
+                      <option value="{{ PaymentStatus.PENDING }}">En Revisión</option>
+                      <option value="{{ PaymentStatus.APPROVED }}">Aprobados</option>
+                      <option value="{{ PaymentStatus.REJECTED }}">Rechazados</option>
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label class="filter-label">Período</label>
+                    <select 
+                      class="form-select filter-select" 
+                      [value]="dateFilter()"
+                      (change)="updateDateFilter($event)"
+                    >
+                      <option value="">Todos los períodos</option>
+                      <option value="current-month">Este mes</option>
+                      <option value="last-3-months">Últimos 3 meses</option>
+                      <option value="last-6-months">Últimos 6 meses</option>
+                      <option value="current-year">Este año</option>
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label class="filter-label">Ordenar</label>
+                    <select 
+                      class="form-select filter-select" 
+                      [value]="sortBy()"
+                      (change)="updateSortBy($event)"
+                    >
+                      <option value="date-desc">Más recientes</option>
+                      <option value="date-asc">Más antiguos</option>
+                      <option value="amount-desc">Mayor monto</option>
+                      <option value="amount-asc">Menor monto</option>
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label class="filter-label">Buscar</label>
+                    <input 
+                      type="text" 
+                      class="form-control filter-input" 
+                      placeholder="Buscar propietario..."
+                      [value]="searchTerm()"
+                      (input)="updateSearchTerm($event)"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="payments-card card">
+        <div class="card-header bg-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-white">Pagos Recibidos</h5>
+            <div class="d-flex gap-2">
+              <div class="text-center">
+                <div class="badge bg-warning text-white fw-bold">{{ getPaymentsByStatus(PaymentStatus.PENDING).length }}</div>
+                <div><small class="text-white">En Revisión</small></div>
+              </div>
+              <div class="text-center">
+                <div class="badge bg-success text-white fw-bold">{{ getPaymentsByStatus(PaymentStatus.APPROVED).length }}</div>
+                <div><small class="text-white">Aprobados</small></div>
+              </div>
+              <div class="text-center">
+                <div class="badge bg-danger text-white fw-bold">{{ getPaymentsByStatus(PaymentStatus.REJECTED).length }}</div>
+                <div><small class="text-white">Rechazados</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column" style="height: calc(100vh - 380px);">
+          @if (loading()) {
+            <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="text-white mt-2">Cargando pagos...</p>
+            </div>
+          } @else if (filteredPayments().length === 0) {
+            <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
+              <h6 class="text-white mt-3">No hay pagos</h6>
+              <p class="text-white small">{{ payments().length === 0 ? 'No hay pagos registrados' : 'No se encontraron pagos con los filtros aplicados' }}</p>
+            </div>
+          } @else {
+            <div class="table-responsive" style="flex: 1; overflow-y: auto; min-height: 0;">
+              <table class="table table-striped">
+                <thead class="sticky-top">
+                  <tr>
+                    <th style="width: 15%;">Propietario</th>
+                    <th style="width: 12%;">Monto</th>
+                    <th style="width: 15%;">Método</th>
+                    <th style="width: 12%;">Fecha</th>
+                    <th style="width: 10%;">Estado</th>
+                    <th style="width: 25%;">Concepto</th>
+                    <th style="width: 11%; text-align: right; padding-right: 1.5rem;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (payment of paginatedPayments(); track payment.id) {
+                    <tr>
+                      <td>{{ payment.ownerName }}</td>
+                      <td>
+                        <div class="payment-amount-cell">
+                          <div class="d-flex align-items-center gap-2">
+                            <div>
+                              ${{ payment.amount.toFixed(2) }}
+                              <small class="currency">{{ payment.currency || 'DOP' }}</small>
+                            </div>
+                            <button 
+                              class="btn-receipt-compact" 
+                              (click)="viewReceipt(payment)" 
+                              title="Ver comprobante">
+                              <i class="pi pi-file-pdf" style="color: #10b981;"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{{ payment.paymentMethod }}</td>
+                      <td>{{ payment.paymentDate | date:'dd/MM/yyyy' }}</td>
+                      <td>
+                        @if (payment.status === PaymentStatus.PENDING) {
+                          <span class="badge status-badge bg-warning">En Revisión</span>
+                        } @else if (payment.status === PaymentStatus.APPROVED) {
+                          <span class="badge status-badge bg-success">Aprobado</span>
+                        } @else if (payment.status === PaymentStatus.REJECTED) {
+                          <span class="badge status-badge bg-danger">Rechazado</span>
+                        }
+                      </td>
+                      <td>
+                        <div>{{ payment.concept || 'Concepto no especificado' }}</div>
+                        @if (payment.status === PaymentStatus.REJECTED && payment.rejectionReason) {
+                          <small class="rejection-reason">{{ payment.rejectionReason }}</small>
+                        }
+                      </td>
+                      <td style="padding-right: 1.5rem;">
+                        <div class="d-flex gap-1 justify-content-end">
+                          @if (payment.status === PaymentStatus.PENDING) {
+                            <button 
+                              class="btn-edit-reported" 
+                              (click)="showApprovalModal(payment)"
+                              [disabled]="processingPayment() === payment.id"
+                              title="Aprobar">
+                              @if (processingPayment() === payment.id && actionType() === PaymentAction.APPROVE) {
+                                <span class="spinner-border spinner-border-sm"></span>
+                              } @else {
+                                <i class="pi pi-check-circle"></i>
+                              }
+                            </button>
+                            <button 
+                              class="btn-edit-progress" 
+                              (click)="showRejectionModal(payment)"
+                              [disabled]="processingPayment() === payment.id"
+                              title="Rechazar">
+                              @if (processingPayment() === payment.id && actionType() === PaymentAction.REJECT) {
+                                <span class="spinner-border spinner-border-sm"></span>
+                              } @else {
+                                <i class="pi pi-trash"></i>
+                              }
+                            </button>
+                          } @else if (payment.status === PaymentStatus.APPROVED) {
+                            <button 
+                              class="btn-edit-progress" 
+                              (click)="showRejectionModal(payment)"
+                              title="Rechazar">
+                              <i class="pi pi-trash"></i>
+                            </button>
+                          } @else if (payment.status === PaymentStatus.REJECTED) {
+                            <button 
+                              class="btn-edit-reported" 
+                              (click)="showApprovalModal(payment)"
+                              title="Aprobar">
+                              <i class="pi pi-check-circle"></i>
+                            </button>
+                          }
+
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            
+            @if (totalPages() > 1) {
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;">
+                <div>
+                  <small class="text-muted">
+                    Mostrando {{ (currentPage() - 1) * pageSize + 1 }} - {{ Math.min(currentPage() * pageSize, filteredPayments().length) }} de {{ filteredPayments().length }} pagos
+                  </small>
+                </div>
+                <nav>
+                  <div class="pagination">
+                    <button 
+                      class="pagination-btn" 
+                      [disabled]="currentPage() === 1"
+                      (click)="goToPage(currentPage() - 1)">
+                      <i class="pi pi-chevron-left"></i>
+                    </button>
+                    
+                    @for (page of getPageNumbers(); track page) {
+                      @if (page === '...') {
+                        <span class="pagination-dots">...</span>
+                      } @else {
+                        <button 
+                          class="pagination-btn"
+                          [class.active]="page === currentPage()"
+                          (click)="goToPage($any(page))">
+                          {{ page }}
+                        </button>
+                      }
+                    }
+                    
+                    <button 
+                      class="pagination-btn" 
+                      [disabled]="currentPage() === totalPages()"
+                      (click)="goToPage(currentPage() + 1)">
+                      <i class="pi pi-chevron-right"></i>
+                    </button>
+                  </div>
+                </nav>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Aprobación -->
+@if (showModal() && modalType() === PaymentAction.APPROVE) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="pi pi-check-circle me-2" style="color: #10b981;"></i>
+            Aprobar Pago
+          </h5>
+          <button type="button" class="btn-close" (click)="closeModal()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>¿Confirmas que deseas aprobar este pago?</p>
+          @if (selectedPayment()) {
+            <div class="payment-info-card">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="fw-semibold">Pago #{{ selectedPayment()?.id?.substring(0, 8) }}</div>
+                  <small class="text-muted">{{ selectedPayment()?.ownerName }}</small>
+                </div>
+                <div class="text-end">
+                  <div class="fw-bold text-success">${{ selectedPayment()?.amount?.toFixed(2) }}</div>
+                  <small class="text-muted">{{ selectedPayment()?.currency || 'DOP' }}</small>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button 
+            type="button" 
+            class="btn btn-outline-secondary modal-btn"
+            (click)="closeModal()">
+            Cancelar
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-outline-success modal-btn"
+            (click)="confirmAction()"
+            [disabled]="processingPayment() !== null">
+            @if (processingPayment() !== null) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Sí, aprobar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal de Rechazo -->
+@if (showModal() && modalType() === PaymentAction.REJECT) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="pi pi-trash me-2" style="color: #ef4444;"></i>
+            Rechazar Pago
+          </h5>
+          <button type="button" class="btn-close" (click)="closeModal()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas rechazar este pago?</p>
+          @if (selectedPayment()) {
+            <div class="payment-info-card">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="fw-semibold">Pago #{{ selectedPayment()?.id?.substring(0, 8) }}</div>
+                  <small class="text-muted">{{ selectedPayment()?.ownerName }}</small>
+                </div>
+                <div class="text-end">
+                  <div class="fw-bold text-danger">${{ selectedPayment()?.amount?.toFixed(2) }}</div>
+                  <small class="text-muted">{{ selectedPayment()?.currency || 'DOP' }}</small>
+                </div>
+              </div>
+            </div>
+          }
+          <div class="form-group" style="margin-top: 1rem;">
+            <label for="rejectionReason">Motivo del rechazo *</label>
+            <textarea 
+              id="rejectionReason"
+              [(ngModel)]="rejectionReason" 
+              class="form-control"
+              rows="3"
+              placeholder="Explica por qué se rechaza este pago..."
+              required>
+            </textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button 
+            type="button" 
+            class="btn btn-outline-secondary modal-btn"
+            (click)="closeModal()">
+            Cancelar
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-outline-danger modal-btn"
+            (click)="confirmAction()"
+            [disabled]="processingPayment() !== null || !rejectionReason.trim()">
+            @if (processingPayment() !== null) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Sí, rechazar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<p-toast></p-toast>

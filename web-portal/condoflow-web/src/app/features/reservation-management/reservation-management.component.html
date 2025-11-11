@@ -92,9 +92,9 @@
                             </span>
                           </td>
                           <td>
-                            @if (reservation.status === reservationStatus.REJECTED && reservation.rejectionReason) {
+                            @if (reservation.status === 'Rejected' && reservation.rejectionReason) {
                               {{ reservation.rejectionReason }}
-                            } @else if (reservation.status === reservationStatus.CANCELLED) {
+                            } @else if (reservation.status === 'Cancelled') {
                               Anulada por propietario →
                             } @else {
                               <span class="text-muted">—</span>
@@ -113,19 +113,19 @@
                                 <button class="btn-receipt-compact" (click)="viewReservationDetail(reservation)" title="Ver detalle">
                                   <i class="pi pi-eye"></i>
                                 </button>
-                                @if (reservation.status === reservationStatus.CONFIRMED) {
-                                  <div class="status-icon-simple resolved" title="Reserva confirmada">
-                                    <i class="pi pi-check-circle"></i>
-                                  </div>
-                                } @else if (reservation.status === reservationStatus.REJECTED) {
-                                  <div class="status-icon-simple cancelled-admin" title="Rechazada por administrador">
-                                    <i class="pi pi-times-circle"></i>
-                                  </div>
-                                } @else if (reservation.status === reservationStatus.CANCELLED) {
-                                  <div class="status-icon-simple cancelled-owner" title="Cancelada por propietario">
-                                    <i class="pi pi-ban"></i>
-                                  </div>
-                                }
+                                @if (reservation.status === 'Confirmed') {
+                                <button class="btn-edit-progress" (click)="showRejectionModal(reservation)" title="Rechazar">
+                                  <i class="pi pi-trash"></i>
+                                </button>
+                              } @else if (reservation.status === 'Rejected') {
+                                <button class="btn-edit-reported" (click)="showApprovalModal(reservation)" title="Confirmar">
+                                  <i class="pi pi-check-circle"></i>
+                                </button>
+                              } @else if (reservation.status === 'Cancelled') {
+                                <button class="btn-edit-progress" disabled title="Cancelada por propietario">
+                                  <i class="pi pi-ban" style="color: #6b7280;"></i>
+                                </button>
+                              }
                               }
                             </div>
                           </td>
@@ -387,7 +387,7 @@
               </div>
             }
             
-            @if (selectedReservationDetail()?.status === reservationStatus.CANCELLED && selectedReservationDetail()?.cancellationReason) {
+            @if (selectedReservationDetail()?.status === 'Cancelled' && selectedReservationDetail()?.cancellationReason) {
               <div class="p-4 border-bottom bg-warning bg-opacity-10">
                 <div class="d-flex align-items-start">
                   <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 32px; height: 32px; background-color: #84cc16;">
@@ -400,7 +400,7 @@
                   </div>
                 </div>
               </div>
-            } @else if (selectedReservationDetail()?.status === reservationStatus.CANCELLED) {
+            } @else if (selectedReservationDetail()?.status === 'Cancelled') {
               <div class="p-4 border-bottom bg-warning bg-opacity-10">
                 <div class="d-flex align-items-start">
                   <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 32px; height: 32px; background-color: #84cc16;">

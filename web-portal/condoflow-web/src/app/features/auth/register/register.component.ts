@@ -406,24 +406,44 @@ import { AuthService } from '../../../core/services/auth.service';
                   <i class="pi pi-lock me-2"></i>
                   Contraseña
                 </label>
-                <input 
-                  formControlName="password"
-                  type="password"
-                  class="form-control"
-                  placeholder="Mínimo 6 caracteres"
-                />
+                <div style="position: relative;">
+                  <input 
+                    formControlName="password"
+                    [type]="showPassword() ? 'text' : 'password'"
+                    class="form-control"
+                    placeholder="Mínimo 6 caracteres"
+                    style="padding-right: 3rem;"
+                  />
+                  <button 
+                    type="button"
+                    (click)="togglePassword()"
+                    style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); border: none; background: none; color: #6c757d; cursor: pointer;"
+                  >
+                    <i [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'" style="font-size: 1.1rem;"></i>
+                  </button>
+                </div>
               </div>
               <div class="form-group">
                 <label class="form-label">
                   <i class="pi pi-lock me-2"></i>
                   Confirmar Contraseña
                 </label>
-                <input 
-                  formControlName="confirmPassword"
-                  type="password"
-                  class="form-control"
-                  placeholder="Repite tu contraseña"
-                />
+                <div style="position: relative;">
+                  <input 
+                    formControlName="confirmPassword"
+                    [type]="showConfirmPassword() ? 'text' : 'password'"
+                    class="form-control"
+                    placeholder="Repite tu contraseña"
+                    style="padding-right: 3rem;"
+                  />
+                  <button 
+                    type="button"
+                    (click)="toggleConfirmPassword()"
+                    style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); border: none; background: none; color: #6c757d; cursor: pointer;"
+                  >
+                    <i [class]="showConfirmPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'" style="font-size: 1.1rem;"></i>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -476,6 +496,8 @@ export class RegisterComponent {
   successMessage = signal('');
   blocks = signal<any[]>([]);
   apartments = signal<any[]>([]);
+  showPassword = signal(false);
+  showConfirmPassword = signal(false);
 
   constructor(
     private fb: FormBuilder,
@@ -561,6 +583,14 @@ export class RegisterComponent {
       value = value.substring(0, 3) + '-' + value.substring(3);
     }
     this.registerForm.patchValue({ phoneNumber: value });
+  }
+
+  togglePassword(): void {
+    this.showPassword.set(!this.showPassword());
+  }
+
+  toggleConfirmPassword(): void {
+    this.showConfirmPassword.set(!this.showConfirmPassword());
   }
 
   onSubmit(): void {

@@ -299,8 +299,11 @@ import { AuthService } from '../../../core/services/auth.service';
       <div class="auth-right">
         <div class="auth-form">
           <div class="form-header">
-            <h2>Iniciar Sesión</h2>
-            <p>Accede a tu cuenta de CondoFlow</p>
+            <div style="width: 60px; height: 60px; margin: 0 auto 1.5rem; background: linear-gradient(135deg, #1e3c72, #2a5298); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+              <i [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-lock'"></i>
+            </div>
+            <h2>CondoFlow</h2>
+            <p>{{ showPassword() ? 'Contraseña visible' : 'Accede a tu cuenta' }}</p>
           </div>
           
           <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
@@ -322,12 +325,22 @@ import { AuthService } from '../../../core/services/auth.service';
                 <i class="pi pi-lock me-2"></i>
                 Contraseña
               </label>
-              <input 
-                formControlName="password"
-                type="password"
-                class="form-control"
-                placeholder="Tu contraseña"
-              />
+              <div style="position: relative;">
+                <input 
+                  formControlName="password"
+                  [type]="showPassword() ? 'text' : 'password'"
+                  class="form-control"
+                  placeholder="Tu contraseña"
+                  style="padding-right: 3rem;"
+                />
+                <button 
+                  type="button"
+                  (click)="togglePassword()"
+                  style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); border: none; background: none; color: #6c757d; cursor: pointer;"
+                >
+                  <i [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'" style="font-size: 1.1rem;"></i>
+                </button>
+              </div>
             </div>
 
             @if (errorMessage()) {
@@ -369,6 +382,7 @@ export class LoginComponent {
   loginForm: FormGroup;
   loading = signal(false);
   errorMessage = signal('');
+  showPassword = signal(false);
 
   constructor(
     private fb: FormBuilder,
@@ -379,6 +393,10 @@ export class LoginComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
+  }
+
+  togglePassword(): void {
+    this.showPassword.set(!this.showPassword());
   }
 
   onSubmit(): void {

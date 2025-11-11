@@ -59,6 +59,7 @@ export interface IncidentStatusCounts {
 export interface IncidentFilters {
   status: string;
   priority: string;
+  dateFilter: string;
   searchTerm: string;
 }
 

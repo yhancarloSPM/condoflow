@@ -116,28 +116,14 @@
                           <button class="btn-receipt-compact" (click)="viewIncidentDetail(incident)" title="Ver detalle">
                             <i class="pi pi-eye"></i>
                           </button>
-                          @if (incident.status === 'reported') {
+                          @if (incident.status === 'cancelled') {
+                            <button class="btn-edit-progress" disabled title="Cancelada por propietario">
+                              <i class="pi pi-ban" style="color: #6b7280;"></i>
+                            </button>
+                          } @else {
                             <button class="btn-edit-reported" (click)="openStatusModal(incident)" title="Cambiar estado">
                               <i class="pi pi-refresh" [style.color]="getIconColor(incident.status)"></i>
                             </button>
-                          } @else if (incident.status === 'in_progress') {
-                            <button class="btn-edit-progress" (click)="openStatusModal(incident)" title="Cambiar estado">
-                              <i class="pi pi-refresh" [style.color]="getIconColor(incident.status)"></i>
-                            </button>
-                          } @else if (incident.status === 'resolved') {
-                            <div class="status-icon-simple resolved" title="Incidencia resuelta">
-                              <i class="pi pi-check-circle"></i>
-                            </div>
-                          } @else if (incident.status === 'rejected') {
-                            <div class="status-icon-simple cancelled-admin" title="Rechazada por administrador">
-                              <i class="pi pi-times-circle"></i>
-                            </div>
-                          } @else if (incident.status === 'cancelled') {
-                            <div class="status-icon-simple cancelled-owner" title="Cancelada por propietario">
-                              <i class="pi pi-ban"></i>
-                            </div>
-                          } @else {
-                            <span class="text-muted">—</span>
                           }
                         </div>
                       </td>

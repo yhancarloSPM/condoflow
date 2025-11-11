@@ -15,6 +15,7 @@ import { Reservation, ReservationStatus, ReservationStatusCounts, ReservationFil
 interface FilterData {
   statusFilter: string;
   eventTypeFilter: string;
+  dateFilter: string;
   searchTerm: string;
 }
 
@@ -51,6 +52,7 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
   filterData: FilterData = {
     statusFilter: '',
     eventTypeFilter: '',
+    dateFilter: '',
     searchTerm: ''
   };
   
@@ -168,6 +170,32 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
     
     if (this.filterData.eventTypeFilter) {
       filtered = filtered.filter(r => r.eventTypeCode === this.filterData.eventTypeFilter);
+    }
+    
+    if (this.filterData.dateFilter) {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      
+      filtered = filtered.filter(r => {
+        const reservationDate = new Date(r.reservationDate);
+        
+        switch (this.filterData.dateFilter) {
+          case 'current-month':
+            return reservationDate.getFullYear() === currentYear && 
+                   reservationDate.getMonth() === currentMonth;
+          case 'last-3-months':
+            const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+            return reservationDate >= threeMonthsAgo;
+          case 'last-6-months':
+            const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+            return reservationDate >= sixMonthsAgo;
+          case 'current-year':
+            return reservationDate.getFullYear() === currentYear;
+          default:
+            return true;
+        }
+      });
     }
     
     if (this.filterData.searchTerm) {
