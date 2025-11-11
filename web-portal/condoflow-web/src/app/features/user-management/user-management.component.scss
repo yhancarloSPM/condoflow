@@ -332,6 +332,11 @@
   min-width: 85px !important;
   text-align: center !important;
   display: inline-block !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  padding: 0.4rem 0.8rem !important;
+  border-radius: 8px !important;
+  letter-spacing: 0.5px !important;
 }
 
 :host ::ng-deep .bg-warning {

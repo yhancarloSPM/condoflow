@@ -54,7 +54,7 @@
             <h5 class="mb-0 text-white">Usuarios del Sistema</h5>
             <div class="d-flex gap-2">
               <div class="text-center">
-                <div class="badge bg-warning text-dark fw-bold">{{ statusCounts().pending }}</div>
+                <div class="badge bg-warning text-white fw-bold">{{ statusCounts().pending }}</div>
                 <div><small class="text-white">Pendientes</small></div>
               </div>
               <div class="text-center">
@@ -119,15 +119,15 @@
                       </td>
                       <td class="text-center">
                         @if (user.isApproved) {
-                          <span class="status-badge status-approved">
+                          <span class="badge status-badge bg-success">
                             Aprobado
                           </span>
                         } @else if (user.isRejected) {
-                          <span class="status-badge status-rejected">
+                          <span class="badge status-badge bg-danger">
                             Rechazado
                           </span>
                         } @else {
-                          <span class="status-badge status-pending">
+                          <span class="badge status-badge bg-warning">
                             Pendiente
                           </span>
                         }

@@ -402,6 +402,10 @@ export class ReservationManagementComponent implements OnInit, OnDestroy {
   
   Math = Math;
 
+  isPending(status: any): boolean {
+    return status === 'Pending' || status === ReservationStatus.PENDING;
+  }
+
   async markAsRead(notificationId: string): Promise<void> {
     await this.notificationService.markAsRead(notificationId);
   }

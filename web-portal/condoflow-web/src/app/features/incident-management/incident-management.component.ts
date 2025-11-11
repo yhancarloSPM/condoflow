@@ -224,4 +224,19 @@ export class IncidentManagementComponent implements OnInit {
   }
 
   Math = Math;
+
+  getIconColor(status: string): string {
+    switch (status) {
+      case 'reported':
+        return '#f59e0b'; // warning - amarillo/naranja
+      case 'in_progress':
+        return '#3b82f6'; // info - azul
+      case 'resolved':
+        return '#10b981'; // success - verde
+      case 'rejected':
+        return '#ef4444'; // danger - rojo
+      default:
+        return '#6b7280'; // secondary - gris
+    }
+  }
 }

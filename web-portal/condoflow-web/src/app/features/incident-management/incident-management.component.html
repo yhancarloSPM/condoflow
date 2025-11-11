@@ -118,11 +118,11 @@
                           </button>
                           @if (incident.status === 'reported') {
                             <button class="btn-edit-reported" (click)="openStatusModal(incident)" title="Cambiar estado">
-                              <i class="pi pi-pencil"></i>
+                              <i class="pi pi-refresh" [style.color]="getIconColor(incident.status)"></i>
                             </button>
                           } @else if (incident.status === 'in_progress') {
                             <button class="btn-edit-progress" (click)="openStatusModal(incident)" title="Cambiar estado">
-                              <i class="pi pi-pencil"></i>
+                              <i class="pi pi-refresh" [style.color]="getIconColor(incident.status)"></i>
                             </button>
                           } @else if (incident.status === 'resolved') {
                             <div class="status-icon-simple resolved" title="Incidencia resuelta">

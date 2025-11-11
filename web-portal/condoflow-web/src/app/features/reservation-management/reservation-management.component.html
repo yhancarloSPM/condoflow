@@ -102,12 +102,12 @@
                           </td>
                           <td style="padding-right: 1.5rem;">
                             <div class="d-flex gap-1 justify-content-end">
-                              @if (reservation.status === reservationStatus.PENDING) {
+                              @if (isPending(reservation.status)) {
                                 <button class="btn-edit-reported" (click)="showApprovalModal(reservation)" title="Confirmar">
-                                  <i class="pi pi-check"></i>
+                                  <i class="pi pi-check-circle"></i>
                                 </button>
                                 <button class="btn-edit-progress" (click)="showRejectionModal(reservation)" title="Rechazar">
-                                  <i class="pi pi-times"></i>
+                                  <i class="pi pi-trash"></i>
                                 </button>
                               } @else {
                                 <button class="btn-receipt-compact" (click)="viewReservationDetail(reservation)" title="Ver detalle">
@@ -234,7 +234,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">
-            <i class="pi pi-exclamation-triangle me-2" style="color: #ef4444;"></i>
+            <i class="pi pi-trash me-2" style="color: #ef4444;"></i>
             Rechazar Reserva
           </h5>
           <button type="button" class="btn-close" (click)="closeRejectModal()">
