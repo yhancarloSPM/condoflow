@@ -21,223 +21,449 @@ import { AuthService } from '../../../core/services/auth.service';
     RouterLink
   ],
   styles: [`
-    .floating-label {
+    .auth-layout {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .auth-left {
+      flex: 1;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
       position: relative;
-      margin-bottom: 1rem;
+      overflow: hidden;
     }
 
-    .floating-input {
-      padding: 1.25rem 0.75rem 0.75rem 0.75rem !important;
-      font-size: 1rem !important;
-    }
-
-    .floating-label-text {
+    .auth-left::before {
+      content: '';
       position: absolute;
-      top: 1.25rem;
-      left: 0.75rem;
-      font-size: 1rem;
-      color: #6c757d;
-      pointer-events: none;
-      transition: all 0.2s ease-in-out;
-      background: white;
-      padding: 0 0.25rem;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: float 8s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateX(0px) rotate(0deg); }
+      50% { transform: translateX(-30px) rotate(180deg); }
+    }
+
+    .brand-section {
+      text-align: center;
       z-index: 1;
     }
 
-    .floating-input:focus + .floating-label-text,
-    .floating-input:not(:placeholder-shown) + .floating-label-text {
-      top: -0.5rem;
-      left: 0.5rem;
-      font-size: 1rem;
-      color: #0d6efd;
+    .brand-icon {
+      width: 5rem;
+      height: 5rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      color: white;
+      font-size: 2.5rem;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .brand-title {
+      font-size: 3rem;
+      font-weight: 800;
+      color: white;
+      margin: 0 0 1rem 0;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0 0 3rem 0;
+      font-weight: 300;
+    }
+
+    .brand-features {
+      display: grid;
+      gap: 1rem;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: white;
+      font-size: 1.1rem;
       font-weight: 500;
     }
 
-    .floating-input:focus {
-      border-color: #0d6efd !important;
-      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+    .feature i {
+      color: #00ff88;
+      font-size: 1.25rem;
     }
 
-    /* Cursor pointer para botones */
-    button, .btn, [pButton] {
-      cursor: pointer !important;
+    .auth-right {
+      flex: 1;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      overflow-y: auto;
     }
 
-    a {
-      cursor: pointer !important;
+    .auth-form {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .form-header h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e3c72;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .form-header p {
+      color: #6b7280;
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .register-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
     }
 
     .form-label {
-      font-weight: normal !important;
+      color: #374151;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      font-size: 0.875rem;
+    }
+
+    .form-control, .form-select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      background: #f9fafb;
+    }
+
+    .form-control:focus, .form-select:focus {
+      outline: none;
+      border-color: #9ca3af;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.1);
+    }
+
+    .form-control::placeholder {
+      color: #9ca3af;
+    }
+
+    .form-select option {
+      background: white;
+      color: #374151;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 255, 136, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .success-message {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #16a34a;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .form-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .form-footer p {
+      color: #6b7280;
+      margin: 0;
+      font-size: 0.875rem;
+    }
+
+    .auth-link {
+      color: #1e3c72;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    .auth-link:hover {
+      color: #2a5298;
+      text-decoration: underline;
     }
   `],
   template: `
-    <div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
-      <div class="row w-100 justify-content-center">
-        <div class="col-12 col-sm-10 col-md-8 col-lg-7 col-xl-6">
-          
-          <div class="card shadow-lg border-0">
-            <div class="card-header bg-primary text-white text-center py-4">
-              <h3 class="mb-1 fw-bold">Crear Cuenta</h3>
-              <p class="mb-0 opacity-75">Únete a CondoFlow</p>
+    <div class="auth-layout">
+      <div class="auth-left">
+        <div class="brand-section">
+          <div class="brand-icon">
+            <i class="pi pi-users"></i>
+          </div>
+          <h1 class="brand-title">CondoFlow</h1>
+          <p class="brand-subtitle">Crea tu cuenta y comienza a gestionar</p>
+          <div class="brand-features">
+            <div class="feature">
+              <i class="pi pi-shield"></i>
+              <span>Seguro y Confiable</span>
             </div>
-            
-            <div class="card-body p-4">
-              <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-                
-                <!-- Información Personal -->
-                <div class="row g-3 mb-3">
-                  <div class="col-6">
-                    <div class="floating-label">
-                      <input 
-                        pInputText 
-                        formControlName="firstName"
-                        placeholder=" "
-                        class="form-control floating-input"
-                        id="firstName"
-                      />
-                      <label for="firstName" class="floating-label-text">Nombre *</label>
-                    </div>
-                  </div>
-                  <div class="col-6">
-                    <div class="floating-label">
-                      <input 
-                        pInputText 
-                        formControlName="lastName"
-                        placeholder=" "
-                        class="form-control floating-input"
-                        id="lastName"
-                      />
-                      <label for="lastName" class="floating-label-text">Apellido *</label>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Contacto -->
-                <div class="row g-3 mb-3">
-                  <div class="col-md-6">
-                    <div class="floating-label">
-                      <input 
-                        pInputText 
-                        formControlName="email"
-                        placeholder=" "
-                        class="form-control floating-input"
-                        type="email"
-                        id="email"
-                      />
-                      <label for="email" class="floating-label-text">Correo Electrónico *</label>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="floating-label">
-                      <input 
-                        pInputText 
-                        formControlName="phoneNumber"
-                        placeholder=" "
-                        class="form-control floating-input"
-                        (input)="formatPhoneNumber($event)"
-                        maxlength="12"
-                        id="phoneNumber"
-                      />
-                      <label for="phoneNumber" class="floating-label-text">Teléfono *</label>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Seguridad -->
-                <div class="row g-3 mb-3">
-                  <div class="col-md-6">
-                    <div class="floating-label">
-                      <input 
-                        pInputText 
-                        formControlName="password"
-                        placeholder=" "
-                        class="form-control floating-input"
-                        type="password"
-                        id="password"
-                      />
-                      <label for="password" class="floating-label-text">Contraseña *</label>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="floating-label">
-                      <input 
-                        pInputText 
-                        formControlName="confirmPassword"
-                        placeholder=" "
-                        class="form-control floating-input"
-                        type="password"
-                        id="confirmPassword"
-                      />
-                      <label for="confirmPassword" class="floating-label-text">Confirmar Contraseña *</label>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Ubicación -->
-                <div class="row g-3 mb-4">
-                  <div class="col-md-6">
-                    <label class="form-label">Bloque/Torre *</label>
-                    <select 
-                      formControlName="block"
-                      class="form-select"
-                      (change)="onBlockChange($event)"
-                    >
-                      <option value="">-- Seleccionar bloque --</option>
-                      @for (block of blocks(); track block.name) {
-                        <option [value]="block.name">{{ block.name }}</option>
-                      }
-                    </select>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Apartamento *</label>
-                    <select 
-                      formControlName="apartment"
-                      class="form-select"
-                    >
-                      <option value="">-- Seleccionar apartamento --</option>
-                      @for (apt of apartments(); track apt.number) {
-                        <option [value]="apt.number">{{ apt.number }}</option>
-                      }
-                    </select>
-                  </div>
-                </div>
-
-                @if (errorMessage()) {
-                  <div class="alert alert-danger mb-3" role="alert">
-                    <small>{{ errorMessage() }}</small>
-                  </div>
-                }
-
-                @if (successMessage()) {
-                  <div class="alert alert-success mb-3" role="alert">
-                    <small>{{ successMessage() }}</small>
-                  </div>
-                }
-
-                <div class="d-grid">
-                  <button 
-                    pButton 
-                    type="submit" 
-                    label="Crear Cuenta"
-                    class="btn-lg"
-                    [loading]="loading()"
-                    [disabled]="registerForm.invalid"
-                  ></button>
-                </div>
-              </form>
+            <div class="feature">
+              <i class="pi pi-mobile"></i>
+              <span>Acceso desde cualquier lugar</span>
             </div>
-            
-            <div class="card-footer text-center bg-light py-3">
-              <small class="text-muted">
-                ¿Ya tienes cuenta? 
-                <a routerLink="/login" class="text-decoration-none fw-semibold">
-                  Iniciar sesión
-                </a>
-              </small>
+            <div class="feature">
+              <i class="pi pi-clock"></i>
+              <span>Disponible 24/7</span>
+            </div>
+            <div class="feature">
+              <i class="pi pi-users"></i>
+              <span>Comunidad conectada</span>
             </div>
           </div>
+        </div>
+      </div>
+      
+      <div class="auth-right">
+        <div class="auth-form">
+          <div class="form-header">
+            <h2>Crear Cuenta</h2>
+            <p>Completa tus datos para unirte a CondoFlow</p>
+          </div>
           
+          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="pi pi-user me-2"></i>
+                  Nombre
+                </label>
+                <input 
+                  formControlName="firstName"
+                  type="text"
+                  class="form-control"
+                  placeholder="Tu nombre"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="pi pi-user me-2"></i>
+                  Apellido
+                </label>
+                <input 
+                  formControlName="lastName"
+                  type="text"
+                  class="form-control"
+                  placeholder="Tu apellido"
+                />
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="pi pi-envelope me-2"></i>
+                  Correo Electrónico
+                </label>
+                <input 
+                  formControlName="email"
+                  type="email"
+                  class="form-control"
+                  placeholder="tu@email.com"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="pi pi-phone me-2"></i>
+                  Teléfono
+                </label>
+                <input 
+                  formControlName="phoneNumber"
+                  type="text"
+                  class="form-control"
+                  placeholder="000-000-0000"
+                  (input)="formatPhoneNumber($event)"
+                  maxlength="12"
+                />
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="pi pi-building me-2"></i>
+                  Bloque/Torre
+                </label>
+                <select 
+                  formControlName="block"
+                  class="form-select"
+                  (change)="onBlockChange($event)"
+                >
+                  <option value="">Seleccionar bloque</option>
+                  @for (block of blocks(); track block.name) {
+                    <option [value]="block.name">{{ block.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="pi pi-home me-2"></i>
+                  Apartamento
+                </label>
+                <select 
+                  formControlName="apartment"
+                  class="form-select"
+                >
+                  <option value="">Seleccionar apartamento</option>
+                  @for (apt of apartments(); track apt.number) {
+                    <option [value]="apt.number">{{ apt.number }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="pi pi-lock me-2"></i>
+                  Contraseña
+                </label>
+                <input 
+                  formControlName="password"
+                  type="password"
+                  class="form-control"
+                  placeholder="Mínimo 6 caracteres"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="pi pi-lock me-2"></i>
+                  Confirmar Contraseña
+                </label>
+                <input 
+                  formControlName="confirmPassword"
+                  type="password"
+                  class="form-control"
+                  placeholder="Repite tu contraseña"
+                />
+              </div>
+            </div>
+
+            @if (errorMessage()) {
+              <div class="error-message">
+                <i class="pi pi-exclamation-triangle me-2"></i>
+                {{ errorMessage() }}
+              </div>
+            }
+
+            @if (successMessage()) {
+              <div class="success-message">
+                <i class="pi pi-check-circle me-2"></i>
+                {{ successMessage() }}
+              </div>
+            }
+
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              [disabled]="registerForm.invalid || loading()"
+            >
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                Creando cuenta...
+              } @else {
+                <i class="pi pi-user-plus me-2"></i>
+                Crear Cuenta
+              }
+            </button>
+          </form>
+          
+          <div class="form-footer">
+            <p>
+              ¿Ya tienes cuenta? 
+              <a routerLink="/login" class="auth-link">
+                Iniciar sesión aquí
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

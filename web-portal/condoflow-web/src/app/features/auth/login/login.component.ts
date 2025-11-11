@@ -20,163 +20,346 @@ import { AuthService } from '../../../core/services/auth.service';
     RouterLink
   ],
   styles: [`
-    .floating-label {
+    .auth-layout {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .auth-left {
+      flex: 1;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
       position: relative;
-      margin-bottom: 2rem;
+      overflow: hidden;
     }
 
-    .floating-input {
-      padding: 1.25rem 0.75rem 0.75rem 0.75rem !important;
-      font-size: 1rem !important;
-    }
-
-    .floating-label-text {
+    .auth-left::before {
+      content: '';
       position: absolute;
-      top: 1.25rem;
-      left: 0.75rem;
-      font-size: 1rem;
-      color: #6c757d;
-      pointer-events: none;
-      transition: all 0.2s ease-in-out;
-      background: white;
-      padding: 0 0.25rem;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .brand-section {
+      text-align: center;
       z-index: 1;
     }
 
-    .floating-input:focus + .floating-label-text,
-    .floating-input:not(:placeholder-shown) + .floating-label-text {
-      top: -0.5rem;
-      left: 0.5rem;
-      font-size: 1rem;
-      color: #0d6efd;
-      font-weight: 500;
+    .brand-icon {
+      width: 5rem;
+      height: 5rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      color: white;
+      font-size: 2.5rem;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
     }
 
-    .floating-input:focus {
-      border-color: #0d6efd !important;
-      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+    .brand-title {
+      font-size: 3rem;
+      font-weight: 800;
+      color: white;
+      margin: 0 0 1rem 0;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      letter-spacing: -0.02em;
     }
 
-    /* Cursor pointer para botones */
-    button, .btn, [pButton] {
-      cursor: pointer !important;
+    .brand-subtitle {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0 0 3rem 0;
+      font-weight: 300;
     }
 
-    a {
-      cursor: pointer !important;
+    .brand-features {
+      display: grid;
+      gap: 1rem;
+      max-width: 300px;
+      margin: 0 auto;
     }
 
-    /* Ajuste para p-password con selectores más específicos */
-    :host ::ng-deep .floating-label .p-password .p-inputtext {
-      padding-right: 3.5rem !important;
-      padding-left: 0.75rem !important;
-      padding-top: 1.25rem !important;
-      padding-bottom: 0.75rem !important;
-      font-size: 1.1rem !important;
-    }
-
-    :host ::ng-deep .floating-label .p-password .p-password-toggle {
-      right: 1rem !important;
-      top: 50% !important;
-      transform: translateY(-50%) !important;
-      position: absolute !important;
-      z-index: 100 !important;
-      width: 1.5rem !important;
-      height: 1.5rem !important;
-    }
-
-    :host ::ng-deep .floating-label .p-password {
-      position: relative !important;
-      width: 100% !important;
-      display: block !important;
-    }
-
-    .floating-label .p-password + .floating-label-text {
-      top: 1.25rem;
-      left: 0.75rem;
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: white;
       font-size: 1.1rem;
-    }
-
-    .floating-label .p-password .p-inputtext:focus + .floating-label-text,
-    .floating-label .p-password .p-inputtext:not(:placeholder-shown) + .floating-label-text {
-      top: -0.5rem;
-      left: 0.5rem;
-      font-size: 0.85rem;
-      color: #0d6efd;
       font-weight: 500;
     }
 
-    :host ::ng-deep .p-password .p-password-toggle {
-      cursor: pointer !important;
+    .feature i {
+      color: #00ff88;
+      font-size: 1.25rem;
+    }
+
+    .auth-right {
+      flex: 1;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      position: relative;
+    }
+
+    .auth-right::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+      z-index: 0;
+    }
+
+    .auth-form {
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .form-header h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e3c72;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .form-header p {
+      color: #6b7280;
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      color: #374151;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      font-size: 0.875rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #f9fafb;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #9ca3af;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.1);
+    }
+
+    .form-control::placeholder {
+      color: #9ca3af;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 255, 136, 0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 0.875rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .form-footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .form-footer p {
+      color: #6b7280;
+      margin: 0;
+      font-size: 0.875rem;
+    }
+
+    .auth-link {
+      color: #1e3c72;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    .auth-link:hover {
+      color: #2a5298;
+      text-decoration: underline;
     }
   `],
   template: `
-    <div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
-      <div class="row w-100 justify-content-center">
-        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4">
-          
-          <div class="card shadow-lg border-0">
-            <div class="card-header bg-primary text-white text-center py-4">
-              <h3 class="mb-1 fw-bold">Iniciar Sesión</h3>
-              <p class="mb-0 opacity-75">Bienvenido a CondoFlow</p>
+    <div class="auth-layout">
+      <div class="auth-left">
+        <div class="brand-section">
+          <div class="brand-icon">
+            <i class="pi pi-home"></i>
+          </div>
+          <h1 class="brand-title">CondoFlow</h1>
+          <p class="brand-subtitle">Sistema de Gestión de Condominios</p>
+          <div class="brand-features">
+            <div class="feature">
+              <i class="pi pi-users"></i>
+              <span>Gestión de Usuarios</span>
             </div>
-            
-            <div class="card-body p-4">
-              <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-                
-                <div class="mb-3 floating-label">
-                  <input 
-                    pInputText 
-                    formControlName="email"
-                    placeholder=" "
-                    class="form-control floating-input"
-                    type="email"
-                    id="email"
-                  />
-                  <label for="email" class="floating-label-text">Correo electrónico</label>
-                </div>
-                
-                <div class="mb-4 floating-label">
-                  <input 
-                    pInputText 
-                    formControlName="password"
-                    placeholder=" "
-                    class="form-control floating-input"
-                    type="password"
-                    id="password"
-                  />
-                  <label for="password" class="floating-label-text">Contraseña</label>
-                </div>
-
-                @if (errorMessage()) {
-                  <div class="alert alert-danger mb-3" role="alert">
-                    <small>{{ errorMessage() }}</small>
-                  </div>
-                }
-
-                <div class="d-grid">
-                  <button 
-                    pButton 
-                    type="submit" 
-                    label="Iniciar Sesión"
-                    class="btn-lg"
-                    [loading]="authService.isLoading()"
-                    [disabled]="loginForm.invalid"
-                  ></button>
-                </div>
-              </form>
+            <div class="feature">
+              <i class="pi pi-credit-card"></i>
+              <span>Gestión de Deudas</span>
             </div>
-            
-            <div class="card-footer text-center bg-light py-3">
-              <small class="text-muted">
-                ¿No tienes cuenta? 
-                <a routerLink="/register" class="text-decoration-none fw-semibold">
-                  Crear cuenta
-                </a>
-              </small>
+            <div class="feature">
+              <i class="pi pi-credit-card"></i>
+              <span>Gestión de Pagos</span>
+            </div>
+            <div class="feature">
+              <i class="pi pi-megaphone"></i>
+              <span>Comunicados</span>
+            </div>
+            <div class="feature">
+              <i class="pi pi-exclamation-triangle"></i>
+              <span>Incidencias</span>
+            </div>
+            <div class="feature">
+              <i class="pi pi-calendar"></i>
+              <span>Reservas</span>
+            </div>
+            <div class="feature">
+              <i class="pi pi-chart-bar"></i>
+              <span>Reportes</span>
             </div>
           </div>
+        </div>
+      </div>
+      
+      <div class="auth-right">
+        <div class="auth-form">
+          <div class="form-header">
+            <h2>Iniciar Sesión</h2>
+            <p>Accede a tu cuenta de CondoFlow</p>
+          </div>
           
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label class="form-label">
+                <i class="pi pi-envelope me-2"></i>
+                Correo Electrónico
+              </label>
+              <input 
+                formControlName="email"
+                type="email"
+                class="form-control"
+                placeholder="tu@email.com"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">
+                <i class="pi pi-lock me-2"></i>
+                Contraseña
+              </label>
+              <input 
+                formControlName="password"
+                type="password"
+                class="form-control"
+                placeholder="Tu contraseña"
+              />
+            </div>
+
+            @if (errorMessage()) {
+              <div class="error-message">
+                <i class="pi pi-exclamation-triangle me-2"></i>
+                {{ errorMessage() }}
+              </div>
+            }
+
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              [disabled]="loginForm.invalid || authService.isLoading()"
+            >
+              @if (authService.isLoading()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                Iniciando...
+              } @else {
+                <i class="pi pi-sign-in me-2"></i>
+                Iniciar Sesión
+              }
+            </button>
+          </form>
+          
+          <div class="form-footer">
+            <p>
+              ¿No tienes cuenta? 
+              <a routerLink="/register" class="auth-link">
+                Crear cuenta aquí
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

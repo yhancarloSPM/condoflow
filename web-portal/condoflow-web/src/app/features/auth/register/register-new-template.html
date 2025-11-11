@@ -1,0 +1,210 @@
+          
+          <div class="auth-body">
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+              
+              <!-- Información Personal -->
+              <div class="form-section">
+                <h6 class="section-title">
+                  <i class="pi pi-user me-2"></i>
+                  Información Personal
+                </h6>
+                
+                <div class="row">
+                  <div class="col-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="pi pi-user me-2"></i>
+                        Nombre
+                      </label>
+                      <input 
+                        formControlName="firstName"
+                        type="text"
+                        class="form-control"
+                        placeholder="Tu nombre"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="pi pi-user me-2"></i>
+                        Apellido
+                      </label>
+                      <input 
+                        formControlName="lastName"
+                        type="text"
+                        class="form-control"
+                        placeholder="Tu apellido"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Contacto -->
+              <div class="form-section">
+                <h6 class="section-title">
+                  <i class="pi pi-envelope me-2"></i>
+                  Información de Contacto
+                </h6>
+                
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="pi pi-envelope me-2"></i>
+                        Correo Electrónico
+                      </label>
+                      <input 
+                        formControlName="email"
+                        type="email"
+                        class="form-control"
+                        placeholder="tu@email.com"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="pi pi-phone me-2"></i>
+                        Teléfono
+                      </label>
+                      <input 
+                        formControlName="phoneNumber"
+                        type="text"
+                        class="form-control"
+                        placeholder="000-000-0000"
+                        (input)="formatPhoneNumber($event)"
+                        maxlength="12"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Ubicación -->
+              <div class="form-section">
+                <h6 class="section-title">
+                  <i class="pi pi-home me-2"></i>
+                  Ubicación en el Condominio
+                </h6>
+                
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="pi pi-building me-2"></i>
+                        Bloque/Torre
+                      </label>
+                      <select 
+                        formControlName="block"
+                        class="form-select"
+                        (change)="onBlockChange($event)"
+                      >
+                        <option value="">-- Seleccionar bloque --</option>
+                        @for (block of blocks(); track block.name) {
+                          <option [value]="block.name">{{ block.name }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="pi pi-home me-2"></i>
+                        Apartamento
+                      </label>
+                      <select 
+                        formControlName="apartment"
+                        class="form-select"
+                      >
+                        <option value="">-- Seleccionar apartamento --</option>
+                        @for (apt of apartments(); track apt.number) {
+                          <option [value]="apt.number">{{ apt.number }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Seguridad -->
+              <div class="form-section">
+                <h6 class="section-title">
+                  <i class="pi pi-lock me-2"></i>
+                  Seguridad
+                </h6>
+                
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="pi pi-lock me-2"></i>
+                        Contraseña
+                      </label>
+                      <input 
+                        formControlName="password"
+                        type="password"
+                        class="form-control"
+                        placeholder="Mínimo 6 caracteres"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="pi pi-lock me-2"></i>
+                        Confirmar Contraseña
+                      </label>
+                      <input 
+                        formControlName="confirmPassword"
+                        type="password"
+                        class="form-control"
+                        placeholder="Repite tu contraseña"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              @if (errorMessage()) {
+                <div class="error-message">
+                  <i class="pi pi-exclamation-triangle me-2"></i>
+                  {{ errorMessage() }}
+                </div>
+              }
+
+              @if (successMessage()) {
+                <div class="success-message">
+                  <i class="pi pi-check-circle me-2"></i>
+                  {{ successMessage() }}
+                </div>
+              }
+
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="registerForm.invalid || loading()"
+              >
+                @if (loading()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  Creando cuenta...
+                } @else {
+                  <i class="pi pi-user-plus me-2"></i>
+                  Crear Cuenta
+                }
+              </button>
+            </form>
+          </div>
+          
+          <div class="auth-footer">
+            <p>
+              ¿Ya tienes cuenta? 
+              <a routerLink="/login" class="auth-link">
+                Iniciar sesión
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
