@@ -1,0 +1,390 @@
+.payments-report-container {
+  height: 100vh;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  overflow: hidden;
+}
+
+.main-content {
+  width: 100%;
+  padding: 0.5rem 1rem 1rem 1rem;
+  box-sizing: border-box;
+}
+
+.header-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.header-content {
+  padding: 1.5rem;
+}
+
+.header-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  .header-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .header-icon {
+    width: 3rem;
+    height: 3rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+  }
+
+  .header-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    font-size: 0.875rem;
+  }
+
+  .back-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+  }
+
+  h1 {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+  }
+}
+
+.filters-section {
+  margin-top: 1.5rem;
+
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    .filter-select,
+    .filter-input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      color: white;
+      padding: 0.75rem;
+      font-size: 0.875rem;
+      width: 100%;
+      height: 48px;
+      transition: all 0.2s ease;
+
+      &::placeholder {
+        color: white !important;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      option {
+        background: #1e3c72;
+        color: white;
+      }
+    }
+  }
+}
+
+.table-section {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+
+  .table-header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding: 1rem;
+    color: white;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      color: white !important;
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 0.5rem;
+
+      .export-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        &.excel-btn {
+          background: #10b981;
+          color: white;
+
+          &:hover:not(:disabled) {
+            background: #059669;
+          }
+        }
+
+        &.pdf-btn {
+          background: #ef4444;
+          color: white;
+
+          &:hover:not(:disabled) {
+            background: #dc2626;
+          }
+        }
+      }
+    }
+  }
+
+  .table-container {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    max-height: 100%;
+  }
+
+  .card-body {
+    padding: 1rem;
+    height: calc(100vh - 420px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .payments-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 1200px;
+    --bs-table-bg: transparent;
+
+    thead th {
+      background: #1e3c72 !important;
+      color: white !important;
+      border: none !important;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    th, td {
+      padding: 0.5rem 0.25rem;
+      font-size: 0.875rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: white;
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .pending-col {
+      background: rgba(251, 146, 60, 0.2) !important;
+      color: white !important;
+      font-weight: 600;
+    }
+
+    .overdue-col {
+      background: rgba(239, 68, 68, 0.2) !important;
+      color: white !important;
+      font-weight: 600;
+    }
+
+    .paid-col {
+      background: rgba(16, 185, 129, 0.2) !important;
+      color: white !important;
+      font-weight: 600;
+    }
+
+    .total-col {
+      background: rgba(99, 102, 241, 0.2) !important;
+      color: white !important;
+      font-weight: 600;
+    }
+
+    .text-muted {
+      color: rgba(255,255,255,0.7) !important;
+    }
+  }
+
+  .center-text {
+    text-align: center;
+  }
+
+  .even-row {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .simple-loading-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 2rem;
+    text-align: center;
+    color: white;
+    z-index: 10;
+    
+    p {
+      color: white;
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-top: 1rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+
+  .filters-section .filters-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .export-section {
+    flex-direction: column;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .payments-table {
+    min-width: 800px;
+  }
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-btn {
+  color: white !important;
+  border-color: rgba(255,255,255,0.3) !important;
+  background: rgba(255,255,255,0.1) !important;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  min-width: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.2) !important;
+  color: white !important;
+}
+
+.pagination-btn.active {
+  background: rgba(255,255,255,0.3) !important;
+  color: white !important;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-dots {
+  color: rgba(255,255,255,0.8) !important;
+  padding: 0.5rem 0.75rem;
+  font-weight: 500;
+}
+
+.card-body {
+  padding: 1rem;
+  color: white;
+}
+
+.card-body small {
+  color: rgba(255,255,255,0.8) !important;
+}
+
+.card-body .text-muted {
+  color: rgba(255,255,255,0.9) !important;
+}

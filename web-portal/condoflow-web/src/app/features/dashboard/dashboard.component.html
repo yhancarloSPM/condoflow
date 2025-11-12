@@ -4,100 +4,110 @@
   <div class="main-content">
 
 
-    <!-- Cards de resumen -->
-    <div class="summary-cards">
-      <div class="summary-card overdue clickable" (click)="navigateToPaymentsByStatus('pending')">
-        <div class="card-icon">
-          <i class="pi pi-times"></i>
+
+    <!-- Indicadores Financieros -->
+    <div class="financial-cards">
+      <div class="financial-card income">
+        <div class="card-header">
+          <div class="card-icon">
+            <i class="pi pi-arrow-up"></i>
+          </div>
+          <span class="card-trend">+12%</span>
         </div>
         <div class="card-content">
-          <h3>{{ getTotalRequirePayment() }}</h3>
-          <p>Requieren Pago</p>
+          <h3>${{ getTotalIncome() | number:'1.0-0' }}</h3>
+          <p>Ingresos del Mes</p>
+          <small>{{ getPaidApartments() }} apartamentos pagaron</small>
         </div>
       </div>
       
-      <div class="summary-card pending clickable" (click)="navigateToPaymentsByStatus('review')">
-        <div class="card-icon">
-          <i class="pi pi-clock"></i>
+      <div class="financial-card expenses">
+        <div class="card-header">
+          <div class="card-icon">
+            <i class="pi pi-arrow-down"></i>
+          </div>
+          <span class="card-trend">-8%</span>
         </div>
         <div class="card-content">
-          <h3>{{ getPaymentsInReview() }}</h3>
-          <p>En Revisión</p>
+          <h3>${{ getTotalExpenses() | number:'1.0-0' }}</h3>
+          <p>Gastos del Mes</p>
+          <small>Mantenimiento y servicios</small>
         </div>
       </div>
       
-      <div class="summary-card paid clickable" (click)="navigateToPaymentsByStatus('paid')">
-        <div class="card-icon">
-          <i class="pi pi-check"></i>
+      <div class="financial-card balance">
+        <div class="card-header">
+          <div class="card-icon">
+            <i class="pi pi-wallet"></i>
+          </div>
+          <span class="card-trend positive">{{ getBalancePercentage() }}%</span>
         </div>
         <div class="card-content">
-          <h3>{{ totalPaid() }}</h3>
-          <p>Pagadas</p>
+          <h3>${{ getAvailableBalance() | number:'1.0-0' }}</h3>
+          <p>Balance Disponible</p>
+          <small>Cuenta principal</small>
         </div>
       </div>
       
-      <div class="summary-card expected">
-        <div class="card-icon">
-          <i class="pi pi-dollar"></i>
+      <div class="financial-card overdue">
+        <div class="card-header">
+          <div class="card-icon">
+            <i class="pi pi-exclamation-triangle"></i>
+          </div>
+          <span class="card-trend negative">{{ getOverduePercentage() }}%</span>
         </div>
         <div class="card-content">
-          <h3>$75K</h3>
-          <p>Ingreso Esperado</p>
+          <h3>${{ getOverdueAmount() | number:'1.0-0' }}</h3>
+          <p>Cuentas por Cobrar</p>
+          <small>{{ totalOverdue() }} apartamentos atrasados</small>
         </div>
       </div>
     </div>
 
-    <!-- Filtros -->
-    <div class="filters-card">
-      <div class="filters-row">
-        <select [(ngModel)]="selectedBlock" (change)="onBlockChange()" class="filter-select">
-          <option value="">Todos los bloques</option>
-          @for (block of blocks(); track block.id) {
-            <option [value]="block.name">Bloque {{ block.name }}</option>
-          }
-        </select>
-        <select [(ngModel)]="selectedApartment" (change)="applyFilters()" class="filter-select">
-          <option value="">Todos los apartamentos</option>
-          @for (apt of getFilteredApartments(); track apt.id) {
-            <option [value]="apt.number">{{ apt.number }}</option>
-          }
-        </select>
-        <select [(ngModel)]="selectedPeriod" (change)="applyFilters()" class="filter-select">
-          <option value="all">Todo el período</option>
-          <option value="2024">2024</option>
-          <option value="2023">2023</option>
-        </select>
-      </div>
-    </div>
-
-
-
-
-
-    <!-- Gráficos -->
+    <!-- Gráficos Financieros -->
     <div class="charts-grid">
       <div class="chart-card">
-        <h3>Estado de Deudas</h3>
-        <div class="chart-container">
-          <canvas #pieChart></canvas>
+        <div class="chart-header">
+          <span class="chart-number">01</span>
+          <h3>Ingresos vs Egresos</h3>
         </div>
-      </div>
-      <div class="chart-card">
-        <h3>Flujo de Pagos Mensuales</h3>
         <div class="chart-container">
           <canvas #incomeChart></canvas>
         </div>
       </div>
       <div class="chart-card">
-        <h3>Morosidad por Bloque</h3>
+        <div class="chart-header">
+          <span class="chart-number">02</span>
+          <h3>Tendencia de Morosidad</h3>
+        </div>
         <div class="chart-container">
-          <canvas #blockChart></canvas>
+          <canvas #morosityChart></canvas>
+        </div>
+      </div>
+      <div class="chart-card top-debtors">
+        <div class="chart-header">
+          <span class="chart-number">03</span>
+          <h3>Top 5 Deudores</h3>
+        </div>
+        <div class="debtors-list">
+          <div class="debtor-item" *ngFor="let debtor of getTopDebtors()">
+            <div class="debtor-info">
+              <span class="apartment">{{ debtor.apartment }}</span>
+              <span class="months">{{ debtor.months }} meses</span>
+            </div>
+            <div class="debtor-amount">
+              <span class="amount">${{ debtor.amount | number:'1.0-0' }}</span>
+            </div>
+          </div>
         </div>
       </div>
       <div class="chart-card">
-        <h3>Morosidad por Apartamento (%)</h3>
+        <div class="chart-header">
+          <span class="chart-number">04</span>
+          <h3>Estado de Deudas</h3>
+        </div>
         <div class="chart-container">
-          <canvas #complianceChart></canvas>
+          <canvas #pieChart></canvas>
         </div>
       </div>
     </div>

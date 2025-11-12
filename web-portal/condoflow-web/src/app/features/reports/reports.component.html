@@ -1,0 +1,79 @@
+<div class="reports-layout">
+  <app-navbar></app-navbar>
+
+  <div class="main-content">
+    <div class="page-header">
+      <h1>Reportes</h1>
+      <p>Genera y descarga reportes del condominio</p>
+    </div>
+
+
+
+    <div class="reports-grid">
+      <div class="report-card clickable" (click)="navigateToMorosityReport()">
+        <div class="report-header">
+          <div class="report-icon overdue">
+            <i class="pi pi-exclamation-triangle"></i>
+          </div>
+          <div class="report-info">
+            <h3>Reporte de Morosidad</h3>
+            <p>Propietarios con deudas vencidas</p>
+          </div>
+        </div>
+        <div class="report-footer">
+          <span class="view-report-text">
+            <i class="pi pi-arrow-right"></i>
+            Ver Detalles
+          </span>
+        </div>
+      </div>
+
+
+
+      <div class="report-card clickable" (click)="navigateToPaymentsReport()">
+        <div class="report-header">
+          <div class="report-icon payments">
+            <i class="pi pi-credit-card"></i>
+          </div>
+          <div class="report-info">
+            <h3>Reporte de Pagos</h3>
+            <p>Historial detallado de pagos</p>
+          </div>
+        </div>
+        <div class="report-footer">
+          <span class="view-report-text">
+            <i class="pi pi-arrow-right"></i>
+            Ver Detalles
+          </span>
+        </div>
+      </div>
+
+      <div class="report-card clickable" (click)="navigateToOwnersReport()">
+        <div class="report-header">
+          <div class="report-icon owners">
+            <i class="pi pi-users"></i>
+          </div>
+          <div class="report-info">
+            <h3>Reporte de Propietarios</h3>
+            <p>Estado general de apartamentos</p>
+          </div>
+        </div>
+        <div class="report-footer">
+          <span class="view-report-text">
+            <i class="pi pi-arrow-right"></i>
+            Ver Detalles
+          </span>
+        </div>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-overlay">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <p>Generando reporte...</p>
+        </div>
+      </div>
+    }
+  </div>
+</div>

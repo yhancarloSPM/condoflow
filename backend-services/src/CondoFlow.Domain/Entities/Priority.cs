@@ -1,20 +1,24 @@
-using CondoFlow.Domain.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace CondoFlow.Domain.Entities;
 
-public class Priority : BaseEntity
+public class Priority
 {
-    public string Code { get; private set; } = null!;
-    public string Name { get; private set; } = null!;
-    public string? Description { get; private set; }
-    public bool IsActive { get; private set; } = true;
-
-    private Priority() { }
-
-    public Priority(string code, string name, string? description = null)
-    {
-        Code = code ?? throw new ArgumentNullException(nameof(code));
-        Name = name ?? throw new ArgumentNullException(nameof(name));
-        Description = description;
-    }
+    [Key]
+    public int Id { get; set; }
+    
+    [Required]
+    [MaxLength(50)]
+    public string Code { get; set; } = string.Empty;
+    
+    [Required]
+    [MaxLength(100)]
+    public string Name { get; set; } = string.Empty;
+    
+    [MaxLength(200)]
+    public string? Description { get; set; }
+    
+    public bool IsActive { get; set; } = true;
+    
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

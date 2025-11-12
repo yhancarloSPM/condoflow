@@ -1,21 +1,26 @@
-using CondoFlow.Domain.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace CondoFlow.Domain.Entities;
 
-public class EventType : BaseEntity
+public class EventType
 {
+    [Key]
+    public int Id { get; set; }
+    
+    [Required]
+    [MaxLength(50)]
     public string Code { get; set; } = string.Empty;
+    
+    [Required]
+    [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
+    
+    [MaxLength(200)]
     public string? Description { get; set; }
+    
     public bool IsActive { get; set; } = true;
-    public int Order { get; set; } = 0;
-
-    public EventType() { }
-
-    public EventType(string code, string name, string? description = null)
-    {
-        Code = code;
-        Name = name;
-        Description = description;
-    }
+    
+    public int Order { get; set; }
+    
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

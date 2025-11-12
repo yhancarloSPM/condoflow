@@ -32,11 +32,16 @@
     "@microsoft/signalr": "^9.0.6",
     "bootstrap": "^5.3.8",
     "chart.js": "^4.5.1",
+    "exceljs": "^4.4.0",
+    "jspdf": "^3.0.3",
+    "jspdf-autotable": "^5.0.2",
     "ng2-charts": "^8.0.0",
     "primeicons": "^7.0.0",
     "primeng": "^20.2.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "xlsx": "^0.18.5",
+    "xlsx-style": "^0.8.13",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

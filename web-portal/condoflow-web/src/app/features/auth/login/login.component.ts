@@ -105,7 +105,7 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .feature i {
-      color: #00ff88;
+      color: #10b981;
       font-size: 1.25rem;
     }
 
@@ -202,13 +202,13 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: white;
     }
 
     .btn-primary:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0, 255, 136, 0.3);
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
     }
 
     .btn-primary:disabled {
@@ -266,22 +266,22 @@ import { AuthService } from '../../../core/services/auth.service';
           <div class="brand-features">
             <div class="feature">
               <i class="pi pi-users"></i>
-              <span>Gestión de Usuarios</span>
+              <span>Usuarios</span>
+            </div>
+            <div class="feature">
+              <i class="pi pi-money-bill"></i>
+              <span>Deudas</span>
             </div>
             <div class="feature">
               <i class="pi pi-credit-card"></i>
-              <span>Gestión de Deudas</span>
-            </div>
-            <div class="feature">
-              <i class="pi pi-credit-card"></i>
-              <span>Gestión de Pagos</span>
+              <span>Pagos</span>
             </div>
             <div class="feature">
               <i class="pi pi-megaphone"></i>
               <span>Comunicados</span>
             </div>
             <div class="feature">
-              <i class="pi pi-exclamation-triangle"></i>
+              <i class="pi pi-wrench"></i>
               <span>Incidencias</span>
             </div>
             <div class="feature">
@@ -289,7 +289,7 @@ import { AuthService } from '../../../core/services/auth.service';
               <span>Reservas</span>
             </div>
             <div class="feature">
-              <i class="pi pi-chart-bar"></i>
+              <i class="pi pi-file-pdf"></i>
               <span>Reportes</span>
             </div>
           </div>

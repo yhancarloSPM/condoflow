@@ -274,19 +274,14 @@ export class IncidentStatusModalComponent implements OnInit {
   }
 
   private loadIncidentStatuses() {
-    this.incidentUtils.getStatuses().subscribe({
-      next: (statuses) => {
-        // Filtrar solo los estados que se pueden cambiar desde el modal
-        const editableStatuses = statuses.filter((status: any) => 
-          ['reported', 'in_progress', 'resolved', 'rejected'].includes(status.code)
-        );
-        this.incidentStatuses.set(editableStatuses);
-      },
-      error: (error) => {
-        console.error('Error loading incident statuses:', error);
-        this.incidentStatuses.set([]);
-      }
-    });
+    // Estados disponibles para cambio por admin
+    const editableStatuses = [
+      { code: 'reported', name: 'Reportada' },
+      { code: 'in_progress', name: 'En Progreso' },
+      { code: 'resolved', name: 'Resuelta' },
+      { code: 'rejected', name: 'Rechazada' }
+    ];
+    this.incidentStatuses.set(editableStatuses);
   }
 
   onStatusChange(): void {

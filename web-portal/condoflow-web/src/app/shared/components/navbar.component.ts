@@ -111,7 +111,8 @@ import { NotificationService } from '../../core/services/notification.service';
   styles: [`
     .top-nav { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
     .nav-container { width: 100%; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 4rem; }
-    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s ease; }
+    .brand:hover { opacity: 0.8; transform: translateY(-1px); }
     .brand-icon { width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; }
     .brand-name { font-size: 1.5rem; font-weight: 700; color: white; }
     .user-section { display: flex; align-items: center; gap: 1.5rem; }

@@ -93,7 +93,7 @@
                         <div style="word-break: break-word; white-space: normal;">{{ incident.title }}</div>
                       </td>
                       <td>
-                        <span class="badge priority-badge" [class]="'bg-' + getPrioritySeverity(incident.priority)" style="font-size: 0.7rem;">
+                        <span class="priority-badge" [ngClass]="'priority-' + incident.priority">
                           {{ getPriorityLabel(incident.priority) }}
                         </span>
                       </td>

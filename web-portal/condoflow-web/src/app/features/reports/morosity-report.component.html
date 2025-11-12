@@ -1,0 +1,180 @@
+<app-navbar></app-navbar>
+
+<div class="payments-report-container">
+  <div class="main-content">
+    <div class="header-card">
+      <div class="header-content">
+        <div class="header-section">
+          <div class="header-info">
+            <div class="header-icon">
+              <i class="pi pi-exclamation-triangle"></i>
+            </div>
+            <div>
+              <h1>Reporte de Morosidad</h1>
+              <p class="header-subtitle">Deudas vencidas y pendientes de pago por propietario</p>
+            </div>
+          </div>
+          <button class="back-btn" (click)="goBack()" style="margin-left: auto;">
+            <i class="pi pi-arrow-left"></i>
+            Volver a Reportes
+          </button>
+        </div>
+
+        <div class="filters-section">
+          <div class="filters-grid">
+            <div class="filter-group">
+              <label>Propietario</label>
+              <input 
+                type="text" 
+                [value]="selectedOwnerName()"
+                (input)="updateOwnerName($event)"
+                placeholder="Buscar propietario..."
+                class="filter-input">
+            </div>
+
+            <div class="filter-group">
+              <label>Bloque</label>
+              <select [(ngModel)]="selectedBlock" class="filter-select" (change)="onBlockChange()">
+                <option value="">Todos los bloques</option>
+                <option *ngFor="let block of blocks()" [value]="block">{{block}}</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label>Apartamento</label>
+              <select [(ngModel)]="selectedApartment" class="filter-select">
+                <option value="">Todos los apartamentos</option>
+                <option *ngFor="let apt of apartments()" [value]="apt">{{apt}}</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label>Año</label>
+              <select [(ngModel)]="selectedYear" class="filter-select">
+                <option value="">Todos los años</option>
+                <option *ngFor="let year of years()" [value]="year">{{year}}</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label>Mes</label>
+              <select [(ngModel)]="selectedMonth" class="filter-select">
+                <option value="">Todos los meses</option>
+                <option *ngFor="let month of months()" [value]="month">{{getMonthName(+month)}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-section">
+      <div class="table-header">
+        <h3>Deudas Vencidas ({{filteredDebts().totalCount}})</h3>
+        <div class="export-buttons">
+          <button class="export-btn excel-btn" (click)="generateExcel()" [disabled]="exportLoading()">
+            <i class="pi pi-file-excel"></i>
+            Excel
+          </button>
+          <button class="export-btn pdf-btn" (click)="generatePDF()" [disabled]="exportLoading()">
+            <i class="pi pi-file-pdf"></i>
+            PDF
+          </button>
+        </div>
+      </div>
+      
+      <div class="card-body d-flex flex-column" style="position: relative;">
+        @if (exportLoading()) {
+          <div class="simple-loading-overlay">
+            <div class="spinner"></div>
+            <p>Generando reporte...</p>
+          </div>
+        }
+        @if (loading()) {
+          <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
+            <div class="spinner"></div>
+            <p class="text-muted">Cargando deudas...</p>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table class="payments-table table table-striped">
+              <thead>
+                <tr>
+                  <th>Propietario</th>
+                  <th>Bloque</th>
+                  <th>Apartamento</th>
+                  <th>Mes</th>
+                  <th>Año</th>
+                  <th style="text-align: right;">Monto</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let debt of filteredDebts().data; let i = index" 
+                    [class.even-row]="i % 2 === 0">
+                  <td>{{debt.ownerName}}</td>
+                  <td class="center-text">{{getBlock(debt)}}</td>
+                  <td class="center-text">{{getApartmentNumber(debt)}}</td>
+                  <td class="center-text">{{getMonthName(debt.month)}}</td>
+                  <td class="center-text">{{debt.year}}</td>
+                  <td class="amount-highlight" style="text-align: right;">${{debt.amount | number:'1.2-2'}}</td>
+                  <td class="center-text">
+                    <span class="status-badge status-overdue">
+                      Vencida
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          @if (filteredDebts().data.length === 0) {
+            <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
+              <h6 class="text-white mt-3">No hay deudas vencidas</h6>
+              <p class="text-white small">No se encontraron deudas vencidas</p>
+            </div>
+          }
+          
+          @if (filteredDebts().totalCount > itemsPerPage) {
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;">
+              <div>
+                <small class="text-muted">
+                  Mostrando {{ (currentPage() - 1) * itemsPerPage + 1 }} - 
+                  {{ Math.min(currentPage() * itemsPerPage, filteredDebts().totalCount) }} 
+                  de {{ filteredDebts().totalCount }} registros
+                </small>
+              </div>
+              <nav>
+                <div class="pagination">
+                  <button 
+                    class="pagination-btn" 
+                    [disabled]="currentPage() === 1" 
+                    (click)="goToPage(currentPage() - 1)">
+                    <i class="pi pi-chevron-left"></i>
+                  </button>
+                  
+                  <button 
+                    *ngFor="let page of [].constructor(Math.min(5, filteredDebts().totalPages)); let i = index" 
+                    class="pagination-btn" 
+                    [class.active]="currentPage() === i + 1" 
+                    (click)="goToPage(i + 1)">
+                    {{ i + 1 }}
+                  </button>
+                  
+                  <span *ngIf="filteredDebts().totalPages > 5" class="pagination-dots">...</span>
+                  
+                  <button 
+                    class="pagination-btn" 
+                    [disabled]="currentPage() === filteredDebts().totalPages" 
+                    (click)="goToPage(currentPage() + 1)">
+                    <i class="pi pi-chevron-right"></i>
+                  </button>
+                </div>
+              </nav>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>

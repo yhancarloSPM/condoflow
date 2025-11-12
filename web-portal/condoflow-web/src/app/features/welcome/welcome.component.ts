@@ -119,27 +119,44 @@ import { NotificationService } from '../../core/services/notification.service';
           </div>
           <div class="gradient-grid">
               @if (isAdmin()) {
-                <div class="action-card" (click)="navigateTo('/user-management')">
-                  <div class="action-icon admin">
-                    <i class="pi pi-users"></i>
-                  </div>
-                  <h3>Gestión de Usuarios</h3>
-                </div>
-                
+                <!-- Tareas diarias más frecuentes -->
                 <div class="action-card" (click)="navigateTo('/payment-management')">
                   <div class="action-icon payments">
                     <i class="pi pi-credit-card"></i>
                   </div>
-                  <h3>Gestión de Pagos</h3>
+                  <h3>Pagos</h3>
                 </div>
                 
                 <div class="action-card" (click)="navigateTo('/debt-management')">
                   <div class="action-icon debts">
                     <i class="pi pi-money-bill"></i>
                   </div>
-                  <h3>Gestión de Deudas</h3>
+                  <h3>Deudas</h3>
                 </div>
                 
+                <div class="action-card" (click)="navigateTo('/incident-management')">
+                  <div class="action-icon maintenance">
+                    <i class="pi pi-wrench"></i>
+                  </div>
+                  <h3>Incidencias</h3>
+                </div>
+                
+                <div class="action-card" (click)="navigateTo('/expense-management')">
+                  <div class="action-icon expenses">
+                    <i class="pi pi-shopping-cart"></i>
+                  </div>
+                  <h3>Gastos</h3>
+                </div>
+                
+                <!-- Dashboard para monitoreo -->
+                <div class="action-card" (click)="navigateTo('/dashboard')">
+                  <div class="action-icon dashboard">
+                    <i class="pi pi-chart-bar"></i>
+                  </div>
+                  <h3>Dashboard</h3>
+                </div>
+                
+                <!-- Reportes para análisis -->
                 <div class="action-card" (click)="navigateTo('/reports')">
                   <div class="action-icon reports">
                     <i class="pi pi-file-pdf"></i>
@@ -147,32 +164,28 @@ import { NotificationService } from '../../core/services/notification.service';
                   <h3>Reportes</h3>
                 </div>
                 
-                <div class="action-card" (click)="navigateTo('/incident-management')">
-                  <div class="action-icon maintenance">
-                    <i class="pi pi-wrench"></i>
-                  </div>
-                  <h3>Gestión de Incidencias</h3>
-                </div>
-                
+                <!-- Comunicación con residentes -->
                 <div class="action-card" (click)="navigateTo('/announcement-management')">
                   <div class="action-icon announcements">
                     <i class="pi pi-megaphone"></i>
                   </div>
-                  <h3>Gestionar Comunicados</h3>
+                  <h3>Comunicados</h3>
                 </div>
                 
+                <!-- Gestión de espacios -->
                 <div class="action-card" (click)="navigateTo('/reservation-management')">
                   <div class="action-icon reservations">
                     <i class="pi pi-calendar"></i>
                   </div>
-                  <h3>Gestión de Reservas</h3>
+                  <h3>Reservas</h3>
                 </div>
                 
-                <div class="action-card" (click)="navigateTo('/dashboard')">
-                  <div class="action-icon dashboard">
-                    <i class="pi pi-chart-bar"></i>
+                <!-- Administración menos frecuente -->
+                <div class="action-card" (click)="navigateTo('/user-management')">
+                  <div class="action-icon admin">
+                    <i class="pi pi-users"></i>
                   </div>
-                  <h3>Dashboard</h3>
+                  <h3>Usuarios</h3>
                 </div>
               } @else {
                 <div class="action-card" (click)="navigateTo('/my-payments')">
@@ -546,6 +559,7 @@ import { NotificationService } from '../../core/services/notification.service';
     .action-icon.profile { background: linear-gradient(135deg, #ec4899, #db2777); }
     .action-icon.documents { background: linear-gradient(135deg, #14b8a6, #0d9488); }
     .action-icon.contact { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .action-icon.expenses { background: linear-gradient(135deg, #dc2626, #b91c1c); }
 
     .contact-card {
       cursor: default !important;

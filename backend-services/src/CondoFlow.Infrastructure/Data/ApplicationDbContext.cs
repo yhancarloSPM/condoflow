@@ -24,6 +24,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Priority> Priorities { get; set; }
     public DbSet<Status> Statuses { get; set; }
     public DbSet<EventType> EventTypes { get; set; }
+    public DbSet<Expense> Expenses { get; set; }
+    public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -342,38 +345,72 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         });
         
         // Seed PaymentConcepts
-        var concept1Id = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        var concept2Id = Guid.Parse("22222222-2222-2222-2222-222222222222");
-        var concept3Id = Guid.Parse("33333333-3333-3333-3333-333333333333");
-        
         modelBuilder.Entity<PaymentConcept>().HasData(
-            new { Id = concept1Id, Code = "maintenance", Name = "Pago de Mantenimiento", DefaultAmount = 2000m, RoofAmount = 1000m, IsAutoCalculated = true, IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new { Id = concept2Id, Code = "extraordinary", Name = "Cuota Extraordinaria", DefaultAmount = (decimal?)null, RoofAmount = (decimal?)null, IsAutoCalculated = false, IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new { Id = concept3Id, Code = "other", Name = "Otro", DefaultAmount = (decimal?)null, RoofAmount = (decimal?)null, IsAutoCalculated = false, IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+            new { Id = 1, Code = "maintenance", Name = "Pago de Mantenimiento", DefaultAmount = 2000m, RoofAmount = 1000m, IsAutoCalculated = true, IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 2, Code = "extraordinary", Name = "Cuota Extraordinaria", DefaultAmount = (decimal?)null, RoofAmount = (decimal?)null, IsAutoCalculated = false, IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 3, Code = "other", Name = "Otro", DefaultAmount = (decimal?)null, RoofAmount = (decimal?)null, IsAutoCalculated = false, IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
         );
         
         // Seed Status data
-        var status1Id = Guid.Parse("a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1");
-        var status2Id = Guid.Parse("b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2");
-        var status3Id = Guid.Parse("c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3");
-        var status4Id = Guid.Parse("d4d4d4d4-d4d4-d4d4-d4d4-d4d4d4d4d4d4");
-        
         modelBuilder.Entity<Status>().HasData(
-            new { Id = status1Id, Code = "Pending", Name = "Pendiente", Description = "Reserva pendiente de aprobación", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new { Id = status2Id, Code = "Confirmed", Name = "Confirmada", Description = "Reserva confirmada", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new { Id = status3Id, Code = "Rejected", Name = "Rechazada", Description = "Reserva rechazada", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new { Id = status4Id, Code = "Cancelled", Name = "Cancelada", Description = "Reserva cancelada", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+            new { Id = 1, Code = "pending", Name = "Pendiente", Description = "Estado pendiente", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 2, Code = "confirmed", Name = "Confirmada", Description = "Estado confirmado", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 3, Code = "rejected", Name = "Rechazada", Description = "Estado rechazado", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 4, Code = "cancelled", Name = "Cancelada", Description = "Estado cancelado", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 5, Code = "paid", Name = "Pagado", Description = "Estado pagado", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
         );
         
         // Seed EventType data
-        var eventType1Id = Guid.Parse("e5e5e5e5-e5e5-e5e5-e5e5-e5e5e5e5e5e5");
-        var eventType2Id = Guid.Parse("f6f6f6f6-f6f6-f6f6-f6f6-f6f6f6f6f6f6");
-        var eventType3Id = Guid.Parse("a7a7a7a7-a7a7-a7a7-a7a7-a7a7a7a7a7a7");
-        
         modelBuilder.Entity<EventType>().HasData(
-            new { Id = eventType1Id, Code = "birthday", Name = "Cumpleaños", Description = "Celebración de cumpleaños", IsActive = true, Order = 1, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new { Id = eventType2Id, Code = "meeting", Name = "Reunión", Description = "Reunión familiar o de trabajo", IsActive = true, Order = 2, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new { Id = eventType3Id, Code = "celebration", Name = "Celebración", Description = "Celebración general", IsActive = true, Order = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+            new { Id = 1, Code = "birthday", Name = "Cumpleaños", Description = "Celebración de cumpleaños", IsActive = true, Order = 1, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 2, Code = "meeting", Name = "Reunión", Description = "Reunión familiar o de trabajo", IsActive = true, Order = 2, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 3, Code = "celebration", Name = "Celebración", Description = "Celebración general", IsActive = true, Order = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
         );
+        
+        // Configurar Expense
+        modelBuilder.Entity<Expense>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Description).HasMaxLength(500).IsRequired();
+            entity.Property(e => e.Amount).HasPrecision(18, 2).IsRequired();
+            entity.Property(e => e.Date).IsRequired();
+            entity.Property(e => e.Provider).HasMaxLength(200);
+            entity.Property(e => e.Notes).HasMaxLength(1000);
+            entity.Property(e => e.CreatedBy).HasMaxLength(450).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            
+            entity.HasOne(e => e.Category)
+                  .WithMany(c => c.Expenses)
+                  .HasForeignKey(e => e.CategoryId)
+                  .OnDelete(DeleteBehavior.Restrict);
+                  
+            entity.HasOne(e => e.Status)
+                  .WithMany()
+                  .HasForeignKey(e => e.StatusId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        // Configurar ExpenseCategory
+        modelBuilder.Entity<ExpenseCategory>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.IsActive).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+        });
+        
+
+        
+        // Seed ExpenseCategories
+        modelBuilder.Entity<ExpenseCategory>().HasData(
+            new { Id = 1, Name = "Mantenimiento", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 2, Name = "Limpieza", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 3, Name = "Seguridad", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 4, Name = "Servicios", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 5, Name = "Administración", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 6, Name = "Reparaciones", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+        );
+        
+
     }
 }

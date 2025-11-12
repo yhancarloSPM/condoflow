@@ -1,0 +1,309 @@
+<div class="expense-layout">
+  <app-navbar></app-navbar>
+
+  <div class="main-content">
+    <div class="header-card">
+      <div class="header-content">
+        <div class="header-info">
+          <div class="header-icon">
+            <i class="pi pi-shopping-cart"></i>
+          </div>
+          <div class="header-text">
+            <h1 class="header-title">Gestión de Gastos</h1>
+            <p class="header-subtitle">Administra los gastos del condominio</p>
+          </div>
+          <button 
+            type="button" 
+            class="btn btn-primary ms-auto"
+            (click)="openCreateModal()">
+            <i class="pi pi-plus"></i>
+            Nuevo Gasto
+          </button>
+        </div>
+
+        <div class="filters-section">
+          <div class="d-flex flex-wrap gap-3 align-items-end">
+            <div class="filter-group">
+              <label class="filter-label">Búsqueda</label>
+              <input 
+                type="text" 
+                class="filter-input" 
+                placeholder="Buscar por descripción..."
+                [(ngModel)]="filters.search"
+                (input)="applyFilters()">
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">Categoría</label>
+              <select class="filter-select" [(ngModel)]="filters.category" (change)="applyFilters()">
+                <option value="">Todas las categorías</option>
+                <option *ngFor="let category of categories()" [value]="category.id">{{ category.name }}</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">Estado</label>
+              <select class="filter-select" [(ngModel)]="filters.status" (change)="applyFilters()">
+                <option value="">Todos los estados</option>
+                <option *ngFor="let status of statuses()" [value]="status.id">{{ status.name }}</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">Mes</label>
+              <select class="filter-select" [(ngModel)]="filters.month" (change)="applyFilters()">
+                <option value="">Todos los meses</option>
+                <option *ngFor="let month of months" [value]="month.value">{{ month.label }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Gastos -->
+    <div class="table-card">
+      <div class="card-header">
+        <h5 class="mb-0">Lista de Gastos</h5>
+        <small class="text-muted">{{ filteredExpenses().length }} gastos encontrados</small>
+      </div>
+      
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 35%;">Descripción</th>
+                <th style="width: 12%;">Categoría</th>
+                <th style="width: 10%;">Monto</th>
+                <th style="width: 10%;">Fecha</th>
+                <th style="width: 10%;">Estado</th>
+                <th style="width: 13%;">Proveedor</th>
+                <th style="width: 10%;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let expense of paginatedExpenses()">
+                <td>
+                  <div class="expense-info">
+                    <span class="expense-description">{{ expense.description }}</span>
+                    <small class="expense-notes" *ngIf="expense.notes">{{ expense.notes }}</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="category-badge" [ngClass]="'category-' + getCategoryClass(expense.categoryId)">
+                    {{ getCategoryName(expense.categoryId) }}
+                  </span>
+                </td>
+                <td>
+                  <span class="amount">${{ expense.amount | number:'1.0-0' }}</span>
+                </td>
+                <td>{{ expense.date | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <span class="badge status-badge" [ngClass]="getStatusBootstrapClass(expense.statusId)">
+                    {{ getStatusName(expense.statusId) }}
+                  </span>
+                </td>
+                <td>{{ expense.provider || 'N/A' }}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button 
+                      type="button" 
+                      class="btn-edit-reported"
+                      (click)="editExpense(expense)"
+                      title="Editar">
+                      <i class="pi pi-refresh" [style.color]="getIconColorByStatus(expense.statusId)"></i>
+                    </button>
+                    <button 
+                      type="button" 
+                      class="btn-edit-progress"
+                      (click)="deleteExpense(expense.id)"
+                      title="Eliminar">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Paginación -->
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3" style="border-top: 1px solid rgba(255,255,255,0.2);">
+          <small style="color: rgba(255,255,255,0.8);">Mostrando {{ getStartIndex() + 1 }} - {{ getEndIndex() }} de {{ filteredExpenses().length }} gastos</small>
+          <div class="pagination">
+            <button 
+              class="pagination-btn"
+              [disabled]="currentPage() === 1"
+              (click)="goToPage(currentPage() - 1)">
+              <i class="pi pi-chevron-left"></i>
+            </button>
+            
+            <ng-container *ngFor="let page of getVisiblePages()">
+              <button 
+                *ngIf="page !== -1"
+                class="pagination-btn"
+                [class.active]="page === currentPage()"
+                (click)="goToPage(page)">
+                {{ page }}
+              </button>
+              <span *ngIf="page === -1" class="pagination-dots">...</span>
+            </ng-container>
+            
+            <button 
+              class="pagination-btn"
+              [disabled]="currentPage() === totalPages()"
+              (click)="goToPage(currentPage() + 1)">
+              <i class="pi pi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Crear/Editar Gasto -->
+<div class="modal fade" id="expenseModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="d-flex align-items-center gap-2">
+          <i class="pi pi-shopping-cart"></i>
+          <h5 class="modal-title mb-0">{{ isEditing() ? 'Editar Gasto' : 'Nuevo Gasto' }}</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <form (ngSubmit)="saveExpense()" #expenseForm="ngForm">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label class="form-label">Descripción *</label>
+              <input 
+                type="text" 
+                class="form-control"
+                [(ngModel)]="currentExpense.description"
+                name="description"
+                required
+                placeholder="Ej: Mantenimiento ascensor">
+            </div>
+            
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Monto *</label>
+              <input 
+                type="number" 
+                class="form-control"
+                [(ngModel)]="currentExpense.amount"
+                name="amount"
+                required
+                min="0"
+                step="0.01"
+                placeholder="0.00">
+            </div>
+            
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Fecha *</label>
+              <input 
+                type="date" 
+                class="form-control"
+                [(ngModel)]="currentExpense.date"
+                name="date"
+                required>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Categoría *</label>
+              <select 
+                class="form-select"
+                [(ngModel)]="currentExpense.categoryId"
+                name="categoryId"
+                required>
+                <option [value]="0">Seleccionar categoría</option>
+                <option *ngFor="let category of categories()" [value]="category.id">{{ category.name }}</option>
+              </select>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Estado *</label>
+              <select 
+                class="form-select"
+                [(ngModel)]="currentExpense.statusId"
+                name="statusId"
+                required>
+                <option [value]="0">Seleccionar estado</option>
+                <option *ngFor="let status of statuses()" [value]="status.id">{{ status.name }}</option>
+              </select>
+            </div>
+            
+            <div class="col-md-12 mb-3">
+              <label class="form-label">Proveedor *</label>
+              <input 
+                type="text" 
+                class="form-control"
+                [(ngModel)]="currentExpense.provider"
+                name="provider"
+                required
+                placeholder="Nombre del proveedor">
+            </div>
+            
+            <div class="col-md-12 mb-3">
+              <label class="form-label">Notas</label>
+              <textarea 
+                class="form-control"
+                [(ngModel)]="currentExpense.notes"
+                name="notes"
+                rows="3"
+                placeholder="Observaciones adicionales..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary modal-btn" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-outline-success modal-btn" [disabled]="!expenseForm.valid || loading()">
+            <span *ngIf="loading()" class="spinner-border spinner-border-sm me-1"></span>
+            {{ loading() ? 'Guardando...' : (isEditing() ? 'Actualizar' : 'Crear') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación de Eliminación -->
+@if (showDeleteModal()) {
+  <div class="modal-backdrop" (click)="closeDeleteModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="pi pi-trash" style="color: #dc2626;"></i>
+            <h5 class="modal-title mb-0">Confirmar Eliminación</h5>
+          </div>
+          <button type="button" class="btn-close" (click)="closeDeleteModal()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p style="color: white;">¿Estás seguro de eliminar este gasto?</p>
+          @if (expenseToDelete()) {
+            <div class="user-info-card">
+              <div>
+                <div class="fw-semibold" style="color: white;">{{ expenseToDelete()?.description }}</div>
+                <span style="color: #ef4444; font-weight: 600; font-size: 0.95rem;">Monto: ${{ expenseToDelete()?.amount | number:'1.0-0' }}</span>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary modal-btn" (click)="closeDeleteModal()">Cancelar</button>
+          <button type="button" class="btn btn-outline-danger modal-btn" (click)="confirmDelete()" [disabled]="loading()">
+            <span *ngIf="loading()" class="spinner-border spinner-border-sm me-1"></span>
+            {{ loading() ? 'Eliminando...' : 'Eliminar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

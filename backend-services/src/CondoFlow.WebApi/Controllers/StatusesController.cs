@@ -66,4 +66,29 @@ public class StatusesController : ControllerBase
             return StatusCode(500, ApiResponse<object>.ErrorResult("Error interno del servidor", 500));
         }
     }
+
+    [HttpGet("expense")]
+    public async Task<ActionResult<ApiResponse<object>>> GetExpenseStatuses()
+    {
+        try
+        {
+            var statuses = await _context.Statuses
+                .Where(s => s.IsActive && (s.Code == "pending" || s.Code == "confirmed" || s.Code == "paid" || s.Code == "rejected" || s.Code == "cancelled"))
+                .Select(s => new
+                {
+                    Id = s.Id,
+                    s.Code,
+                    s.Name,
+                    s.Description,
+                    IsActive = s.IsActive
+                })
+                .ToListAsync();
+
+            return Ok(ApiResponse<object>.SuccessResult(statuses, "Estados de gasto obtenidos exitosamente"));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.ErrorResult("Error interno del servidor", 500));
+        }
+    }
 }

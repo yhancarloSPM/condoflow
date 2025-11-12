@@ -1,26 +1,27 @@
-using CondoFlow.Domain.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace CondoFlow.Domain.Entities;
 
-public class PaymentConcept : BaseEntity
+public class PaymentConcept
 {
-    public string Code { get; private set; } = null!;
-    public string Name { get; private set; } = null!;
-    public decimal? DefaultAmount { get; private set; }
-    public decimal? RoofAmount { get; private set; }
-    public bool IsAutoCalculated { get; private set; }
-    public bool IsActive { get; private set; }
-
-    private PaymentConcept() { }
-
-    public PaymentConcept(string code, string name, decimal? defaultAmount = null, 
-                         decimal? roofAmount = null, bool isAutoCalculated = false)
-    {
-        Code = code;
-        Name = name;
-        DefaultAmount = defaultAmount;
-        RoofAmount = roofAmount;
-        IsAutoCalculated = isAutoCalculated;
-        IsActive = true;
-    }
+    [Key]
+    public int Id { get; set; }
+    
+    [Required]
+    [MaxLength(50)]
+    public string Code { get; set; } = string.Empty;
+    
+    [Required]
+    [MaxLength(100)]
+    public string Name { get; set; } = string.Empty;
+    
+    public decimal? DefaultAmount { get; set; }
+    
+    public decimal? RoofAmount { get; set; }
+    
+    public bool IsAutoCalculated { get; set; }
+    
+    public bool IsActive { get; set; } = true;
+    
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

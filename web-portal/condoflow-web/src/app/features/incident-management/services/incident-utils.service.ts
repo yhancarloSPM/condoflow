@@ -104,6 +104,21 @@ export class IncidentUtilsService {
   }
 
   getStatusLabel(status: string): string {
+    // Mapeo directo para estados conocidos
+    const statusMap: Record<string, string> = {
+      'reported': 'Reportada',
+      'in_progress': 'En Progreso', 
+      'resolved': 'Resuelta',
+      'cancelled': 'Cancelada',
+      'rejected': 'Rechazada'
+    };
+    
+    // Primero intentar el mapeo directo
+    if (statusMap[status]) {
+      return statusMap[status];
+    }
+    
+    // Si no, buscar en cache
     const statusItem = this.statusesCache.find(s => s.code === status);
     return statusItem ? statusItem.name : status;
   }

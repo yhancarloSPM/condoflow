@@ -12,12 +12,12 @@ public static class CatalogSeeder
         {
             var categories = new List<Category>
             {
-                new("plumbing", "Plomería", "Problemas relacionados con tuberías, grifos y sistemas de agua"),
-                new("electrical", "Eléctrico", "Problemas con instalaciones eléctricas, luces y enchufes"),
-                new("maintenance", "Mantenimiento", "Mantenimiento general de áreas comunes y privadas"),
-                new("security", "Seguridad", "Problemas de seguridad y acceso"),
-                new("cleaning", "Limpieza", "Problemas de limpieza en áreas comunes"),
-                new("other", "Otros", "Otras incidencias no clasificadas")
+                new() { Code = "plumbing", Name = "Plomería", Description = "Problemas relacionados con tuberías, grifos y sistemas de agua", IsActive = true },
+                new() { Code = "electrical", Name = "Eléctrico", Description = "Problemas con instalaciones eléctricas, luces y enchufes", IsActive = true },
+                new() { Code = "maintenance", Name = "Mantenimiento", Description = "Mantenimiento general de áreas comunes y privadas", IsActive = true },
+                new() { Code = "security", Name = "Seguridad", Description = "Problemas de seguridad y acceso", IsActive = true },
+                new() { Code = "cleaning", Name = "Limpieza", Description = "Problemas de limpieza en áreas comunes", IsActive = true },
+                new() { Code = "other", Name = "Otros", Description = "Otras incidencias no clasificadas", IsActive = true }
             };
             context.Categories.AddRange(categories);
         }
@@ -27,10 +27,10 @@ public static class CatalogSeeder
         {
             var priorities = new List<Priority>
             {
-                new("low", "Baja", "Prioridad baja - no urgente"),
-                new("medium", "Media", "Prioridad media - atención normal"),
-                new("high", "Alta", "Prioridad alta - requiere atención pronta"),
-                new("critical", "Crítica", "Prioridad crítica - requiere atención inmediata")
+                new() { Code = "low", Name = "Baja", Description = "Prioridad baja - no urgente", IsActive = true },
+                new() { Code = "medium", Name = "Media", Description = "Prioridad media - atención normal", IsActive = true },
+                new() { Code = "high", Name = "Alta", Description = "Prioridad alta - requiere atención pronta", IsActive = true },
+                new() { Code = "critical", Name = "Crítica", Description = "Prioridad crítica - requiere atención inmediata", IsActive = true }
             };
             context.Priorities.AddRange(priorities);
         }
@@ -40,19 +40,11 @@ public static class CatalogSeeder
         {
             var statuses = new List<Status>
             {
-                // Estados para incidencias
-                new("reported", "Reportada", "Incidencia recién reportada"),
-                new("in_progress", "En Progreso", "Incidencia siendo atendida"),
-                new("resolved", "Resuelta", "Incidencia resuelta exitosamente"),
-                new("cancelled", "Cancelada", "Incidencia cancelada"),
-                new("pending", "Pendiente", "Incidencia pendiente de información adicional"),
-                
-                // Estados para reservas
-                new("Pending", "Pendiente", "Reserva pendiente de aprobación"),
-                new("Confirmed", "Confirmada", "Reserva confirmada por administrador"),
-                new("Rejected", "Rechazada", "Reserva rechazada por administrador"),
-                new("Cancelled", "Cancelada", "Reserva cancelada por propietario"),
-                new("Completed", "Completada", "Reserva completada exitosamente")
+                new() { Code = "pending", Name = "Pendiente", Description = "Estado pendiente", IsActive = true },
+                new() { Code = "confirmed", Name = "Confirmada", Description = "Estado confirmado", IsActive = true },
+                new() { Code = "rejected", Name = "Rechazada", Description = "Estado rechazado", IsActive = true },
+                new() { Code = "cancelled", Name = "Cancelada", Description = "Estado cancelado", IsActive = true },
+                new() { Code = "paid", Name = "Pagado", Description = "Estado pagado", IsActive = true }
             };
             context.Statuses.AddRange(statuses);
         }
@@ -62,16 +54,16 @@ public static class CatalogSeeder
         {
             var eventTypes = new List<EventType>
             {
-                new("birthday", "Cumpleaños", "Celebración de cumpleaños") { Order = 1 },
-                new("wedding", "Boda", "Ceremonia de boda") { Order = 2 },
-                new("anniversary", "Aniversario", "Celebración de aniversario") { Order = 3 },
-                new("graduation", "Graduación", "Celebración de graduación") { Order = 4 },
-                new("baby_shower", "Baby Shower", "Celebración de baby shower") { Order = 5 },
-                new("quinceañera", "Quinceañera", "Celebración de quinceañera") { Order = 6 },
-                new("family_reunion", "Reunión Familiar", "Reunión familiar") { Order = 7 },
-                new("corporate", "Evento Corporativo", "Evento de empresa") { Order = 8 },
-                new("social", "Evento Social", "Evento social general") { Order = 9 },
-                new("other", "Otro", "Otro tipo de evento") { Order = 10 }
+                new() { Code = "birthday", Name = "Cumpleaños", Description = "Celebración de cumpleaños", Order = 1, IsActive = true },
+                new() { Code = "wedding", Name = "Boda", Description = "Ceremonia de boda", Order = 2, IsActive = true },
+                new() { Code = "anniversary", Name = "Aniversario", Description = "Celebración de aniversario", Order = 3, IsActive = true },
+                new() { Code = "graduation", Name = "Graduación", Description = "Celebración de graduación", Order = 4, IsActive = true },
+                new() { Code = "baby_shower", Name = "Baby Shower", Description = "Celebración de baby shower", Order = 5, IsActive = true },
+                new() { Code = "quinceañera", Name = "Quinceañera", Description = "Celebración de quinceañera", Order = 6, IsActive = true },
+                new() { Code = "family_reunion", Name = "Reunión Familiar", Description = "Reunión familiar", Order = 7, IsActive = true },
+                new() { Code = "corporate", Name = "Evento Corporativo", Description = "Evento de empresa", Order = 8, IsActive = true },
+                new() { Code = "social", Name = "Evento Social", Description = "Evento social general", Order = 9, IsActive = true },
+                new() { Code = "other", Name = "Otro", Description = "Otro tipo de evento", Order = 10, IsActive = true }
             };
             context.EventTypes.AddRange(eventTypes);
         }

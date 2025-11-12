@@ -106,7 +106,7 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .feature i {
-      color: #00ff88;
+      color: #10b981;
       font-size: 1.25rem;
     }
 
@@ -208,13 +208,13 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: white;
     }
 
     .btn-primary:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0, 255, 136, 0.3);
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
     }
 
     .btn-primary:disabled {
