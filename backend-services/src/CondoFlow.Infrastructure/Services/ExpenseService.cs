@@ -30,6 +30,7 @@ public class ExpenseService : IExpenseService
         var expenses = await _context.Expenses
             .Include(e => e.Category)
             .Include(e => e.Status)
+            .Include(e => e.Provider)
             .OrderByDescending(e => e.CreatedAt)
             .ToListAsync();
             
@@ -44,7 +45,8 @@ public class ExpenseService : IExpenseService
             StatusId = e.StatusId,
             StatusName = e.Status.Name,
             StatusClass = GetStatusClass(e.Status.Code),
-            Provider = e.Provider,
+            ProviderId = e.ProviderId,
+            ProviderName = e.Provider != null ? e.Provider.Name : null,
             Notes = e.Notes,
             InvoiceUrl = e.InvoiceUrl,
             CreatedBy = e.CreatedBy,
@@ -58,6 +60,7 @@ public class ExpenseService : IExpenseService
         var expense = await _context.Expenses
             .Include(e => e.Category)
             .Include(e => e.Status)
+            .Include(e => e.Provider)
             .FirstOrDefaultAsync(e => e.Id == id);
 
         if (expense == null) return null;
@@ -73,7 +76,8 @@ public class ExpenseService : IExpenseService
             StatusId = expense.StatusId,
             StatusName = expense.Status.Name,
             StatusClass = GetStatusClass(expense.Status.Code),
-            Provider = expense.Provider,
+            ProviderId = expense.ProviderId,
+            ProviderName = expense.Provider != null ? expense.Provider.Name : null,
             Notes = expense.Notes,
             InvoiceUrl = expense.InvoiceUrl,
             CreatedBy = expense.CreatedBy,
@@ -95,7 +99,7 @@ public class ExpenseService : IExpenseService
             Date = createDto.Date,
             CategoryId = createDto.CategoryId,
             StatusId = pendingStatus.Id, // Siempre crear en estado pendiente
-            Provider = createDto.Provider ?? string.Empty,
+            ProviderId = createDto.ProviderId,
             Notes = createDto.Notes,
             InvoiceUrl = invoiceUrl,
             CreatedBy = userId,
@@ -124,7 +128,7 @@ public class ExpenseService : IExpenseService
         expense.Date = updateDto.Date;
         expense.CategoryId = updateDto.CategoryId;
         expense.StatusId = updateDto.StatusId;
-        expense.Provider = updateDto.Provider;
+        expense.ProviderId = updateDto.ProviderId;
         expense.Notes = updateDto.Notes;
         expense.UpdatedAt = DateTime.UtcNow;
 

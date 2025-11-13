@@ -11,7 +11,8 @@ public class ExpenseDto
     public int StatusId { get; set; }
     public string StatusName { get; set; } = string.Empty;
     public string StatusClass { get; set; } = string.Empty;
-    public string? Provider { get; set; }
+    public int? ProviderId { get; set; }
+    public string? ProviderName { get; set; }
     public string? Notes { get; set; }
     public string? InvoiceUrl { get; set; }
     public string CreatedBy { get; set; } = string.Empty;
@@ -26,7 +27,7 @@ public class CreateExpenseDto
     public DateTime Date { get; set; }
     public int CategoryId { get; set; }
     public int StatusId { get; set; }
-    public string? Provider { get; set; }
+    public int? ProviderId { get; set; }
     public string? Notes { get; set; }
 }
 
@@ -37,7 +38,7 @@ public class UpdateExpenseDto
     public DateTime Date { get; set; }
     public int CategoryId { get; set; }
     public int StatusId { get; set; }
-    public string? Provider { get; set; }
+    public int? ProviderId { get; set; }
     public string? Notes { get; set; }
 }
 

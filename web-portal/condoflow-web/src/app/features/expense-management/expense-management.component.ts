@@ -15,7 +15,8 @@ interface Expense {
   date: string;
   categoryId: number;
   statusId: number;
-  provider?: string;
+  providerId?: number;
+  providerName?: string;
   notes?: string;
   invoiceUrl?: string;
   createdBy: string;
@@ -34,6 +35,16 @@ interface Status {
   isActive: boolean;
 }
 
+interface Provider {
+  id: number;
+  name: string;
+  phone?: string;
+  email?: string;
+  rnc?: string;
+  address?: string;
+  isActive: boolean;
+}
+
 @Component({
   selector: 'app-expense-management',
   standalone: true,
@@ -45,6 +56,7 @@ export class ExpenseManagementComponent implements OnInit {
   expenses = signal<Expense[]>([]);
   categories = signal<Category[]>([]);
   statuses = signal<Status[]>([]);
+  providers = signal<Provider[]>([]);
   loading = signal(false);
   isEditing = signal(false);
   currentPage = signal(1);
@@ -63,7 +75,7 @@ export class ExpenseManagementComponent implements OnInit {
     date: new Date().toISOString().split('T')[0],
     categoryId: 0,
     statusId: 0,
-    provider: '',
+    providerId: 0,
     notes: '',
     invoiceUrl: ''
   };
@@ -107,7 +119,7 @@ export class ExpenseManagementComponent implements OnInit {
       const search = this.filters.search.toLowerCase();
       filtered = filtered.filter(e => 
         e.description.toLowerCase().includes(search) ||
-        e.provider?.toLowerCase().includes(search) ||
+        e.providerName?.toLowerCase().includes(search) ||
         e.notes?.toLowerCase().includes(search)
       );
     }
@@ -134,6 +146,7 @@ export class ExpenseManagementComponent implements OnInit {
     this.loadExpenses();
     this.loadCategories();
     this.loadStatuses();
+    this.loadProviders();
   }
 
   loadExpenses() {
@@ -201,7 +214,7 @@ export class ExpenseManagementComponent implements OnInit {
       date: new Date().toISOString().split('T')[0],
       categoryId: 0,
       statusId: pendingStatus?.id || 0,
-      provider: '',
+      providerId: 0,
       notes: '',
       invoiceUrl: ''
     };
@@ -227,7 +240,7 @@ export class ExpenseManagementComponent implements OnInit {
     formData.append('date', this.currentExpense.date || '');
     formData.append('categoryId', this.currentExpense.categoryId?.toString() || '0');
     formData.append('statusId', this.currentExpense.statusId?.toString() || '0');
-    formData.append('provider', this.currentExpense.provider || '');
+    formData.append('providerId', this.currentExpense.providerId?.toString() || '0');
     formData.append('notes', this.currentExpense.notes || '');
     
     if (this.selectedInvoiceFile) {
@@ -440,6 +453,25 @@ export class ExpenseManagementComponent implements OnInit {
 
   isStatusReadonly(): boolean {
     return !this.isEditing();
+  }
+
+  loadProviders() {
+    this.http.get<any>(`${environment.apiUrl}/providers/active`).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.providers.set(response.data);
+        }
+      },
+      error: (error) => {
+        console.error('Error cargando proveedores:', error);
+        this.providers.set([]);
+      }
+    });
+  }
+
+  getProviderName(providerId: number): string {
+    const provider = this.providers().find(p => p.id === providerId);
+    return provider?.name || 'Sin proveedor';
   }
 
   getAvailableStatuses(): Status[] {

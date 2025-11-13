@@ -20,6 +20,7 @@ import { ReservationManagementComponent } from './features/reservation-managemen
 import { MyIncidentsComponent } from './features/my-incidents/my-incidents.component';
 import { IncidentManagementComponent } from './features/incident-management/incident-management.component';
 import { ExpenseManagementComponent } from './features/expense-management/expense-management.component';
+import { ProviderManagementComponent } from './features/provider-management/provider-management.component';
 import { FinancialReportComponent } from './features/reports/financial-report/financial-report.component';
 
 export const routes: Routes = [
@@ -48,6 +49,7 @@ export const routes: Routes = [
   { path: 'my-incidents', component: MyIncidentsComponent },
   { path: 'incident-management', component: IncidentManagementComponent },
   { path: 'expense-management', component: ExpenseManagementComponent },
+  { path: 'provider-management', component: ProviderManagementComponent },
   { path: 'contact', redirectTo: '/my-profile', pathMatch: 'full' },
   { path: '**', redirectTo: '/welcome' }
 ];

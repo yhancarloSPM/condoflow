@@ -148,6 +148,13 @@ import { NotificationService } from '../../core/services/notification.service';
                   <h3>Gastos</h3>
                 </div>
                 
+                <div class="action-card" (click)="navigateTo('/provider-management')">
+                  <div class="action-icon providers">
+                    <i class="pi pi-truck"></i>
+                  </div>
+                  <h3>Proveedores</h3>
+                </div>
+                
                 <!-- Dashboard para monitoreo -->
                 <div class="action-card" (click)="navigateTo('/dashboard')">
                   <div class="action-icon dashboard">
@@ -561,6 +568,7 @@ import { NotificationService } from '../../core/services/notification.service';
     .action-icon.documents { background: linear-gradient(135deg, #14b8a6, #0d9488); }
     .action-icon.contact { background: linear-gradient(135deg, #3b82f6, #2563eb); }
     .action-icon.expenses { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+    .action-icon.providers { background: linear-gradient(135deg, #0891b2, #0e7490); }
 
     .contact-card {
       cursor: default !important;

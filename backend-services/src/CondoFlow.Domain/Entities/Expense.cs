@@ -25,9 +25,7 @@ public class Expense
     [Required]
     public int StatusId { get; set; }
     
-    [Required]
-    [MaxLength(200)]
-    public string Provider { get; set; } = string.Empty;
+    public int? ProviderId { get; set; }
     
     [MaxLength(1000)]
     public string? Notes { get; set; }
@@ -49,4 +47,7 @@ public class Expense
     
     [ForeignKey(nameof(StatusId))]
     public virtual Status Status { get; set; } = null!;
+    
+    [ForeignKey(nameof(ProviderId))]
+    public virtual Provider? Provider { get; set; }
 }

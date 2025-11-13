@@ -123,6 +123,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDebtReminderService, CondoFlow.Infrastructure.Services.DebtReminderService>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped<CondoFlow.Infrastructure.Services.IExpenseService, CondoFlow.Infrastructure.Services.ExpenseService>();
+builder.Services.AddScoped<CondoFlow.Infrastructure.Services.IProviderService, CondoFlow.Infrastructure.Services.ProviderService>();
 builder.Services.AddHostedService<CondoFlow.Infrastructure.Services.MonthlyDebtGenerationService>();
 builder.Services.AddHostedService<CondoFlow.Infrastructure.Services.DebtReminderBackgroundService>();
 

@@ -22,6 +22,7 @@
         </div>
 
         <div class="filters-section">
+          <div class="filters-divider"></div>
           <div class="d-flex flex-wrap gap-3 align-items-end">
             <div class="filter-group">
               <label class="filter-label">Búsqueda</label>
@@ -104,7 +105,7 @@
                     {{ getStatusName(expense.statusId) }}
                   </span>
                 </td>
-                <td>{{ expense.provider || 'N/A' }}</td>
+                <td>{{ getProviderName(expense.providerId || 0) }}</td>
                 <td>
                   <div class="action-buttons">
                     <button 
@@ -129,7 +130,7 @@
         </div>
         
         <!-- Paginación -->
-        <div class="d-flex justify-content-between align-items-center mt-3 pt-3" style="border-top: 1px solid rgba(255,255,255,0.2);">
+        <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;">
           <small style="color: rgba(255,255,255,0.8);">Mostrando {{ getStartIndex() + 1 }} - {{ getEndIndex() }} de {{ filteredExpenses().length }} gastos</small>
           <div class="pagination">
             <button 
@@ -180,79 +181,112 @@
         <div class="modal-body">
           <div class="row">
             <div class="col-md-8 mb-3">
-              <label class="form-label">Descripción *</label>
+              <label class="form-label"><i class="pi pi-file-edit me-2"></i>Descripción *</label>
               <input 
                 type="text" 
                 class="form-control"
                 [(ngModel)]="currentExpense.description"
                 name="description"
                 required
+                maxlength="120"
                 autocomplete="off"
-                placeholder="Ej: Mantenimiento ascensor">
+                placeholder="Ej: Mantenimiento ascensor"
+                #descriptionInput="ngModel"
+                [class.is-invalid]="descriptionInput.invalid && descriptionInput.touched">
+              <div *ngIf="descriptionInput.invalid && descriptionInput.touched" class="invalid-feedback">
+                <div *ngIf="descriptionInput.errors?.['required']">La descripción es obligatoria</div>
+                <div *ngIf="descriptionInput.errors?.['maxlength']">La descripción no puede tener más de 120 caracteres</div>
+              </div>
             </div>
             
             <div class="col-md-4 mb-3">
-              <label class="form-label">Monto *</label>
+              <label class="form-label"><i class="pi pi-dollar me-2"></i>Monto *</label>
               <input 
                 type="number" 
                 class="form-control"
                 [(ngModel)]="currentExpense.amount"
                 name="amount"
                 required
-                min="0"
+                min="0.01"
                 step="0.01"
-                placeholder="0.00">
+                placeholder="0.00"
+                #amountInput="ngModel"
+                [class.is-invalid]="amountInput.invalid && amountInput.touched">
+              <div *ngIf="amountInput.invalid && amountInput.touched" class="invalid-feedback">
+                <div *ngIf="amountInput.errors?.['required']">El monto es obligatorio</div>
+                <div *ngIf="amountInput.errors?.['min']">El monto debe ser mayor a 0</div>
+              </div>
             </div>
             
             <div class="col-md-4 mb-3">
-              <label class="form-label">Fecha *</label>
+              <label class="form-label"><i class="pi pi-calendar me-2"></i>Fecha *</label>
               <input 
                 type="date" 
                 class="form-control"
                 [(ngModel)]="currentExpense.date"
                 name="date"
-                required>
+                required
+                #dateInput="ngModel"
+                [class.is-invalid]="dateInput.invalid && dateInput.touched">
+              <div *ngIf="dateInput.invalid && dateInput.touched" class="invalid-feedback">
+                La fecha es obligatoria
+              </div>
             </div>
             
             <div class="col-md-4 mb-3">
-              <label class="form-label">Categoría *</label>
+              <label class="form-label"><i class="pi pi-tags me-2"></i>Categoría *</label>
               <select 
                 class="form-select"
                 [(ngModel)]="currentExpense.categoryId"
                 name="categoryId"
-                required>
+                required
+                #categoryInput="ngModel"
+                [class.is-invalid]="categoryInput.invalid && categoryInput.touched">
                 <option [value]="0">Seleccionar categoría</option>
                 <option *ngFor="let category of categories()" [value]="category.id">{{ category.name }}</option>
               </select>
+              <div *ngIf="categoryInput.invalid && categoryInput.touched" class="invalid-feedback">
+                Debe seleccionar una categoría
+              </div>
             </div>
             
             <div class="col-md-4 mb-3">
-              <label class="form-label">Estado *</label>
+              <label class="form-label"><i class="pi pi-flag me-2"></i>Estado *</label>
               <select 
                 class="form-select"
                 [(ngModel)]="currentExpense.statusId"
                 name="statusId"
                 required
-                [disabled]="!isEditing() || isStatusReadonly()">
+                [disabled]="!isEditing() || isStatusReadonly()"
+                #statusInput="ngModel"
+                [class.is-invalid]="statusInput.invalid && statusInput.touched">
                 <option [value]="0">Seleccionar estado</option>
                 <option *ngFor="let status of getAvailableStatuses()" [value]="status.id">{{ status.name }}</option>
               </select>
+              <div *ngIf="statusInput.invalid && statusInput.touched" class="invalid-feedback">
+                Debe seleccionar un estado
+              </div>
             </div>
             
             <div class="col-md-6 mb-3">
-              <label class="form-label">Proveedor *</label>
-              <input 
-                type="text" 
-                class="form-control"
-                [(ngModel)]="currentExpense.provider"
-                name="provider"
+              <label class="form-label"><i class="pi pi-truck me-2"></i>Proveedor *</label>
+              <select 
+                class="form-select"
+                [(ngModel)]="currentExpense.providerId"
+                name="providerId"
                 required
-                autocomplete="off"
-                placeholder="Nombre del proveedor">
+                #providerInput="ngModel"
+                [class.is-invalid]="providerInput.invalid && providerInput.touched">
+                <option [value]="0">Seleccionar proveedor</option>
+                <option *ngFor="let provider of providers()" [value]="provider.id">{{ provider.name }}</option>
+              </select>
+              <div *ngIf="providerInput.invalid && providerInput.touched" class="invalid-feedback">
+                Debe seleccionar un proveedor
+              </div>
             </div>
             
             <div class="col-md-12 mb-3">
-              <label class="form-label">Factura del Proveedor (Opcional)</label>
+              <label class="form-label"><i class="pi pi-file me-2"></i>Factura del Proveedor (Opcional)</label>
               <div class="modern-file-upload" [class.has-file]="selectedInvoiceFile || currentExpense.invoiceUrl">
                 <div class="file-drop-zone" (click)="triggerInvoiceFileInput()">
                   @if (!selectedInvoiceFile && !currentExpense.invoiceUrl) {
@@ -295,13 +329,19 @@
             </div>
             
             <div class="col-md-12 mb-3">
-              <label class="form-label">Notas</label>
+              <label class="form-label"><i class="pi pi-comment me-2"></i>Notas</label>
               <textarea 
                 class="form-control"
                 [(ngModel)]="currentExpense.notes"
                 name="notes"
+                maxlength="250"
                 rows="3"
-                placeholder="Observaciones adicionales..."></textarea>
+                placeholder="Observaciones adicionales..."
+                #notesInput="ngModel"
+                [class.is-invalid]="notesInput.invalid && notesInput.touched"></textarea>
+              <div *ngIf="notesInput.invalid && notesInput.touched" class="invalid-feedback">
+                Las notas no pueden tener más de 250 caracteres
+              </div>
             </div>
           </div>
         </div>

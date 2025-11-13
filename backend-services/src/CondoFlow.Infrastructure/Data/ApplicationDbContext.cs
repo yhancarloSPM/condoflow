@@ -26,6 +26,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<EventType> EventTypes { get; set; }
     public DbSet<Expense> Expenses { get; set; }
     public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
+    public DbSet<Provider> Providers { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -374,7 +375,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.Description).HasMaxLength(500).IsRequired();
             entity.Property(e => e.Amount).HasPrecision(18, 2).IsRequired();
             entity.Property(e => e.Date).IsRequired();
-            entity.Property(e => e.Provider).HasMaxLength(200);
             entity.Property(e => e.Notes).HasMaxLength(1000);
             entity.Property(e => e.CreatedBy).HasMaxLength(450).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
@@ -388,6 +388,25 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .WithMany()
                   .HasForeignKey(e => e.StatusId)
                   .OnDelete(DeleteBehavior.Restrict);
+                  
+            entity.HasOne(e => e.Provider)
+                  .WithMany(p => p.Expenses)
+                  .HasForeignKey(e => e.ProviderId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+        
+        // Configurar Provider
+        modelBuilder.Entity<Provider>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.RNC).HasMaxLength(20);
+            entity.Property(e => e.Address).HasMaxLength(300);
+            entity.Property(e => e.IsActive).IsRequired();
+            entity.Property(e => e.CreatedBy).HasMaxLength(450).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
         });
         
         // Configurar ExpenseCategory
