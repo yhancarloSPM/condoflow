@@ -4,11 +4,10 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface CatalogItem {
-  id: string;
+  id: number;
   code: string;
   name: string;
   description?: string;
-  order?: number;
   isActive: boolean;
 }
 

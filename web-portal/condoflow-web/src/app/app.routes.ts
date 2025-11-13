@@ -20,6 +20,7 @@ import { ReservationManagementComponent } from './features/reservation-managemen
 import { MyIncidentsComponent } from './features/my-incidents/my-incidents.component';
 import { IncidentManagementComponent } from './features/incident-management/incident-management.component';
 import { ExpenseManagementComponent } from './features/expense-management/expense-management.component';
+import { FinancialReportComponent } from './features/reports/financial-report/financial-report.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/welcome', pathMatch: 'full' },
@@ -38,6 +39,7 @@ export const routes: Routes = [
   { path: 'reports/payments', component: PaymentsReportComponent },
   { path: 'reports/morosity', component: MorosityReportComponent },
   { path: 'reports/owners', loadComponent: () => import('./features/reports/owners-report/owners-report.component').then(m => m.OwnersReportComponent) },
+  { path: 'reports/financial', component: FinancialReportComponent },
   { path: 'my-profile', component: MyProfileComponent },
   { path: 'announcements', component: AnnouncementsComponent },
   { path: 'announcement-management', component: AnnouncementManagementComponent },

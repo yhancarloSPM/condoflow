@@ -25,8 +25,8 @@ import { IncidentPriorityOption, IncidentStatusCounts, IncidentStatus } from '..
           <label class="filter-label">Estado</label>
           <select class="form-select filter-select" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
             <option value="">Todos los estados</option>
-            <option *ngFor="let status of statuses" [value]="status.value">
-              {{status.label}}
+            <option *ngFor="let status of statuses" [value]="status.code">
+              {{status.name}}
             </option>
           </select>
         </div>

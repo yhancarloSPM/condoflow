@@ -126,19 +126,17 @@
                     <tr>
                       <td>{{ payment.ownerName }}</td>
                       <td>
-                        <div class="payment-amount-cell">
-                          <div class="d-flex align-items-center gap-2">
-                            <div>
-                              ${{ payment.amount.toFixed(2) }}
-                              <small class="currency">{{ payment.currency || 'DOP' }}</small>
-                            </div>
-                            <button 
-                              class="btn-receipt-compact" 
-                              (click)="viewReceipt(payment)" 
-                              title="Ver comprobante">
-                              <i class="pi pi-file-pdf" style="color: #10b981;"></i>
-                            </button>
+                        <div class="d-flex align-items-center gap-2">
+                          <div>
+                            ${{ payment.amount.toFixed(2) }}
+                            <small class="currency">{{ payment.currency || 'DOP' }}</small>
                           </div>
+                          <button 
+                            class="btn-receipt-compact" 
+                            (click)="viewReceipt(payment)" 
+                            title="Ver comprobante">
+                            <i class="pi pi-file-pdf" style="color: #10b981;"></i>
+                          </button>
                         </div>
                       </td>
                       <td>{{ payment.paymentMethod }}</td>

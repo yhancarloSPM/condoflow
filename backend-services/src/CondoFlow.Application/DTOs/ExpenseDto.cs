@@ -13,6 +13,7 @@ public class ExpenseDto
     public string StatusClass { get; set; } = string.Empty;
     public string? Provider { get; set; }
     public string? Notes { get; set; }
+    public string? InvoiceUrl { get; set; }
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

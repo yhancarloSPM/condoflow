@@ -123,6 +123,10 @@ export class ReportsComponent implements OnInit {
     this.router.navigate(['/reports/owners']);
   }
 
+  navigateToFinancialReport() {
+    this.router.navigate(['/reports/financial']);
+  }
+
 
 
   getUserInitials(): string {

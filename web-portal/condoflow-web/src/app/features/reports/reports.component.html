@@ -65,6 +65,24 @@
           </span>
         </div>
       </div>
+
+      <div class="report-card clickable" (click)="navigateToFinancialReport()">
+        <div class="report-header">
+          <div class="report-icon financial">
+            <i class="pi pi-chart-line"></i>
+          </div>
+          <div class="report-info">
+            <h3>Reporte Financiero</h3>
+            <p>Análisis de ingresos vs gastos</p>
+          </div>
+        </div>
+        <div class="report-footer">
+          <span class="view-report-text">
+            <i class="pi pi-arrow-right"></i>
+            Ver Detalles
+          </span>
+        </div>
+      </div>
     </div>
 
     @if (loading()) {

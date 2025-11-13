@@ -469,10 +469,11 @@ import { NotificationService } from '../../core/services/notification.service';
     
     .gradient-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
       width: 100%;
       padding: 0 2rem;
+      max-width: 1200px;
     }
 
     .actions-grid {
@@ -488,8 +489,8 @@ import { NotificationService } from '../../core/services/notification.service';
       background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
       backdrop-filter: blur(15px);
       border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 24px;
-      padding: 2.5rem 2rem;
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
       cursor: pointer;
       transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
       text-align: center;
@@ -519,17 +520,17 @@ import { NotificationService } from '../../core/services/notification.service';
     }
 
     .action-icon {
-      width: 4rem;
-      height: 4rem;
-      border-radius: 20px;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       color: white;
-      margin: 0 auto 1.5rem auto;
+      margin: 0 auto 1.2rem auto;
       flex-shrink: 0;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
       transition: all 0.4s ease;
       position: relative;
     }
@@ -540,12 +541,12 @@ import { NotificationService } from '../../core/services/notification.service';
     }
 
     .action-card h3 {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 600;
       color: white;
       margin: 0;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
 
     .action-icon.admin { background: linear-gradient(135deg, #10b981, #059669); }

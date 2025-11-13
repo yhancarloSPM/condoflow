@@ -13,10 +13,12 @@ namespace CondoFlow.WebApi.Controllers;
 public class ExpensesController : ControllerBase
 {
     private readonly IExpenseService _expenseService;
+    private readonly IWebHostEnvironment _environment;
 
-    public ExpensesController(IExpenseService expenseService)
+    public ExpensesController(IExpenseService expenseService, IWebHostEnvironment environment)
     {
         _expenseService = expenseService;
+        _environment = environment;
     }
 
     [HttpGet]
@@ -76,7 +78,7 @@ public class ExpensesController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<ExpenseDto>>> CreateExpense(CreateExpenseDto createDto)
+    public async Task<ActionResult<ApiResponse<ExpenseDto>>> CreateExpense([FromForm] CreateExpenseDto createDto, [FromForm] IFormFile? invoice)
     {
         try
         {
@@ -90,7 +92,13 @@ public class ExpensesController : ControllerBase
                 });
             }
 
-            var expense = await _expenseService.CreateExpenseAsync(createDto, userId);
+            string? invoiceUrl = null;
+            if (invoice != null)
+            {
+                invoiceUrl = await SaveInvoiceFileAsync(invoice);
+            }
+
+            var expense = await _expenseService.CreateExpenseAsync(createDto, userId, invoiceUrl);
             return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, new ApiResponse<ExpenseDto>
             {
                 Success = true,
@@ -110,11 +118,23 @@ public class ExpensesController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<ExpenseDto>>> UpdateExpense(int id, UpdateExpenseDto updateDto)
+    public async Task<ActionResult<ApiResponse<ExpenseDto>>> UpdateExpense(int id, [FromForm] UpdateExpenseDto updateDto, [FromForm] IFormFile? invoice)
     {
         try
         {
-            var expense = await _expenseService.UpdateExpenseAsync(id, updateDto);
+            string? invoiceUrl = null;
+            if (invoice != null)
+            {
+                // Obtener el gasto actual para eliminar la factura anterior si existe
+                var currentExpense = await _expenseService.GetExpenseByIdAsync(id);
+                if (currentExpense != null && !string.IsNullOrEmpty(currentExpense.InvoiceUrl))
+                {
+                    DeleteInvoiceFile(currentExpense.InvoiceUrl);
+                }
+                invoiceUrl = await SaveInvoiceFileAsync(invoice);
+            }
+
+            var expense = await _expenseService.UpdateExpenseAsync(id, updateDto, invoiceUrl);
             if (expense == null)
             {
                 return NotFound(new ApiResponse<ExpenseDto>
@@ -170,6 +190,39 @@ public class ExpensesController : ControllerBase
                 Success = false,
                 Message = $"Error interno del servidor: {ex.Message}"
             });
+        }
+    }
+    
+    private async Task<string> SaveInvoiceFileAsync(IFormFile file)
+    {
+        var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "invoices");
+        Directory.CreateDirectory(uploadsFolder);
+        
+        var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+        var filePath = Path.Combine(uploadsFolder, fileName);
+        
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+        
+        return $"/uploads/invoices/{fileName}";
+    }
+    
+    private void DeleteInvoiceFile(string invoiceUrl)
+    {
+        try
+        {
+            var filePath = Path.Combine(_environment.WebRootPath, invoiceUrl.TrimStart('/'));
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't throw - file deletion shouldn't break the operation
+            Console.WriteLine($"Error deleting invoice file: {ex.Message}");
         }
     }
 }

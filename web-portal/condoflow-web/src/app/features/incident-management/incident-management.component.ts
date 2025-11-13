@@ -103,16 +103,15 @@ export class IncidentManagementComponent implements OnInit {
       }
     });
 
-    this.incidentUtils.getStatuses().subscribe({
-      next: (statuses) => {
-        console.log('Statuses loaded in incidents:', statuses);
-        this.statuses.set(statuses);
-      },
-      error: (error) => {
-        console.error('Error loading statuses:', error);
-        this.statuses.set([]);
-      }
-    });
+    // Usar los mismos estados que el modal
+    const editableStatuses = [
+      { code: 'reported', name: 'Reportada' },
+      { code: 'in_progress', name: 'En Progreso' },
+      { code: 'resolved', name: 'Resuelta' },
+      { code: 'rejected', name: 'Rechazada' },
+      { code: 'cancelled', name: 'Cancelada' }
+    ];
+    this.statuses.set(editableStatuses);
   }
 
   loadIncidents(): void {

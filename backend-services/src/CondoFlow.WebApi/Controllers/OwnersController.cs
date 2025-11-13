@@ -92,9 +92,9 @@ public class OwnersController : ControllerBase
                 return Ok(ApiResponse<object>.SuccessResult(new { owners = new object[0], debug = debugInfo }, "No hay deudas activas", 200));
             }
 
-            // Obtener deudas activas (incluyendo las que están vencidas pero con status Pending)
+            // Obtener deudas activas (incluyendo las que tienen pagos en revisión)
             var activeDebts = await _context.Debts
-                .Where(d => d.Status == "Pending" || d.Status == "Overdue")
+                .Where(d => d.Status == "Pending" || d.Status == "Overdue" || d.Status == "PaymentSubmitted")
                 .ToListAsync();
 
             // Actualizar status basado en IsOverdue
@@ -134,10 +134,10 @@ public class OwnersController : ControllerBase
                     name = g.Key.FirstName + " " + g.Key.LastName,
                     apartment = g.Key.Block + "-" + g.Key.Apartment,
                     pendingAmount = g.Where(x => x.d.Status == "Pending").Sum(x => x.d.Amount.Amount),
-                    overdueAmount = g.Where(x => x.d.Status == "Overdue").Sum(x => x.d.Amount.Amount),
+                    overdueAmount = g.Where(x => x.d.Status == "Overdue" || x.d.Status == "PaymentSubmitted").Sum(x => x.d.Amount.Amount),
                     totalAmount = g.Sum(x => x.d.Amount.Amount),
                     pendingCount = g.Count(x => x.d.Status == "Pending"),
-                    overdueCount = g.Count(x => x.d.Status == "Overdue"),
+                    overdueCount = g.Count(x => x.d.Status == "Overdue" || x.d.Status == "PaymentSubmitted"),
                     lastUpdate = g.Max(x => x.d.CreatedAt)
                 })
                 .OrderByDescending(o => o.totalAmount)
@@ -160,7 +160,7 @@ public class OwnersController : ControllerBase
             var ownerGuid = Guid.Parse(ownerId);
             
             var debts = await _context.Debts
-                .Where(d => d.OwnerId == ownerGuid && (d.Status == "Pending" || d.Status == "Overdue"))
+                .Where(d => d.OwnerId == ownerGuid && (d.Status == "Pending" || d.Status == "Overdue" || d.Status == "PaymentSubmitted"))
                 .OrderByDescending(d => d.Year)
                 .ThenByDescending(d => d.Month)
                 .ToListAsync();

@@ -247,7 +247,9 @@
                             <div>{{ formatTime(reservation.startTime) }} - {{ formatTime(reservation.endTime) }}</div>
                           </td>
                           <td>
-                            <div>{{ getEventTypeName(reservation.eventTypeCode) }}</div>
+                            <span class="event-type-badge" [ngClass]="'event-type-' + reservation.eventTypeCode">
+                              {{ getEventTypeName(reservation.eventTypeCode) }}
+                            </span>
                           </td>
                           <td>
                             <div><small>{{ reservation.notes || 'Sin descripción' }}</small></div>

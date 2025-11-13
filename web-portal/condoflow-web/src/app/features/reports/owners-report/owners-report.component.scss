@@ -82,6 +82,8 @@
 }
 
 .filters-section {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1.5rem;
   margin-top: 1.5rem;
 
   .filters-grid {
@@ -208,7 +210,7 @@
 
   .card-body {
     padding: 1rem;
-    height: calc(100vh - 420px);
+    height: calc(100vh - 440px);
     display: flex;
     flex-direction: column;
   }

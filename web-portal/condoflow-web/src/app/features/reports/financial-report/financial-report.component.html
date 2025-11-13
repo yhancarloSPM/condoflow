@@ -1,0 +1,200 @@
+<app-navbar></app-navbar>
+
+<div class="financial-report-container">
+  <div class="main-content">
+    <div class="header-card">
+      <div class="header-content">
+        <div class="header-section">
+          <div class="header-info">
+            <div class="header-icon">
+              <i class="pi pi-chart-line"></i>
+            </div>
+            <div>
+              <h1>Reporte Financiero</h1>
+              <p class="header-subtitle">Análisis de ingresos vs gastos por período</p>
+            </div>
+          </div>
+          <button class="back-btn" (click)="goBack()" style="margin-left: auto;">
+            <i class="pi pi-arrow-left"></i>
+            Volver a Reportes
+          </button>
+        </div>
+
+        <div class="filters-section">
+          <div class="filters-row">
+            <div class="filters-group">
+              <div class="filter-group">
+                <label>Año</label>
+                <select [(ngModel)]="selectedYear" class="filter-select">
+                  <option value="">Todos los años</option>
+                  <option *ngFor="let year of years()" [value]="year">{{year}}</option>
+                </select>
+              </div>
+              
+              <div class="filter-group">
+                <label>Mes</label>
+                <select [(ngModel)]="selectedMonth" class="filter-select">
+                  <option value="">Todos los meses</option>
+                  <option *ngFor="let month of months()" [value]="month">{{getMonthName(+month)}}</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="summary-metrics">
+              <div class="metric-item income">
+                <div class="metric-icon">
+                  <i class="pi pi-arrow-up"></i>
+                </div>
+                <div class="metric-data">
+                  <span class="metric-value">${{totals().totalIncome.toFixed(0)}}</span>
+                  <span class="metric-label">Ingresos</span>
+                </div>
+              </div>
+              
+              <div class="metric-item expense">
+                <div class="metric-icon">
+                  <i class="pi pi-arrow-down"></i>
+                </div>
+                <div class="metric-data">
+                  <span class="metric-value">${{totals().totalExpenses.toFixed(0)}}</span>
+                  <span class="metric-label">Gastos</span>
+                </div>
+              </div>
+              
+              <div class="metric-item balance" [class.positive]="totals().totalBalance >= 0" [class.negative]="totals().totalBalance < 0">
+                <div class="metric-icon">
+                  <i class="pi pi-dollar"></i>
+                </div>
+                <div class="metric-data">
+                  <span class="metric-value">${{totals().totalBalance.toFixed(0)}}</span>
+                  <span class="metric-label">Balance</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de datos -->
+    <div class="table-section">
+
+
+      <div class="table-header">
+        <h3>Análisis por Período ({{financialData().totalCount}})</h3>
+        <div class="export-buttons">
+          <button class="export-btn excel-btn" (click)="generateExcel()" [disabled]="exportLoading()">
+            <i class="pi pi-file-excel"></i>
+            Excel
+          </button>
+          <button class="export-btn pdf-btn" (click)="generatePDF()" [disabled]="exportLoading()">
+            <i class="pi pi-file-pdf"></i>
+            PDF
+          </button>
+        </div>
+      </div>
+      
+      <div class="card-body d-flex flex-column" style="position: relative;">
+        @if (exportLoading()) {
+          <div class="simple-loading-overlay">
+            <div class="spinner"></div>
+            <p>Generando reporte...</p>
+          </div>
+        }
+        @if (loading()) {
+          <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
+            <div class="spinner"></div>
+            <p class="text-muted">Cargando datos financieros...</p>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table class="financial-table table table-striped">
+              <thead>
+                <tr>
+                  <th>Año</th>
+                  <th>Mes</th>
+                  <th style="text-align: right; background: rgba(16, 185, 129, 0.8) !important;">Ingresos</th>
+                  <th style="text-align: right; background: rgba(239, 68, 68, 0.8) !important;">Gastos</th>
+                  <th style="text-align: right; background: rgba(59, 130, 246, 0.8) !important;">Balance</th>
+                  <th class="center-text">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let period of financialData().data; let i = index" 
+                    [class.even-row]="i % 2 === 0">
+                  <td>{{period.year}}</td>
+                  <td>{{period.monthName}}</td>
+                  <td class="amount-cell income-amount" style="text-align: right;">
+                    ${{period.income.toFixed(2)}}
+                  </td>
+                  <td class="amount-cell expense-amount" style="text-align: right;">
+                    ${{period.expenses.toFixed(2)}}
+                  </td>
+                  <td class="amount-cell balance-amount" 
+                      [class.positive-balance]="period.balance >= 0"
+                      [class.negative-balance]="period.balance < 0"
+                      style="text-align: right;">
+                    ${{period.balance.toFixed(2)}}
+                  </td>
+                  <td class="center-text">
+                    <span class="badge status-badge" 
+                          [class.balance-positive]="period.balance >= 0"
+                          [class.bg-danger]="period.balance < 0">
+                      {{period.balance >= 0 ? 'Positivo' : 'Negativo'}}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          @if (financialData().data.length === 0) {
+            <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
+              <h6 class="text-white mt-3">No hay datos financieros</h6>
+              <p class="text-white small">No se encontraron registros con los filtros aplicados</p>
+            </div>
+          }
+          
+          @if (financialData().totalCount > itemsPerPage) {
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;">
+              <div>
+                <small class="text-muted">
+                  Mostrando {{ (currentPage() - 1) * itemsPerPage + 1 }} - 
+                  {{ Math.min(currentPage() * itemsPerPage, financialData().totalCount) }} 
+                  de {{ financialData().totalCount }} registros
+                </small>
+              </div>
+              <nav>
+                <div class="pagination">
+                  <button 
+                    class="pagination-btn" 
+                    [disabled]="currentPage() === 1" 
+                    (click)="goToPage(currentPage() - 1)">
+                    <i class="pi pi-chevron-left"></i>
+                  </button>
+                  
+                  <button 
+                    *ngFor="let page of [].constructor(Math.min(5, financialData().totalPages)); let i = index" 
+                    class="pagination-btn" 
+                    [class.active]="currentPage() === i + 1" 
+                    (click)="goToPage(i + 1)">
+                    {{ i + 1 }}
+                  </button>
+                  
+                  <span *ngIf="financialData().totalPages > 5" class="pagination-dots">...</span>
+                  
+                  <button 
+                    class="pagination-btn" 
+                    [disabled]="currentPage() === financialData().totalPages" 
+                    (click)="goToPage(currentPage() + 1)">
+                    <i class="pi pi-chevron-right"></i>
+                  </button>
+                </div>
+              </nav>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>

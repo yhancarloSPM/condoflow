@@ -57,6 +57,20 @@ public class AdminPaymentsController : ControllerBase
                     }
                 }
 
+                // Obtener información del período de la deuda si existe
+                int? debtMonth = null;
+                int? debtYear = null;
+                if (payment.DebtId.HasValue)
+                {
+                    var debtRepository = HttpContext.RequestServices.GetRequiredService<IDebtRepository>();
+                    var debt = await debtRepository.GetByIdAsync(payment.DebtId.Value);
+                    if (debt != null)
+                    {
+                        debtMonth = debt.Month;
+                        debtYear = debt.Year;
+                    }
+                }
+
                 paymentResponses.Add(new
                 {
                     Id = payment.Id,
@@ -71,7 +85,9 @@ public class AdminPaymentsController : ControllerBase
                     Status = payment.Status.ToString().ToLower(),
                     RejectionReason = payment.RejectionReason,
                     CreatedAt = payment.CreatedAt,
-                    Concept = concept
+                    Concept = concept,
+                    DebtMonth = debtMonth,
+                    DebtYear = debtYear
                 });
             }
 

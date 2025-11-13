@@ -202,12 +202,13 @@ export class OwnersReportComponent implements OnInit {
       }
       
       const ownerData = ownersMap.get(key);
-      if (debt.isPaid) {
+      if (debt.isPaid || debt.status === 'Paid') {
         ownerData.pagadas++;
-      } else if (debt.isOverdue) {
+      } else if (debt.isOverdue || debt.status === 'PaymentSubmitted') {
+        // Deudas vencidas o con pago en revisión siguen siendo vencidas
         ownerData.vencidas++;
         ownerData.totalAdeuda += debt.amount;
-      } else {
+      } else if (debt.status === 'Pending') {
         ownerData.pendientes++;
         ownerData.totalAdeuda += debt.amount;
       }
@@ -296,7 +297,7 @@ export class OwnersReportComponent implements OnInit {
     dateCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'ECFDF5' } };
     dateCell.alignment = { horizontal: 'center' };
     
-    const headers = ['Propietario', 'Bloque', 'Apartamento', 'Pendientes', 'Vencidas', 'Total Adeuda', 'Pagadas'];
+    const headers = ['Propietario', 'Bloque', 'Apartamento', 'Meses Pendientes', 'Meses Vencidos', 'Total Adeuda', 'Meses Pagados'];
     worksheet.getRow(4).values = headers;
     worksheet.getRow(4).font = { bold: true, color: { argb: 'FFFFFF' }, size: 11 };
     worksheet.getRow(4).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '059669' } };
@@ -377,7 +378,7 @@ export class OwnersReportComponent implements OnInit {
     ]);
     
     autoTable(doc, {
-      head: [['Propietario', 'Bloque', 'Apt', 'Pendientes', 'Vencidas', 'Total Adeuda', 'Pagadas']],
+      head: [['Propietario', 'Bloque', 'Apt', 'Meses Pend.', 'Meses Venc.', 'Total Adeuda', 'Meses Pag.']],
       body: tableData,
       startY: 40,
       styles: { fontSize: 8, cellPadding: 2 },

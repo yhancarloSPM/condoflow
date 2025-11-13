@@ -24,7 +24,7 @@ export class PaymentsReportComponent implements OnInit {
   payments = signal<any[]>([]);
   owners = signal<any[]>([]);
   selectedOwnerName = signal('');
-  selectedStatus = signal<string>('');
+
   selectedBlock = signal<string>('');
   selectedApartment = signal<string>('');
 
@@ -124,7 +124,8 @@ export class PaymentsReportComponent implements OnInit {
   });
 
   private getFilteredData() {
-    let filtered = this.payments();
+    // Solo mostrar pagos aprobados en el reporte
+    let filtered = this.payments().filter(p => p.status.toLowerCase() === 'approved');
     
     if (this.selectedOwnerName()) {
       filtered = filtered.filter(p => {
@@ -134,10 +135,6 @@ export class PaymentsReportComponent implements OnInit {
         }
         return ownerName.toLowerCase().includes(this.selectedOwnerName().toLowerCase());
       });
-    }
-    
-    if (this.selectedStatus()) {
-      filtered = filtered.filter(p => p.status === this.selectedStatus());
     }
     
     if (this.selectedBlock() || this.selectedApartment()) {

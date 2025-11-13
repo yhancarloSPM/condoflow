@@ -75,7 +75,12 @@ export class MorosityReportComponent implements OnInit {
   }
 
   filteredDebts = computed(() => {
-    let filtered = this.debts().filter(d => d.isOverdue === true);
+    // Mostrar deudas vencidas, incluyendo las que tienen pagos en revisión
+    let filtered = this.debts().filter(d => 
+      (d.isOverdue === true || d.status === 'PaymentSubmitted') && 
+      d.status !== 'Paid' && 
+      !d.isPaid
+    );
     
     if (this.selectedOwnerName()) {
       filtered = filtered.filter(d => d.ownerName.toLowerCase().includes(this.selectedOwnerName().toLowerCase()));
@@ -117,7 +122,11 @@ export class MorosityReportComponent implements OnInit {
     const yearsSet = new Set<string>();
     const monthsSet = new Set<string>();
     
-    this.debts().filter(d => d.isOverdue === true).forEach(debt => {
+    this.debts().filter(d => 
+      (d.isOverdue === true || d.status === 'PaymentSubmitted') && 
+      d.status !== 'Paid' && 
+      !d.isPaid
+    ).forEach(debt => {
       // Owners
       if (debt.ownerId && !ownersMap.has(debt.ownerId)) {
         ownersMap.set(debt.ownerId, {
@@ -222,7 +231,11 @@ export class MorosityReportComponent implements OnInit {
       worksheet.getRow(4).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DC2626' } };
       
       let rowIndex = 5;
-      this.debts().filter(d => d.isOverdue === true).forEach(debt => {
+      this.debts().filter(d => 
+        (d.isOverdue === true || d.status === 'PaymentSubmitted') && 
+        d.status !== 'Paid' && 
+        !d.isPaid
+      ).forEach(debt => {
         const row = worksheet.getRow(rowIndex);
         row.values = [
           debt.ownerName,
@@ -270,7 +283,11 @@ export class MorosityReportComponent implements OnInit {
       doc.setFont('helvetica', 'normal');
       doc.text(`Fecha de generación: ${currentDate}`, 105, 30, { align: 'center' });
       
-      const data = this.debts().filter(d => d.isOverdue === true).map(debt => [
+      const data = this.debts().filter(d => 
+        (d.isOverdue === true || d.status === 'PaymentSubmitted') && 
+        d.status !== 'Paid' && 
+        !d.isPaid
+      ).map(debt => [
         debt.ownerName,
         this.getBlock(debt),
         this.getApartmentNumber(debt),

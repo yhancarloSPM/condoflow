@@ -32,6 +32,9 @@ public class Expense
     [MaxLength(1000)]
     public string? Notes { get; set; }
     
+    [MaxLength(500)]
+    public string? InvoiceUrl { get; set; }
+    
     [Required]
     [MaxLength(450)]
     public string CreatedBy { get; set; } = string.Empty;

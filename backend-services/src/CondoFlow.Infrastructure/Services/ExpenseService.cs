@@ -9,8 +9,8 @@ public interface IExpenseService
 {
     Task<IEnumerable<ExpenseDto>> GetAllExpensesAsync();
     Task<ExpenseDto?> GetExpenseByIdAsync(int id);
-    Task<ExpenseDto> CreateExpenseAsync(CreateExpenseDto createDto, string userId);
-    Task<ExpenseDto?> UpdateExpenseAsync(int id, UpdateExpenseDto updateDto);
+    Task<ExpenseDto> CreateExpenseAsync(CreateExpenseDto createDto, string userId, string? invoiceUrl = null);
+    Task<ExpenseDto?> UpdateExpenseAsync(int id, UpdateExpenseDto updateDto, string? invoiceUrl = null);
     Task<bool> DeleteExpenseAsync(int id);
     Task<IEnumerable<ExpenseCategoryDto>> GetCategoriesAsync();
     Task<IEnumerable<ExpenseStatusDto>> GetStatusesAsync();
@@ -46,6 +46,7 @@ public class ExpenseService : IExpenseService
             StatusClass = GetStatusClass(e.Status.Code),
             Provider = e.Provider,
             Notes = e.Notes,
+            InvoiceUrl = e.InvoiceUrl,
             CreatedBy = e.CreatedBy,
             CreatedAt = e.CreatedAt,
             UpdatedAt = e.UpdatedAt
@@ -74,13 +75,14 @@ public class ExpenseService : IExpenseService
             StatusClass = GetStatusClass(expense.Status.Code),
             Provider = expense.Provider,
             Notes = expense.Notes,
+            InvoiceUrl = expense.InvoiceUrl,
             CreatedBy = expense.CreatedBy,
             CreatedAt = expense.CreatedAt,
             UpdatedAt = expense.UpdatedAt
         };
     }
 
-    public async Task<ExpenseDto> CreateExpenseAsync(CreateExpenseDto createDto, string userId)
+    public async Task<ExpenseDto> CreateExpenseAsync(CreateExpenseDto createDto, string userId, string? invoiceUrl = null)
     {
         // Obtener el estado "pending"
         var pendingStatus = await _context.Statuses.FirstOrDefaultAsync(s => s.Code == "pending");
@@ -95,6 +97,7 @@ public class ExpenseService : IExpenseService
             StatusId = pendingStatus.Id, // Siempre crear en estado pendiente
             Provider = createDto.Provider ?? string.Empty,
             Notes = createDto.Notes,
+            InvoiceUrl = invoiceUrl,
             CreatedBy = userId,
             CreatedAt = DateTime.UtcNow
         };
@@ -105,10 +108,16 @@ public class ExpenseService : IExpenseService
         return await GetExpenseByIdAsync(expense.Id) ?? throw new InvalidOperationException("Failed to create expense");
     }
 
-    public async Task<ExpenseDto?> UpdateExpenseAsync(int id, UpdateExpenseDto updateDto)
+    public async Task<ExpenseDto?> UpdateExpenseAsync(int id, UpdateExpenseDto updateDto, string? invoiceUrl = null)
     {
         var expense = await _context.Expenses.FindAsync(id);
         if (expense == null) return null;
+
+        // Si se proporciona una nueva URL de factura, actualizarla
+        if (invoiceUrl != null)
+        {
+            expense.InvoiceUrl = invoiceUrl;
+        }
 
         expense.Description = updateDto.Description;
         expense.Amount = updateDto.Amount;
@@ -176,4 +185,6 @@ public class ExpenseService : IExpenseService
             _ => "pending"
         };
     }
+    
+
 }

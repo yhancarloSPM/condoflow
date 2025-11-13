@@ -165,11 +165,11 @@
 
 <!-- Modal de Crear/Editar Gasto -->
 <div class="modal fade" id="expenseModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog" style="max-width: 700px; width: 85%;">
     <div class="modal-content">
       <div class="modal-header">
         <div class="d-flex align-items-center gap-2">
-          <i class="pi pi-shopping-cart"></i>
+          <i class="pi pi-shopping-cart" style="color: #10b981;"></i>
           <h5 class="modal-title mb-0">{{ isEditing() ? 'Editar Gasto' : 'Nuevo Gasto' }}</h5>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal">
@@ -179,7 +179,7 @@
       <form (ngSubmit)="saveExpense()" #expenseForm="ngForm">
         <div class="modal-body">
           <div class="row">
-            <div class="col-md-12 mb-3">
+            <div class="col-md-8 mb-3">
               <label class="form-label">Descripción *</label>
               <input 
                 type="text" 
@@ -187,10 +187,11 @@
                 [(ngModel)]="currentExpense.description"
                 name="description"
                 required
+                autocomplete="off"
                 placeholder="Ej: Mantenimiento ascensor">
             </div>
             
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label class="form-label">Monto *</label>
               <input 
                 type="number" 
@@ -203,7 +204,7 @@
                 placeholder="0.00">
             </div>
             
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label class="form-label">Fecha *</label>
               <input 
                 type="date" 
@@ -213,7 +214,7 @@
                 required>
             </div>
             
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label class="form-label">Categoría *</label>
               <select 
                 class="form-select"
@@ -225,19 +226,20 @@
               </select>
             </div>
             
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
               <label class="form-label">Estado *</label>
               <select 
                 class="form-select"
                 [(ngModel)]="currentExpense.statusId"
                 name="statusId"
-                required>
+                required
+                [disabled]="!isEditing() || isStatusReadonly()">
                 <option [value]="0">Seleccionar estado</option>
-                <option *ngFor="let status of statuses()" [value]="status.id">{{ status.name }}</option>
+                <option *ngFor="let status of getAvailableStatuses()" [value]="status.id">{{ status.name }}</option>
               </select>
             </div>
             
-            <div class="col-md-12 mb-3">
+            <div class="col-md-6 mb-3">
               <label class="form-label">Proveedor *</label>
               <input 
                 type="text" 
@@ -245,7 +247,51 @@
                 [(ngModel)]="currentExpense.provider"
                 name="provider"
                 required
+                autocomplete="off"
                 placeholder="Nombre del proveedor">
+            </div>
+            
+            <div class="col-md-12 mb-3">
+              <label class="form-label">Factura del Proveedor (Opcional)</label>
+              <div class="modern-file-upload" [class.has-file]="selectedInvoiceFile || currentExpense.invoiceUrl">
+                <div class="file-drop-zone" (click)="triggerInvoiceFileInput()">
+                  @if (!selectedInvoiceFile && !currentExpense.invoiceUrl) {
+                    <div class="upload-placeholder">
+                      <i class="pi pi-cloud-upload"></i>
+                      <span class="upload-text">Arrastra tu archivo aquí o <strong>haz clic para seleccionar</strong></span>
+                      <span class="upload-hint">JPG, PNG, PDF - Máx. 5MB</span>
+                    </div>
+                  } @else if (selectedInvoiceFile) {
+                    <div class="file-preview">
+                      <i class="pi pi-file"></i>
+                      <div class="file-info">
+                        <span class="file-name">{{ selectedInvoiceFile.name }}</span>
+                        <span class="file-size">{{ getFileSize(selectedInvoiceFile.size) }}</span>
+                      </div>
+                      <button type="button" class="remove-file" (click)="removeInvoiceFile($event)">
+                        <i class="pi pi-times"></i>
+                      </button>
+                    </div>
+                  } @else if (currentExpense.invoiceUrl) {
+                    <div class="file-preview">
+                      <i class="pi pi-file"></i>
+                      <div class="file-info">
+                        <span class="file-name">Factura actual</span>
+                        <span class="file-size">Ver archivo</span>
+                      </div>
+                      <div class="file-actions">
+                        <a [href]="currentExpense.invoiceUrl" target="_blank" class="view-file" title="Ver factura">
+                          <i class="pi pi-eye"></i>
+                        </a>
+                        <button type="button" class="remove-file" (click)="removeInvoiceFile($event)" title="Cambiar archivo">
+                          <i class="pi pi-refresh"></i>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <input type="file" #invoiceFileInput (change)="onInvoiceFileSelected($event)" accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+              </div>
             </div>
             
             <div class="col-md-12 mb-3">

@@ -23,7 +23,7 @@ export class IncidentUtilsService {
         if (response.success && response.data) {
           return response.data
             .filter((item: CatalogItem) => item.isActive)
-            .sort((a: CatalogItem, b: CatalogItem) => (a.order || 0) - (b.order || 0))
+            .sort((a: CatalogItem, b: CatalogItem) => a.name.localeCompare(b.name))
             .map((item: CatalogItem) => ({
               label: item.name,
               value: item.code as IncidentCategory
@@ -46,7 +46,7 @@ export class IncidentUtilsService {
         if (response.success && response.data) {
           return response.data
             .filter((item: CatalogItem) => item.isActive)
-            .sort((a: CatalogItem, b: CatalogItem) => (a.order || 0) - (b.order || 0))
+            .sort((a: CatalogItem, b: CatalogItem) => a.name.localeCompare(b.name))
             .map((item: CatalogItem) => ({
               label: item.name,
               value: item.code as IncidentPriority

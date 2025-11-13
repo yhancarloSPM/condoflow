@@ -17,6 +17,7 @@ interface Expense {
   statusId: number;
   provider?: string;
   notes?: string;
+  invoiceUrl?: string;
   createdBy: string;
   createdAt: string;
 }
@@ -63,8 +64,11 @@ export class ExpenseManagementComponent implements OnInit {
     categoryId: 0,
     statusId: 0,
     provider: '',
-    notes: ''
+    notes: '',
+    invoiceUrl: ''
   };
+
+  selectedInvoiceFile: File | null = null;
 
   months = [
     { value: '1', label: 'Enero' },
@@ -189,15 +193,19 @@ export class ExpenseManagementComponent implements OnInit {
 
   openCreateModal() {
     this.isEditing.set(false);
+    // Obtener el estado "pending" por defecto
+    const pendingStatus = this.statuses().find(s => s.code === 'pending');
     this.currentExpense = {
       description: '',
       amount: 0,
       date: new Date().toISOString().split('T')[0],
       categoryId: 0,
-      statusId: 0,
+      statusId: pendingStatus?.id || 0,
       provider: '',
-      notes: ''
+      notes: '',
+      invoiceUrl: ''
     };
+    this.selectedInvoiceFile = null;
     const modal = new bootstrap.Modal(document.getElementById('expenseModal'));
     modal.show();
   }
@@ -205,6 +213,7 @@ export class ExpenseManagementComponent implements OnInit {
   editExpense(expense: Expense) {
     this.isEditing.set(true);
     this.currentExpense = { ...expense };
+    this.selectedInvoiceFile = null;
     const modal = new bootstrap.Modal(document.getElementById('expenseModal'));
     modal.show();
   }
@@ -212,13 +221,26 @@ export class ExpenseManagementComponent implements OnInit {
   saveExpense() {
     this.loading.set(true);
     
+    const formData = new FormData();
+    formData.append('description', this.currentExpense.description || '');
+    formData.append('amount', this.currentExpense.amount?.toString() || '0');
+    formData.append('date', this.currentExpense.date || '');
+    formData.append('categoryId', this.currentExpense.categoryId?.toString() || '0');
+    formData.append('statusId', this.currentExpense.statusId?.toString() || '0');
+    formData.append('provider', this.currentExpense.provider || '');
+    formData.append('notes', this.currentExpense.notes || '');
+    
+    if (this.selectedInvoiceFile) {
+      formData.append('invoice', this.selectedInvoiceFile);
+    }
+    
     const url = this.isEditing() 
       ? `${environment.apiUrl}/expenses/${this.currentExpense.id?.toString()}`
       : `${environment.apiUrl}/expenses`;
     
     const method = this.isEditing() ? 'PUT' : 'POST';
     
-    this.http.request(method, url, { body: this.currentExpense }).subscribe({
+    this.http.request(method, url, { body: formData }).subscribe({
       next: (response: any) => {
         if (response.success) {
           this.loadExpenses();
@@ -367,6 +389,71 @@ export class ExpenseManagementComponent implements OnInit {
       case 'rejected': return '#ef4444'; // rojo
       case 'cancelled': return '#ef4444'; // rojo
       default: return '#6b7280'; // gris
+    }
+  }
+
+  onInvoiceFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      // Validar tamaño (5MB máximo)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('El archivo es muy grande. Máximo 5MB.');
+        return;
+      }
+      
+      // Validar tipo
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Formato no válido. Solo JPG, PNG y PDF.');
+        return;
+      }
+      
+      this.selectedInvoiceFile = file;
+    }
+  }
+
+  triggerInvoiceFileInput() {
+    const fileInput = document.querySelector('#expenseModal input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
+  removeInvoiceFile(event: Event) {
+    event.stopPropagation();
+    this.selectedInvoiceFile = null;
+    this.currentExpense.invoiceUrl = '';
+    // Reset file input
+    const fileInput = document.querySelector('#expenseModal input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
+  getFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  isStatusReadonly(): boolean {
+    return !this.isEditing();
+  }
+
+  getAvailableStatuses(): Status[] {
+    if (!this.isEditing()) {
+      // Al crear, solo mostrar "pending"
+      return this.statuses().filter(s => s.code === 'pending');
+    } else {
+      // Al editar, excluir "pending" si el estado actual no es pending
+      const currentStatus = this.statuses().find(s => s.id === this.currentExpense.statusId);
+      if (currentStatus?.code === 'pending') {
+        return this.statuses(); // Mostrar todos si está en pending
+      } else {
+        return this.statuses().filter(s => s.code !== 'pending'); // Excluir pending
+      }
     }
   }
 }

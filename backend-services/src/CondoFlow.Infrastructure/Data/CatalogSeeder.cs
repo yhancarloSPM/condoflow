@@ -49,23 +49,44 @@ public static class CatalogSeeder
             context.Statuses.AddRange(statuses);
         }
 
-        // Seed event types
-        if (!await context.EventTypes.AnyAsync())
+        // Seed event types - agregar solo los que no existen
+        var existingEventTypes = await context.EventTypes.Select(et => et.Code).ToListAsync();
+        var newEventTypes = new List<EventType>();
+        
+        var allEventTypes = new List<(string Code, string Name, string Description, int Order)>
         {
-            var eventTypes = new List<EventType>
+            ("birthday", "Cumpleaños", "Celebración de cumpleaños", 1),
+            ("meeting", "Reunión", "Reunión familiar o de trabajo", 2),
+            ("celebration", "Celebración", "Celebración general", 3),
+            ("wedding", "Boda", "Ceremonia de boda", 4),
+            ("anniversary", "Aniversario", "Celebración de aniversario", 5),
+            ("graduation", "Graduación", "Celebración de graduación", 6),
+            ("baby_shower", "Baby Shower", "Celebración de baby shower", 7),
+            ("quinceañera", "Quinceañera", "Celebración de quinceañera", 8),
+            ("family_reunion", "Reunión Familiar", "Reunión familiar", 9),
+            ("corporate", "Evento Corporativo", "Evento de empresa", 10),
+            ("social", "Evento Social", "Evento social general", 11),
+            ("other", "Otro", "Otro tipo de evento", 12)
+        };
+        
+        foreach (var eventType in allEventTypes)
+        {
+            if (!existingEventTypes.Contains(eventType.Code))
             {
-                new() { Code = "birthday", Name = "Cumpleaños", Description = "Celebración de cumpleaños", Order = 1, IsActive = true },
-                new() { Code = "wedding", Name = "Boda", Description = "Ceremonia de boda", Order = 2, IsActive = true },
-                new() { Code = "anniversary", Name = "Aniversario", Description = "Celebración de aniversario", Order = 3, IsActive = true },
-                new() { Code = "graduation", Name = "Graduación", Description = "Celebración de graduación", Order = 4, IsActive = true },
-                new() { Code = "baby_shower", Name = "Baby Shower", Description = "Celebración de baby shower", Order = 5, IsActive = true },
-                new() { Code = "quinceañera", Name = "Quinceañera", Description = "Celebración de quinceañera", Order = 6, IsActive = true },
-                new() { Code = "family_reunion", Name = "Reunión Familiar", Description = "Reunión familiar", Order = 7, IsActive = true },
-                new() { Code = "corporate", Name = "Evento Corporativo", Description = "Evento de empresa", Order = 8, IsActive = true },
-                new() { Code = "social", Name = "Evento Social", Description = "Evento social general", Order = 9, IsActive = true },
-                new() { Code = "other", Name = "Otro", Description = "Otro tipo de evento", Order = 10, IsActive = true }
-            };
-            context.EventTypes.AddRange(eventTypes);
+                newEventTypes.Add(new EventType
+                {
+                    Code = eventType.Code,
+                    Name = eventType.Name,
+                    Description = eventType.Description,
+                    Order = eventType.Order,
+                    IsActive = true
+                });
+            }
+        }
+        
+        if (newEventTypes.Any())
+        {
+            context.EventTypes.AddRange(newEventTypes);
         }
 
         await context.SaveChangesAsync();
