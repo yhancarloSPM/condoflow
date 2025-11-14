@@ -248,7 +248,7 @@
                           </td>
                           <td>
                             <span class="event-type-badge" [ngClass]="'event-type-' + reservation.eventTypeCode">
-                              {{ getEventTypeName(reservation.eventTypeCode) }}
+                              {{ getEventTypeName(reservation.eventTypeCode).toUpperCase() }}
                             </span>
                           </td>
                           <td>

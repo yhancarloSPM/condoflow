@@ -100,27 +100,27 @@
             <table class="payments-table table table-striped">
               <thead>
                 <tr>
-                  <th>Propietario</th>
+                  <th style="text-align: left;">Propietario</th>
                   <th>Bloque</th>
                   <th>Apartamento</th>
                   <th>Mes</th>
                   <th>Año</th>
                   <th style="text-align: right;">Monto</th>
-                  <th>Estado</th>
+                  <th style="text-align: center;">Estado</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let debt of filteredDebts().data; let i = index" 
                     [class.even-row]="i % 2 === 0">
-                  <td>{{debt.ownerName}}</td>
+                  <td style="text-align: left !important;">{{debt.ownerName}}</td>
                   <td class="center-text">{{getBlock(debt)}}</td>
                   <td class="center-text">{{getApartmentNumber(debt)}}</td>
                   <td class="center-text">{{getMonthName(debt.month)}}</td>
                   <td class="center-text">{{debt.year}}</td>
                   <td class="amount-highlight" style="text-align: right;">${{debt.amount | number:'1.2-2'}}</td>
-                  <td class="center-text">
+                  <td style="text-align: center;">
                     <span class="status-badge status-overdue">
-                      Vencida
+                      VENCIDA
                     </span>
                   </td>
                 </tr>

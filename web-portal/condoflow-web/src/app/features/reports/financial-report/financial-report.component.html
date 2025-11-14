@@ -136,11 +136,9 @@
                       style="text-align: right;">
                     ${{period.balance.toFixed(2)}}
                   </td>
-                  <td class="center-text">
-                    <span class="badge status-badge" 
-                          [class.balance-positive]="period.balance >= 0"
-                          [class.bg-danger]="period.balance < 0">
-                      {{period.balance >= 0 ? 'Positivo' : 'Negativo'}}
+                  <td style="text-align: center;">
+                    <span class="status-badge" [class]="period.balance >= 0 ? 'balance-positive' : 'status-overdue'">
+                      {{period.balance >= 0 ? 'POSITIVO' : 'NEGATIVO'}}
                     </span>
                   </td>
                 </tr>

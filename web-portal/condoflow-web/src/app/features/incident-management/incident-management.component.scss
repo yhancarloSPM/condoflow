@@ -229,35 +229,40 @@
 
 .priority-badge {
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 0.35rem 0.65rem;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 500;
-  min-width: 90px;
+  width: 90px;
+  height: 28px;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .priority-low {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
+  background: rgba(16, 185, 129, 0.3);
+  color: #34d399;
 }
 
 .priority-medium {
-  background: rgba(245, 158, 11, 0.2);
-  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
 }
 
 .priority-high {
-  background: rgba(249, 115, 22, 0.2);
-  color: #f97316;
+  background: rgba(249, 115, 22, 0.3);
+  color: #fb923c;
 }
 
 .priority-critical {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  background: rgba(239, 68, 68, 0.3);
+  color: #f87171;
 }
 
 :host ::ng-deep .bg-warning {

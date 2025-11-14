@@ -294,15 +294,20 @@
 
 .category-badge {
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 0.35rem 0.65rem;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 500;
-  min-width: 90px;
+  width: 120px;
+  height: 28px;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .amount {
@@ -355,33 +360,33 @@
 }
 
 .category-mantenimiento {
-  background: rgba(245, 158, 11, 0.2);
-  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
 }
 
 .category-limpieza {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
+  background: rgba(16, 185, 129, 0.3);
+  color: #34d399;
 }
 
 .category-seguridad {
-  background: rgba(59, 130, 246, 0.2);
-  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
 }
 
 .category-servicios {
-  background: rgba(139, 92, 246, 0.2);
-  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.3);
+  color: #a78bfa;
 }
 
 .category-administracion {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  background: rgba(239, 68, 68, 0.3);
+  color: #f87171;
 }
 
 .category-reparaciones {
-  background: rgba(249, 115, 22, 0.2);
-  color: #f97316;
+  background: rgba(249, 115, 22, 0.3);
+  color: #fb923c;
 }
 
 .action-buttons {

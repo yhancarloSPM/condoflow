@@ -168,11 +168,11 @@ export class PaymentsReportComponent implements OnInit {
 
   getPaymentStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'pending': 'Pendiente',
-      'approved': 'Aprobado', 
-      'rejected': 'Rechazado'
+      'pending': 'PENDIENTE',
+      'approved': 'APROBADO', 
+      'rejected': 'RECHAZADO'
     };
-    return statusMap[status.toLowerCase()] || status;
+    return statusMap[status.toLowerCase()] || status.toUpperCase();
   }
 
   generateExcel() {

@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
-import { AnnouncementType } from '../models/announcement.models';
+import { AnnouncementTypeFilter } from '../models/announcement.models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnnouncementUtilsService {
 
-  getTypeLabel(type: AnnouncementType): string {
+  getTypeLabel(type: AnnouncementTypeFilter): string {
     const typeLabels = {
-      [AnnouncementType.ALL]: 'Todos',
-      [AnnouncementType.URGENT]: 'Urgentes',
-      [AnnouncementType.EVENT]: 'Eventos',
-      [AnnouncementType.INFO]: 'Informativos'
+      [AnnouncementTypeFilter.ALL]: 'Todos',
+      [AnnouncementTypeFilter.URGENT]: 'Urgentes',
+      [AnnouncementTypeFilter.EVENT]: 'Eventos',
+      [AnnouncementTypeFilter.INFO]: 'Informativos'
     };
     return typeLabels[type] || type;
   }

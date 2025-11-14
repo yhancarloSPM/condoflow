@@ -16,6 +16,7 @@ public class AnnouncementRepository : IAnnouncementRepository
     public async Task<List<Announcement>> GetAllAsync()
     {
         return await _context.Announcements
+            .Include(a => a.AnnouncementType)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
@@ -42,7 +43,7 @@ public class AnnouncementRepository : IAnnouncementRepository
         var announcement = await GetByIdAsync(id);
         if (announcement != null)
         {
-            _context.Announcements.Remove(announcement);
+            announcement.SoftDelete();
             await _context.SaveChangesAsync();
         }
     }

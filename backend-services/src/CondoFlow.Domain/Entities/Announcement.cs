@@ -10,24 +10,34 @@ public class Announcement : BaseEntity
     public DateTime? EventDate { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public string CreatedBy { get; private set; } = string.Empty;
+    public bool IsActive { get; private set; } = true;
+    public int AnnouncementTypeId { get; private set; }
+    public AnnouncementType AnnouncementType { get; private set; } = null!;
 
     private Announcement() { } // EF Constructor
 
-    public Announcement(string title, string content, bool isUrgent, string createdBy, DateTime? eventDate = null)
+    public Announcement(string title, string content, bool isUrgent, string createdBy, int announcementTypeId, DateTime? eventDate = null)
     {
         Title = title;
         Content = content;
         IsUrgent = isUrgent;
         EventDate = eventDate;
         CreatedBy = createdBy;
+        AnnouncementTypeId = announcementTypeId;
         CreatedAt = DateTime.Now;
     }
 
-    public void Update(string title, string content, bool isUrgent, DateTime? eventDate = null)
+    public void Update(string title, string content, bool isUrgent, int announcementTypeId, DateTime? eventDate = null)
     {
         Title = title;
         Content = content;
         IsUrgent = isUrgent;
+        AnnouncementTypeId = announcementTypeId;
         EventDate = eventDate;
+    }
+
+    public void SoftDelete()
+    {
+        IsActive = false;
     }
 }

@@ -125,14 +125,16 @@ public class OwnersController : ControllerBase
                     x.d.OwnerId, 
                     FirstName = x.u?.FirstName ?? "Usuario", 
                     LastName = x.u?.LastName ?? "no encontrado", 
-                    Block = x.u?.Block ?? "N",
-                    Apartment = x.u?.Apartment ?? "A" 
+                    Block = x.u?.Block ?? "",
+                    Apartment = x.u?.Apartment ?? "" 
                 })
                 .Select(g => new
                 {
                     ownerId = g.Key.OwnerId,
                     name = g.Key.FirstName + " " + g.Key.LastName,
-                    apartment = g.Key.Block + "-" + g.Key.Apartment,
+                    apartment = !string.IsNullOrEmpty(g.Key.Block) && !string.IsNullOrEmpty(g.Key.Apartment) 
+                        ? g.Key.Block + "-" + g.Key.Apartment 
+                        : "",
                     pendingAmount = g.Where(x => x.d.Status == "Pending").Sum(x => x.d.Amount.Amount),
                     overdueAmount = g.Where(x => x.d.Status == "Overdue" || x.d.Status == "PaymentSubmitted").Sum(x => x.d.Amount.Amount),
                     totalAmount = g.Sum(x => x.d.Amount.Amount),

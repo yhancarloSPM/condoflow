@@ -135,7 +135,7 @@
                             class="btn-receipt-compact" 
                             (click)="viewReceipt(payment)" 
                             title="Ver comprobante">
-                            <i class="pi pi-file-pdf" style="color: #10b981;"></i>
+                            <i class="pi pi-file-pdf" style="color: #10b981; font-size: 0.875rem;"></i>
                           </button>
                         </div>
                       </td>
@@ -143,11 +143,11 @@
                       <td>{{ payment.paymentDate | date:'dd/MM/yyyy' }}</td>
                       <td>
                         @if (payment.status === PaymentStatus.PENDING) {
-                          <span class="badge status-badge bg-warning">En Revisión</span>
+                          <span class="badge status-badge bg-warning">EN REVISIÓN</span>
                         } @else if (payment.status === PaymentStatus.APPROVED) {
-                          <span class="badge status-badge bg-success">Aprobado</span>
+                          <span class="badge status-badge bg-success">APROBADO</span>
                         } @else if (payment.status === PaymentStatus.REJECTED) {
-                          <span class="badge status-badge bg-danger">Rechazado</span>
+                          <span class="badge status-badge bg-danger">RECHAZADO</span>
                         }
                       </td>
                       <td>

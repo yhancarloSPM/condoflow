@@ -35,7 +35,9 @@ public class AdminDebtsController : ControllerBase
             {
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.OwnerId == debt.OwnerId);
                 var ownerName = user != null ? $"{user.FirstName} {user.LastName}" : "Usuario no encontrado";
-                var apartment = user != null ? $"{user.Block}-{user.Apartment}" : "N/A";
+                var apartment = user != null && !string.IsNullOrEmpty(user.Block) && !string.IsNullOrEmpty(user.Apartment) 
+                    ? $"{user.Block}-{user.Apartment}" 
+                    : "";
 
                 debtResponses.Add(new
                 {

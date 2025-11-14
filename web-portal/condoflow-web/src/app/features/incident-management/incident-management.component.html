@@ -99,7 +99,7 @@
                       </td>
                       <td>
                         <span class="badge status-badge" [class]="'bg-' + getStatusSeverity(incident.status)" style="font-size: 0.7rem;">
-                          {{ getStatusLabel(incident.status) }}
+                          {{ getStatusLabel(incident.status).toUpperCase() }}
                         </span>
                       </td>
                       <td>
@@ -189,7 +189,7 @@
               <h4 class="mb-3 fw-bold text-dark">{{ selectedIncident()?.title }}</h4>
               <div class="d-flex gap-2 flex-wrap">
                 <span class="badge fs-6 px-3 py-2" [class]="'bg-' + getStatusSeverity(selectedIncident()?.status)">
-                  {{ getStatusLabel(selectedIncident()?.status) }}
+                  {{ getStatusLabel(selectedIncident()?.status).toUpperCase() }}
                 </span>
                 <span class="badge fs-6 px-3 py-2" [class]="'bg-' + getPrioritySeverity(selectedIncident()?.priority)">
                   {{ getPriorityLabel(selectedIncident()?.priority) }}

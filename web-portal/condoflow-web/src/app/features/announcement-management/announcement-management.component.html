@@ -2,280 +2,148 @@
   <app-navbar></app-navbar>
 
   <div class="main-content">
-    <div class="container-fluid">
-      <div class="row mb-3">
-        <div class="col-12">
-          <div class="header-card">
-            <div class="header-content">
-              <div class="header-info">
-                <div class="header-icon">
-                  <i class="pi pi-megaphone"></i>
-                </div>
-                <div class="header-text">
-                  <h2 class="header-title">Gestión de Comunicados</h2>
-                  <p class="header-subtitle">Crear y administrar comunicados para los propietarios</p>
-                </div>
-              </div>
-              
-
-            </div>
+    <div class="header-card">
+      <div class="header-content">
+        <div class="header-info">
+          <div class="header-icon">
+            <i class="pi pi-megaphone"></i>
           </div>
+          <div class="header-text">
+            <h1 class="header-title">Gestión de Comunicados</h1>
+            <p class="header-subtitle">Crear y administrar comunicados para los propietarios</p>
+          </div>
+          <button 
+            type="button" 
+            class="btn btn-primary ms-auto"
+            (click)="openCreateModal()">
+            <i class="pi pi-plus"></i>
+            Nuevo Comunicado
+          </button>
+        </div>
+
+        <div class="filters-section">
+          <div class="filters-divider"></div>
+          <app-announcement-filters
+            [filters]="filterData"
+            (filtersChange)="onFiltersChange($event)">
+          </app-announcement-filters>
         </div>
       </div>
+    </div>
 
-      <div class="tabs-container">
-        <!-- Tab Navigation -->
-        <div class="tab-nav">
-          <button 
-            class="tab-btn" 
-            [class.active]="activeTab() === 'create'"
-            (click)="setActiveTab('create')">
-            <i class="pi pi-plus-circle me-2"></i>
-            Crear Comunicado
-          </button>
-          <button 
-            class="tab-btn" 
-            [class.active]="activeTab() === 'view'"
-            (click)="setActiveTab('view')">
-            <i class="pi pi-list me-2"></i>
-            Ver Comunicados
-            <span class="tab-badge">{{ announcements().length }}</span>
-          </button>
-        </div>
-
-        <!-- Tab Content -->
-        <div class="tab-content">
-          <!-- Create Tab -->
-          @if (activeTab() === 'create') {
-            <div class="create-tab">
-              <div class="create-form-card">
-                <div class="form-header">
-                  <div class="form-header-icon">
-                    <i class="pi pi-plus-circle"></i>
-                  </div>
-                  <div class="form-header-text">
-                    <h4 class="form-title">Nuevo Comunicado</h4>
-                    <p class="form-subtitle">Completa la información para publicar un comunicado</p>
-                  </div>
-                </div>
-                
-                <form [formGroup]="announcementForm" (ngSubmit)="onCreateAnnouncement()">
-                  <div class="form-body">
-                    <div class="row">
-                      <div class="col-md-6">
-                        <div class="form-group mb-3">
-                          <label for="title" class="form-label">
-                            <i class="pi pi-tag me-2"></i>
-                            Título del Comunicado *
-                          </label>
-                          <input 
-                            type="text" 
-                            id="title" 
-                            formControlName="title" 
-                            class="form-control" 
-                            placeholder="Ej: Asamblea General de Propietarios"
-                          >
-                        </div>
-                        
-                        <div class="form-group mb-3">
-                          <label for="eventDate" class="form-label">
-                            <i class="pi pi-calendar me-2"></i>
-                            Fecha del Evento (Opcional)
-                          </label>
-                          <input 
-                            type="datetime-local" 
-                            id="eventDate" 
-                            formControlName="eventDate" 
-                            class="form-control"
-                          >
-
-                        </div>
-                        
-                        <div class="form-group mb-3">
-                          <label class="form-label">
-                            <i class="pi pi-exclamation-triangle me-2"></i>
-                            Configuración
-                          </label>
-                          <div class="form-check-custom">
-                            <div class="d-flex align-items-center justify-content-between">
-                              <div class="d-flex align-items-center">
-                                <input 
-                                  type="checkbox" 
-                                  id="isUrgent" 
-                                  formControlName="isUrgent" 
-                                  class="form-check-input me-2"
-                                >
-                                <label for="isUrgent" class="form-check-label mb-0">
-                                  Marcar como urgente
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                          <small class="form-text">Se destacará visualmente para los propietarios</small>
-                        </div>
-                      </div>
-                      
-                      <div class="col-md-6">
-                        <div class="form-group mb-3">
-                          <label for="content" class="form-label">
-                            <i class="pi pi-align-left me-2"></i>
-                            Descripción del Comunicado *
-                          </label>
-                          <textarea 
-                            id="content" 
-                            formControlName="content" 
-                            class="form-control" 
-                            rows="4" 
-                            placeholder="Describe detalladamente el comunicado. Incluye toda la información relevante para los propietarios..."
-                          ></textarea>
-                          <small class="form-text">Mínimo 10 caracteres, máximo 1000 caracteres</small>
-                        </div>
-                        
-                        <div class="form-actions-inline">
-                          <button 
-                            type="submit" 
-                            class="btn btn-outline-success" 
-                            [disabled]="announcementForm.invalid || creating()"
-                          >
-                            @if (creating()) {
-                              <span class="spinner-border spinner-border-sm me-2"></span>
-                              Publicando...
-                            } @else {
-                              <i class="pi pi-send me-2"></i>
-                              Publicar
-                            }
-                          </button>
-                          <button 
-                            type="button" 
-                            class="btn btn-outline-secondary"
-                            (click)="announcementForm.reset()">
-                            <i class="pi pi-eraser me-2"></i>
-                            Limpiar
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-
-                </form>
-              </div>
-            </div>
-          }
-
-          <!-- View Tab -->
-          @if (activeTab() === 'view') {
-            <div class="view-tab">
-              <!-- Filtros solo en el tab de ver -->
-              <div class="filters-section">
-                <app-announcement-filters
-                  [filters]="filterData"
-                  (filtersChange)="onFiltersChange($event)">
-                </app-announcement-filters>
-              </div>
-              
-              @if (loading()) {
-                <div class="text-center py-5">
-                  <div class="spinner-border text-primary" role="status"></div>
-                  <p class="text-white mt-2">Cargando comunicados...</p>
-                </div>
-              } @else if (filteredAnnouncements().length === 0) {
-                <div class="text-center py-5">
-                  <h6 class="text-white mt-3">No hay comunicados</h6>
-                  <p class="text-white small">
-                    @if (filterData.type || filterData.searchTerm) {
-                      No se encontraron comunicados con los filtros aplicados
+    <div class="table-card">
+      <div class="card-header">
+        <h5 class="mb-0">Lista de Comunicados</h5>
+        <small class="text-muted">{{ filteredAnnouncements().length }} comunicados encontrados</small>
+      </div>
+      
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 24%;">Título</th>
+                <th style="width: 32%;">Descripción</th>
+                <th style="width: 10%; text-align: center;">Tipo</th>
+                <th style="width: 10%; text-align: center;">Urgente</th>
+                <th style="width: 12%;">Fecha Evento</th>
+                <th style="width: 12%;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (announcement of paginatedAnnouncements(); track announcement.id) {
+                <tr (click)="openDetailModal(announcement)" style="cursor: pointer;">
+                  <td>
+                    <div class="fw-semibold">{{ announcement.title }}</div>
+                    <small class="text-muted">{{ announcement.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                  </td>
+                  <td>
+                    <div class="content-preview">{{ truncateContent(announcement.content, 80) }}</div>
+                  </td>
+                  <td class="text-center">
+                    <span class="category-badge" [ngClass]="'category-' + announcement.announcementTypeName.toLowerCase()">
+                      {{ announcement.announcementTypeName }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    @if (announcement.isUrgent) {
+                      <span class="category-badge category-urgente">Sí</span>
                     } @else {
-                      Los comunicados aparecerán aquí cuando los publiques
+                      <span class="category-badge category-normal">No</span>
                     }
-                  </p>
-                  <button class="btn btn-primary mt-3" (click)="setActiveTab('create')">
-                    <i class="pi pi-plus me-2"></i>
-                    Crear Primer Comunicado
-                  </button>
-                </div>
-              } @else {
-                <div class="announcements-grid">
-                  @for (announcement of paginatedAnnouncements(); track announcement.id) {
-                    <div class="announcement-card" [class.urgent]="announcement.isUrgent" [class.event]="announcement.eventDate && !announcement.isUrgent" (click)="openDetailModal(announcement)">
-                      <div class="announcement-header">
-                        <h5 class="announcement-title">{{ announcement.title }}</h5>
-                        <div class="announcement-actions">
-                          <span 
-                            class="badge type-badge"
-                            [class]="'bg-' + getTypeSeverity(announcement.isUrgent, !!announcement.eventDate)"
-                          >
-                            {{ getTypeText(announcement.isUrgent, !!announcement.eventDate) }}
-                          </span>
-                          <button 
-                            class="btn-delete-card" 
-                            (click)="$event.stopPropagation(); openDeleteModal(announcement)" 
-                            title="Eliminar comunicado"
-                          >
-                            <i class="pi pi-trash"></i>
-                          </button>
-                        </div>
-                      </div>
-                      
-                      @if (announcement.eventDate) {
-                        <div class="event-date-info">
-                          <i class="pi pi-calendar"></i>
-                          <strong>Evento:</strong>
-                          <span>{{ announcement.eventDate | date:'dd/MM/yyyy HH:mm' }}</span>
-                        </div>
+                  </td>
+                  <td>
+                    @if (announcement.eventDate) {
+                      <div class="text-white">{{ announcement.eventDate | date:'dd/MM/yyyy' }}</div>
+                      <small class="text-muted">{{ announcement.eventDate | date:'HH:mm' }}</small>
+                    } @else {
+                      <span class="text-muted">-</span>
+                    }
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      @if (announcement.isActive) {
+                        <button 
+                          class="btn-edit-progress me-1" 
+                          (click)="$event.stopPropagation(); openTypeModal(announcement)" 
+                          title="Cambiar tipo"
+                          [style.color]="'#ff6b6b'"
+                        >
+                          <i class="pi pi-refresh" [style.color]="getTypeIconColor(announcement.announcementTypeName)"></i>
+                        </button>
+                        <button 
+                          class="btn-edit-progress" 
+                          (click)="$event.stopPropagation(); openDeleteModal(announcement)" 
+                          title="Eliminar comunicado"
+                        >
+                          <i class="pi pi-trash"></i>
+                        </button>
+                      } @else {
+                        <button class="btn-edit-progress me-1" disabled>
+                          <span style="color: #9ca3af;">-</span>
+                        </button>
+                        <button class="btn-edit-progress" disabled>
+                          <i class="pi pi-ban" title="Comunicado eliminado" style="font-size: 1.2rem; color: #9ca3af;"></i>
+                        </button>
                       }
-                      
-                      <p class="announcement-preview">{{ truncateContent(announcement.content, 120) }}</p>
-                      
-                      <div class="announcement-meta">
-                        <span class="date">Publicado: {{ announcement.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-                      </div>
                     </div>
-                  }
-                </div>
-                
-                @if (totalPages() > 1) {
-                  <div class="pagination-container">
-                    <div>
-                      <small class="text-muted">
-                        Mostrando {{ (currentPage() - 1) * pageSize + 1 }} - {{ Math.min(currentPage() * pageSize, filteredAnnouncements().length) }} de {{ filteredAnnouncements().length }} comunicados
-                      </small>
-                    </div>
-                    <nav>
-                      <div class="pagination">
-                        <button 
-                          class="pagination-btn" 
-                          [disabled]="currentPage() === 1"
-                          (click)="goToPage(currentPage() - 1)">
-                          <i class="pi pi-chevron-left"></i>
-                        </button>
-                        
-                        @for (page of getPageNumbers(); track page) {
-                          @if (page === '...') {
-                            <span class="pagination-dots">...</span>
-                          } @else {
-                            <button 
-                              class="pagination-btn"
-                              [class.active]="page === currentPage()"
-                              (click)="goToPage($any(page))">
-                              {{ page }}
-                            </button>
-                          }
-                        }
-                        
-                        <button 
-                          class="pagination-btn" 
-                          [disabled]="currentPage() === totalPages()"
-                          (click)="goToPage(currentPage() + 1)">
-                          <i class="pi pi-chevron-right"></i>
-                        </button>
-                      </div>
-                    </nav>
-                  </div>
-                }
+                  </td>
+                </tr>
               }
-            </div>
-          }
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;">
+          <small style="color: rgba(255,255,255,0.8);">Mostrando {{ (currentPage() - 1) * pageSize + 1 }} - {{ Math.min(currentPage() * pageSize, filteredAnnouncements().length) }} de {{ filteredAnnouncements().length }} comunicados</small>
+          <div class="pagination">
+            <button 
+              class="pagination-btn"
+              [disabled]="currentPage() === 1"
+              (click)="goToPage(currentPage() - 1)">
+              <i class="pi pi-chevron-left"></i>
+            </button>
+            
+            @for (page of getPageNumbers(); track page) {
+              @if (page === '...') {
+                <span class="pagination-dots">...</span>
+              } @else {
+                <button 
+                  class="pagination-btn"
+                  [class.active]="page === currentPage()"
+                  (click)="goToPage($any(page))">
+                  {{ page }}
+                </button>
+              }
+            }
+            
+            <button 
+              class="pagination-btn"
+              [disabled]="currentPage() === totalPages()"
+              (click)="goToPage(currentPage() + 1)">
+              <i class="pi pi-chevron-right"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -285,11 +153,11 @@
 <!-- Modal de Crear Comunicado -->
 @if (showCreateModal()) {
   <div class="modal-backdrop" (click)="closeCreateModal()">
-    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-dialog" style="max-width: 700px; width: 85%;" (click)="$event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">
-            <i class="pi pi-megaphone me-2" style="color: #06b6d4;"></i>
+            <i class="pi pi-megaphone me-2" style="color: #10b981;"></i>
             Crear Nuevo Comunicado
           </h5>
           <button type="button" class="btn-close" (click)="closeCreateModal()">
@@ -299,54 +167,64 @@
         <div class="modal-body">
           <form [formGroup]="announcementForm" (ngSubmit)="onCreateAnnouncement()">
             <div class="row">
-              <div class="col-md-6">
-                <div class="form-group mb-3">
-                  <label for="title" class="form-label">Título del Comunicado *</label>
-                  <input 
-                    type="text" 
-                    id="title" 
-                    formControlName="title" 
-                    class="form-control" 
-                    placeholder="Ej: Asamblea General de Propietarios"
-                  >
-                </div>
-                
-                <div class="form-group mb-3">
-                  <label for="eventDate" class="form-label">Fecha del Evento (Opcional)</label>
-                  <input 
-                    type="datetime-local" 
-                    id="eventDate" 
-                    formControlName="eventDate" 
-                    class="form-control"
-                  >
-                </div>
-                
-                <div class="form-check mb-3">
-                  <input 
-                    type="checkbox" 
-                    id="isUrgent" 
-                    formControlName="isUrgent" 
-                    class="form-check-input"
-                  >
-                  <label for="isUrgent" class="form-check-label text-white">
-                    Marcar como urgente
-                  </label>
-                  <small class="form-text text-white-50 d-block">
-                    Los comunicados urgentes se destacan y envían notificaciones inmediatas
-                  </small>
+              <div class="col-md-8 mb-3">
+                <label for="title" class="form-label"><i class="pi pi-tag me-2"></i>Título del Comunicado *</label>
+                <input 
+                  type="text" 
+                  id="title" 
+                  formControlName="title" 
+                  class="form-control" 
+                  placeholder="Ej: Asamblea General de Propietarios"
+                  autocomplete="off"
+                  maxlength="120"
+                  [class.is-invalid]="announcementForm.get('title')?.invalid && announcementForm.get('title')?.touched"
+                >
+                <div *ngIf="announcementForm.get('title')?.invalid && announcementForm.get('title')?.touched" class="invalid-feedback">
+                  <div *ngIf="announcementForm.get('title')?.errors?.['required']">El título del comunicado es obligatorio</div>
+                  <div *ngIf="announcementForm.get('title')?.errors?.['maxlength']">El título no puede tener más de 120 caracteres</div>
                 </div>
               </div>
               
-              <div class="col-md-6">
-                <div class="form-group mb-3">
-                  <label for="content" class="form-label">Descripción *</label>
-                  <textarea 
-                    id="content" 
-                    formControlName="content" 
-                    class="form-control" 
-                    rows="6" 
-                    placeholder="Describe el comunicado detalladamente..."
-                  ></textarea>
+              <div class="col-md-4 mb-3">
+                <label for="eventDate" class="form-label"><i class="pi pi-calendar me-2"></i>Fecha del Evento</label>
+                <input 
+                  type="datetime-local" 
+                  id="eventDate" 
+                  formControlName="eventDate" 
+                  class="form-control"
+                  autocomplete="off"
+                >
+              </div>
+              
+              <div class="col-md-12 mb-3">
+                <label for="content" class="form-label"><i class="pi pi-align-left me-2"></i>Descripción del Comunicado *</label>
+                <textarea 
+                  id="content" 
+                  formControlName="content" 
+                  class="form-control" 
+                  rows="4" 
+                  placeholder="Describe detalladamente el comunicado..."
+                  autocomplete="off"
+                  maxlength="350"
+                  [class.is-invalid]="announcementForm.get('content')?.invalid && announcementForm.get('content')?.touched"
+                ></textarea>
+                <div *ngIf="announcementForm.get('content')?.invalid && announcementForm.get('content')?.touched" class="invalid-feedback">
+                  <div *ngIf="announcementForm.get('content')?.errors?.['required']">La descripción del comunicado es obligatoria</div>
+                  <div *ngIf="announcementForm.get('content')?.errors?.['minlength']">La descripción debe tener al menos 10 caracteres</div>
+                  <div *ngIf="announcementForm.get('content')?.errors?.['maxlength']">La descripción no puede tener más de 350 caracteres</div>
+                </div>
+              </div>
+              
+              <div class="col-md-12 mb-3">
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    formControlName="isUrgent"
+                    id="isUrgent">
+                  <label class="form-check-label" for="isUrgent" style="color: white;">
+                    Marcar como urgente
+                  </label>
                 </div>
               </div>
             </div>
@@ -368,7 +246,6 @@
               <span class="spinner-border spinner-border-sm me-2"></span>
               Publicando...
             } @else {
-              <i class="pi pi-send me-2"></i>
               Publicar Comunicado
             }
           </button>
@@ -398,11 +275,8 @@
               <div class="detail-header">
                 <h4 class="detail-title">{{ selectedAnnouncement()!.title }}</h4>
                 <div class="detail-badges">
-                  <span 
-                    class="badge"
-                    [class]="'bg-' + getTypeSeverity(selectedAnnouncement()!.isUrgent, !!selectedAnnouncement()!.eventDate)"
-                  >
-                    {{ getTypeText(selectedAnnouncement()!.isUrgent, !!selectedAnnouncement()!.eventDate) }}
+                  <span class="badge" [class]="getTypeColor(selectedAnnouncement()!.announcementTypeName)">
+                    {{ selectedAnnouncement()!.announcementTypeName }}
                   </span>
                 </div>
               </div>
@@ -445,6 +319,60 @@
   </div>
 }
 
+<!-- Modal de cambio de tipo -->
+@if (showTypeModal()) {
+  <div class="modal-backdrop" (click)="closeTypeModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="pi pi-tag me-2" style="color: #10b981;"></i>
+            Cambiar Tipo de Comunicado
+          </h5>
+          <button type="button" class="btn-close" (click)="closeTypeModal()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Selecciona el nuevo tipo para este comunicado:</p>
+          @if (announcementToChangeType()) {
+            <div class="announcement-info-card mb-3">
+              <div class="fw-semibold">{{ announcementToChangeType()!.title }}</div>
+              <small class="text-muted">{{ truncateContent(announcementToChangeType()!.content, 50) }}</small>
+            </div>
+          }
+          <div class="form-group">
+            <label for="typeSelect" class="form-label">Tipo de Comunicado:</label>
+            <select 
+              id="typeSelect" 
+              class="form-select" 
+              [(ngModel)]="selectedTypeId"
+            >
+              @for (type of announcementTypes(); track type.id) {
+                <option [value]="type.id">{{ type.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button 
+            type="button" 
+            class="btn btn-outline-secondary modal-btn"
+            (click)="closeTypeModal()">
+            Cancelar
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-outline-success modal-btn"
+            (click)="confirmTypeChange()">
+            Actualizar Tipo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
 <!-- Modal de confirmación de eliminación -->
 @if (showDeleteModal()) {
   <div class="modal-backdrop" (click)="closeDeleteModal()">
@@ -469,11 +397,8 @@
                   <small class="text-muted">{{ truncateContent(announcementToDelete()!.content, 50) }}</small>
                 </div>
                 <div class="text-end">
-                  <span 
-                    class="badge"
-                    [class]="'bg-' + getTypeSeverity(announcementToDelete()!.isUrgent, !!announcementToDelete()!.eventDate)"
-                  >
-                    {{ getTypeText(announcementToDelete()!.isUrgent, !!announcementToDelete()!.eventDate) }}
+                  <span class="badge" [class]="getTypeColor(announcementToDelete()!.announcementTypeName)">
+                    {{ announcementToDelete()!.announcementTypeName }}
                   </span>
                 </div>
               </div>

@@ -1,25 +1,26 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { AnnouncementService } from '../../core/services/announcement.service';
 import { NavbarComponent } from '../../shared/components/navbar.component';
 import { AnnouncementFiltersComponent } from './components/announcement-filters.component';
-import { Announcement, AnnouncementFilters } from './models/announcement.models';
+import { Announcement, AnnouncementFilters, AnnouncementType } from './models/announcement.models';
 import { AnnouncementUtilsService } from './services/announcement-utils.service';
 import { PaginationService } from './services/pagination.service';
 
 @Component({
   selector: 'app-announcement-management',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent, AnnouncementFiltersComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, NavbarComponent, AnnouncementFiltersComponent],
   templateUrl: './announcement-management.component.html',
   styleUrls: ['./announcement-management.component.scss']
 })
 export class AnnouncementManagementComponent implements OnInit {
   currentUser = signal<any>(null);
   announcements = signal<Announcement[]>([]);
+  announcementTypes = signal<AnnouncementType[]>([]);
   loading = signal(true);
   creating = signal(false);
   
@@ -31,6 +32,8 @@ export class AnnouncementManagementComponent implements OnInit {
   };
   
   filteredAnnouncements = signal<Announcement[]>([]);
+  
+
   
   // Paginación
   currentPage = signal(1);
@@ -48,17 +51,16 @@ export class AnnouncementManagementComponent implements OnInit {
   showCreateModal = signal(false);
   showDeleteModal = signal(false);
   showDetailModal = signal(false);
+  showTypeModal = signal(false);
   announcementToDelete = signal<Announcement | null>(null);
   selectedAnnouncement = signal<Announcement | null>(null);
+  announcementToChangeType = signal<Announcement | null>(null);
+  selectedTypeId = signal<number>(1);
   
   announcementForm: FormGroup;
   Math = Math;
   
-  // Tabs
-  activeTab = signal<'create' | 'view'>('view');
-  
-  // Collapsible Form
-  showForm = signal(false);
+
 
   constructor(
     private authService: AuthService,
@@ -69,8 +71,8 @@ export class AnnouncementManagementComponent implements OnInit {
     private paginationService: PaginationService
   ) {
     this.announcementForm = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(200)]],
-      content: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
+      title: ['', [Validators.required, Validators.maxLength(120)]],
+      content: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(350)]],
       eventDate: [''],
       isUrgent: [false]
     });
@@ -79,6 +81,7 @@ export class AnnouncementManagementComponent implements OnInit {
   ngOnInit() {
     this.currentUser.set(this.authService.currentUser());
     this.loadAnnouncements();
+    this.loadAnnouncementTypes();
   }
 
   loadAnnouncements() {
@@ -96,6 +99,19 @@ export class AnnouncementManagementComponent implements OnInit {
         this.announcements.set([]);
         this.applyFilters();
         this.loading.set(false);
+      }
+    });
+  }
+
+  loadAnnouncementTypes() {
+    this.announcementService.getAnnouncementTypes().subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.announcementTypes.set(response.data || []);
+        }
+      },
+      error: (error) => {
+        console.error('Error cargando tipos de anuncio:', error);
       }
     });
   }
@@ -186,7 +202,7 @@ export class AnnouncementManagementComponent implements OnInit {
           this.creating.set(false);
           if (response.success) {
             this.showSuccessMessage('Comunicado publicado exitosamente');
-            this.announcementForm.reset();
+            this.closeCreateModal();
             this.loadAnnouncements();
           }
         },
@@ -278,17 +294,51 @@ export class AnnouncementManagementComponent implements OnInit {
   getTypeText(isUrgent: boolean, hasEventDate: boolean): string {
     return this.announcementUtils.getTypeText(isUrgent, hasEventDate);
   }
+
+  getTypeColor(typeName: string): string {
+    switch (typeName.toLowerCase()) {
+      case 'general': return 'bg-success';
+      case 'evento': return 'bg-warning';
+      case 'aviso': return 'bg-danger';
+      default: return 'bg-secondary';
+    }
+  }
+
+  getTypeIconColor(typeName: string): string {
+    switch (typeName.toLowerCase()) {
+      case 'general': return '#10b981';
+      case 'evento': return '#ffc107';
+      case 'aviso': return '#ef4444';
+      default: return '#6c757d';
+    }
+  }
+
+  getTypeCategoryClass(typeName: string): string {
+    switch (typeName.toLowerCase()) {
+      case 'general': return 'success';
+      case 'evento': return 'warning';
+      case 'aviso': return 'danger';
+      default: return 'secondary';
+    }
+  }
   
   truncateContent(content: string, maxLength: number = 100): string {
     return this.announcementUtils.truncateContent(content, maxLength);
   }
   
-  setActiveTab(tab: 'create' | 'view') {
-    this.activeTab.set(tab);
+  openCreateModal() {
+    this.announcementForm.reset();
+    const today = new Date();
+    const todayString = today.toISOString().slice(0, 16);
+    this.announcementForm.patchValue({
+      eventDate: todayString
+    });
+    this.showCreateModal.set(true);
   }
   
   closeCreateModal() {
     this.showCreateModal.set(false);
+    this.announcementForm.reset();
   }
   
   openDetailModal(announcement: Announcement) {
@@ -300,8 +350,40 @@ export class AnnouncementManagementComponent implements OnInit {
     this.showDetailModal.set(false);
     this.selectedAnnouncement.set(null);
   }
-  
-  toggleForm() {
-    this.showForm.set(!this.showForm());
+
+  openTypeModal(announcement: Announcement) {
+    this.announcementToChangeType.set(announcement);
+    this.selectedTypeId.set(announcement.announcementTypeId);
+    this.showTypeModal.set(true);
   }
+
+  closeTypeModal() {
+    this.showTypeModal.set(false);
+    this.announcementToChangeType.set(null);
+    this.selectedTypeId.set(1);
+  }
+
+  confirmTypeChange() {
+    const announcement = this.announcementToChangeType();
+    if (!announcement) return;
+
+    this.announcementService.updateAnnouncementType(announcement.id, this.selectedTypeId()).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.showSuccessMessage('Tipo de comunicado actualizado exitosamente');
+          this.loadAnnouncements();
+          this.closeTypeModal();
+        }
+      },
+      error: (error) => {
+        console.error('Error actualizando tipo:', error);
+        this.showErrorMessage('Error al actualizar el tipo de comunicado');
+        this.closeTypeModal();
+      }
+    });
+  }
+  
+
+  
+
 }

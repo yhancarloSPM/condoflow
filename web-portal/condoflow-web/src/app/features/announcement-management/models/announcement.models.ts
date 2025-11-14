@@ -6,6 +6,9 @@ export interface Announcement {
   isUrgent: boolean;
   createdAt: string;
   updatedAt?: string;
+  isActive: boolean;
+  announcementTypeId: number;
+  announcementTypeName: string;
 }
 
 export interface CreateAnnouncementRequest {
@@ -21,7 +24,13 @@ export interface AnnouncementFilters {
   searchTerm: string;
 }
 
-export enum AnnouncementType {
+export interface AnnouncementType {
+  id: number;
+  name: string;
+  code: string;
+}
+
+export enum AnnouncementTypeFilter {
   ALL = 'all',
   URGENT = 'urgent',
   EVENT = 'event',

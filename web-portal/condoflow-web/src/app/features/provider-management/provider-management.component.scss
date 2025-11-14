@@ -543,8 +543,8 @@
 }
 
 .form-control.is-invalid {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
 }
 
 .invalid-feedback {
@@ -552,7 +552,7 @@
   width: 100%;
   margin-top: 0.25rem;
   font-size: 0.75rem;
-  color: #dc3545;
+  color: #ff6b6b;
   font-weight: 500;
 }
 

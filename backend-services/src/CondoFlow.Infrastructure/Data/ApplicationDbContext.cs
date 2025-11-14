@@ -27,6 +27,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Expense> Expenses { get; set; }
     public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
     public DbSet<Provider> Providers { get; set; }
+    public DbSet<AnnouncementType> AnnouncementTypes { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -335,6 +336,40 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             new { DebtId = debt4Id, Amount = 0.00m, Currency = "DOP" }
         );
         
+        // Configurar Announcement
+        modelBuilder.Entity<Announcement>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Content).HasMaxLength(1000).IsRequired();
+            entity.Property(e => e.IsUrgent).IsRequired();
+            entity.Property(e => e.EventDate);
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.CreatedBy).HasMaxLength(450).IsRequired();
+            entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
+            
+            entity.HasOne(e => e.AnnouncementType)
+                  .WithMany()
+                  .HasForeignKey(e => e.AnnouncementTypeId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        // Configurar AnnouncementType
+        modelBuilder.Entity<AnnouncementType>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Code).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(200);
+            entity.Property(e => e.IsActive).IsRequired();
+            entity.Property(e => e.Order).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            
+            entity.HasIndex(e => e.Code)
+                  .IsUnique()
+                  .HasDatabaseName("IX_AnnouncementTypes_Code_Unique");
+        });
+        
         // Configurar PaymentConcept
         modelBuilder.Entity<PaymentConcept>(entity =>
         {
@@ -428,6 +463,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             new { Id = 4, Name = "Servicios", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
             new { Id = 5, Name = "Administración", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
             new { Id = 6, Name = "Reparaciones", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+        );
+        
+        // Seed AnnouncementTypes
+        modelBuilder.Entity<AnnouncementType>().HasData(
+            new { Id = 1, Code = "general", Name = "General", Description = "Comunicado general informativo", IsActive = true, Order = 1, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 2, Code = "event", Name = "Evento", Description = "Comunicado sobre eventos programados", IsActive = true, Order = 2, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 3, Code = "notice", Name = "Aviso", Description = "Avisos importantes para los propietarios", IsActive = true, Order = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
         );
         
 

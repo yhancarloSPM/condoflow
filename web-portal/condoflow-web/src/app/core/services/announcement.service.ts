@@ -27,6 +27,16 @@ export class AnnouncementService {
     return this.http.delete(`${this.apiUrl}/${id}`, { headers });
   }
 
+  getAnnouncementTypes(): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.get(`${this.apiUrl}/types`, { headers });
+  }
+
+  updateAnnouncementType(id: string, typeId: number): Observable<any> {
+    const headers = this.getAuthHeaders();
+    return this.http.put(`${this.apiUrl}/${id}/type`, { announcementTypeId: typeId }, { headers });
+  }
+
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
     return new HttpHeaders({

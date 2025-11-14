@@ -92,7 +92,7 @@
                             <span 
                               class="badge status-badge"
                               [class]="'bg-' + getStatusSeverity(reservation.status)">
-                              {{ getStatusText(reservation.status) }}
+                              {{ getStatusText(reservation.status).toUpperCase() }}
                             </span>
                           </td>
                           <td>
@@ -345,7 +345,7 @@
               <h4 class="mb-3 fw-bold text-dark">{{ selectedReservationDetail()?.eventTypeCode ? getEventTypeName(selectedReservationDetail()!.eventTypeCode) : '' }}</h4>
               <div class="d-flex gap-2 flex-wrap">
                 <span class="badge fs-6 px-3 py-2" [class]="'bg-' + (selectedReservationDetail()?.status ? getStatusSeverity(selectedReservationDetail()!.status) : 'secondary')">
-                  {{ selectedReservationDetail()?.status ? getStatusText(selectedReservationDetail()!.status) : '' }}
+                  {{ selectedReservationDetail()?.status ? getStatusText(selectedReservationDetail()!.status).toUpperCase() : '' }}
                 </span>
                 <span class="badge bg-info fs-6 px-3 py-2">
                   {{ selectedReservationDetail()?.reservationDate | date:'dd/MM/yyyy' }}
