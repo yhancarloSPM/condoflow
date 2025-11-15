@@ -1,0 +1,48 @@
+<div class="dashboards-layout">
+  <app-navbar></app-navbar>
+
+  <div class="main-content">
+    <div class="page-header">
+      <h1>Dashboards</h1>
+      <p>Selecciona el tipo de dashboard que deseas ver</p>
+    </div>
+
+    <div class="dashboards-grid">
+      <div class="dashboard-card clickable" (click)="navigateToMonthlyDashboard()">
+        <div class="dashboard-header">
+          <div class="dashboard-icon monthly">
+            <i class="pi pi-calendar"></i>
+          </div>
+          <div class="dashboard-info">
+            <h3>Dashboard Mensual</h3>
+            <p>Métricas y análisis del mes actual</p>
+          </div>
+        </div>
+        <div class="dashboard-footer">
+          <span class="view-dashboard-text">
+            <i class="pi pi-arrow-right"></i>
+            Ver Dashboard
+          </span>
+        </div>
+      </div>
+
+      <div class="dashboard-card clickable" (click)="navigateToYearlyDashboard()">
+        <div class="dashboard-header">
+          <div class="dashboard-icon yearly">
+            <i class="pi pi-chart-line"></i>
+          </div>
+          <div class="dashboard-info">
+            <h3>Dashboard Anual</h3>
+            <p>Análisis y tendencias anuales</p>
+          </div>
+        </div>
+        <div class="dashboard-footer">
+          <span class="view-dashboard-text">
+            <i class="pi pi-arrow-right"></i>
+            Ver Dashboard
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

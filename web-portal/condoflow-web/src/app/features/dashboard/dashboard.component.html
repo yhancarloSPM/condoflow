@@ -2,10 +2,30 @@
   <app-navbar></app-navbar>
 
   <div class="main-content">
+    <!-- Dashboard Tabs -->
+    <div class="dashboard-tabs">
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab() === 'monthly'"
+        (click)="onTabChange('monthly')">
+        <i class="pi pi-calendar"></i>
+        Dashboard Mensual
+      </button>
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab() === 'yearly'"
+        (click)="onTabChange('yearly')">
+        <i class="pi pi-chart-line"></i>
+        Dashboard Anual
+      </button>
+    </div>
+
+    <!-- Monthly Dashboard -->
+    <div class="tab-content" *ngIf="activeTab() === 'monthly'">
 
 
 
-    <!-- Indicadores Financieros -->
+    <!-- Indicadores Financieros Mensuales -->
     <div class="financial-cards">
       <div class="financial-card income">
         <div class="card-header">
@@ -64,50 +84,149 @@
       </div>
     </div>
 
-    <!-- Gráficos Financieros -->
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-header">
-          <span class="chart-number">01</span>
-          <h3>Ingresos vs Egresos</h3>
+
+
+      <!-- Gráficos Financieros Mensuales -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-number">01</span>
+            <h3>Ingresos vs Egresos (Mensual)</h3>
+          </div>
+          <div class="chart-container">
+            <canvas #incomeChart></canvas>
+          </div>
         </div>
-        <div class="chart-container">
-          <canvas #incomeChart></canvas>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-number">02</span>
+            <h3>Tendencia de Morosidad</h3>
+          </div>
+          <div class="chart-container">
+            <canvas #morosityChart></canvas>
+          </div>
         </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <span class="chart-number">02</span>
-          <h3>Tendencia de Morosidad</h3>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-number">03</span>
+            <h3>Estado de Cobranza</h3>
+          </div>
+          <div class="chart-container">
+            <canvas #pieChart></canvas>
+          </div>
         </div>
-        <div class="chart-container">
-          <canvas #morosityChart></canvas>
-        </div>
-      </div>
-      <div class="chart-card top-debtors">
-        <div class="chart-header">
-          <span class="chart-number">03</span>
-          <h3>Top 5 Deudores</h3>
-        </div>
-        <div class="debtors-list">
-          <div class="debtor-item" *ngFor="let debtor of getTopDebtors()">
-            <div class="debtor-info">
-              <span class="apartment">{{ debtor.apartment }}</span>
-              <span class="months">{{ debtor.months }} meses</span>
-            </div>
-            <div class="debtor-amount">
-              <span class="amount">${{ debtor.amount | number:'1.0-0' }}</span>
-            </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-number">04</span>
+            <h3>Gastos por Categoría</h3>
+          </div>
+          <div class="chart-container">
+            <canvas #expenseChart></canvas>
           </div>
         </div>
       </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <span class="chart-number">04</span>
-          <h3>Estado de Deudas</h3>
+    </div>
+
+    <!-- Yearly Dashboard -->
+    <div class="tab-content" *ngIf="activeTab() === 'yearly'">
+      <!-- Indicadores Financieros Anuales -->
+      <div class="financial-cards yearly">
+        <div class="financial-card yearly-income">
+          <div class="card-header">
+            <div class="card-icon">
+              <i class="pi pi-chart-line"></i>
+            </div>
+            <span class="card-trend">{{ getCurrentYear() }}</span>
+          </div>
+          <div class="card-content">
+            <h3>${{ getYearlyIncome() | number:'1.0-0' }}</h3>
+            <p>Ingresos del Año</p>
+            <small>Acumulado hasta la fecha</small>
+          </div>
         </div>
-        <div class="chart-container">
-          <canvas #pieChart></canvas>
+        
+        <div class="financial-card yearly-expenses">
+          <div class="card-header">
+            <div class="card-icon">
+              <i class="pi pi-chart-bar"></i>
+            </div>
+            <span class="card-trend">{{ getCurrentYear() }}</span>
+          </div>
+          <div class="card-content">
+            <h3>${{ getYearlyExpenses() | number:'1.0-0' }}</h3>
+            <p>Gastos del Año</p>
+            <small>Proyección anual</small>
+          </div>
+        </div>
+        
+        <div class="financial-card yearly-balance">
+          <div class="card-header">
+            <div class="card-icon">
+              <i class="pi pi-dollar"></i>
+            </div>
+            <span class="card-trend" [class.positive]="getYearlyBalance() > 0" [class.negative]="getYearlyBalance() < 0">
+              {{ getYearlyBalance() > 0 ? '+' : '' }}{{ ((getYearlyBalance() / getYearlyIncome()) * 100) | number:'1.0-0' }}%
+            </span>
+          </div>
+          <div class="card-content">
+            <h3>${{ getYearlyBalance() | number:'1.0-0' }}</h3>
+            <p>Balance Anual</p>
+            <small>Resultado del ejercicio</small>
+          </div>
+        </div>
+        
+        <div class="financial-card yearly-overdue">
+          <div class="card-header">
+            <div class="card-icon">
+              <i class="pi pi-clock"></i>
+            </div>
+            <span class="card-trend">{{ getCurrentYear() }}</span>
+          </div>
+          <div class="card-content">
+            <h3>${{ getYearlyOverdueAmount() | number:'1.0-0' }}</h3>
+            <p>Morosidad Anual</p>
+            <small>Deudas pendientes del año</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficos Anuales -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-number">01</span>
+            <h3>Evolución Anual de Ingresos</h3>
+          </div>
+          <div class="chart-container">
+            <canvas #yearlyIncomeChart></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-number">02</span>
+            <h3>Comparativo Anual</h3>
+          </div>
+          <div class="chart-container">
+            <canvas #yearlyComparisonChart></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-number">03</span>
+            <h3>Morosidad por Trimestre</h3>
+          </div>
+          <div class="chart-container">
+            <canvas #quarterlyMorosityChart></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-number">04</span>
+            <h3>Proyección Anual</h3>
+          </div>
+          <div class="chart-container">
+            <canvas #projectionChart></canvas>
+          </div>
         </div>
       </div>
     </div>

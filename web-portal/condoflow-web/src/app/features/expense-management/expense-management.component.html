@@ -23,39 +23,57 @@
 
         <div class="filters-section">
           <div class="filters-divider"></div>
-          <div class="d-flex flex-wrap gap-3 align-items-end">
+          <div class="filters-grid">
             <div class="filter-group">
               <label class="filter-label">Búsqueda</label>
               <input 
                 type="text" 
                 class="filter-input" 
-                placeholder="Buscar por descripción..."
-                [(ngModel)]="filters.search"
-                (input)="applyFilters()">
+                placeholder="Buscar..."
+                [ngModel]="filters.search()"
+                (ngModelChange)="filters.search.set($event); applyFilters()">
             </div>
             
             <div class="filter-group">
               <label class="filter-label">Categoría</label>
-              <select class="filter-select" [(ngModel)]="filters.category" (change)="applyFilters()">
-                <option value="">Todas las categorías</option>
+              <select class="filter-select" [ngModel]="filters.category()" (ngModelChange)="filters.category.set($event); applyFilters()">
+                <option value="">Todas</option>
                 <option *ngFor="let category of categories()" [value]="category.id">{{ category.name }}</option>
               </select>
             </div>
             
             <div class="filter-group">
               <label class="filter-label">Estado</label>
-              <select class="filter-select" [(ngModel)]="filters.status" (change)="applyFilters()">
-                <option value="">Todos los estados</option>
+              <select class="filter-select" [ngModel]="filters.status()" (ngModelChange)="filters.status.set($event); applyFilters()">
+                <option value="">Todos</option>
                 <option *ngFor="let status of statuses()" [value]="status.id">{{ status.name }}</option>
               </select>
             </div>
             
             <div class="filter-group">
-              <label class="filter-label">Mes</label>
-              <select class="filter-select" [(ngModel)]="filters.month" (change)="applyFilters()">
-                <option value="">Todos los meses</option>
-                <option *ngFor="let month of months" [value]="month.value">{{ month.label }}</option>
+              <label class="filter-label">Proveedor</label>
+              <select class="filter-select" [ngModel]="filters.provider()" (ngModelChange)="filters.provider.set($event); applyFilters()">
+                <option value="">Todos</option>
+                <option *ngFor="let provider of providers()" [value]="provider.id">{{ provider.name }}</option>
               </select>
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">Desde</label>
+              <input 
+                type="date" 
+                class="filter-input" 
+                [ngModel]="filters.startDate()"
+                (ngModelChange)="filters.startDate.set($event); applyFilters()">
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">Hasta</label>
+              <input 
+                type="date" 
+                class="filter-input" 
+                [ngModel]="filters.endDate()"
+                (ngModelChange)="filters.endDate.set($event); applyFilters()">
             </div>
           </div>
         </div>
@@ -130,7 +148,7 @@
         </div>
         
         <!-- Paginación -->
-        <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;">
+        <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;" *ngIf="filteredExpenses().length > 10">
           <small style="color: rgba(255,255,255,0.8);">Mostrando {{ getStartIndex() + 1 }} - {{ getEndIndex() }} de {{ filteredExpenses().length }} gastos</small>
           <div class="pagination">
             <button 

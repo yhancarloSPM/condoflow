@@ -63,10 +63,12 @@ export class ExpenseManagementComponent implements OnInit {
   itemsPerPage = 10;
 
   filters = {
-    category: '',
-    status: '',
-    month: '',
-    search: ''
+    category: signal(''),
+    status: signal(''),
+    provider: signal(''),
+    startDate: signal(''),
+    endDate: signal(''),
+    search: signal('')
   };
 
   currentExpense: Partial<Expense> = {
@@ -82,41 +84,41 @@ export class ExpenseManagementComponent implements OnInit {
 
   selectedInvoiceFile: File | null = null;
 
-  months = [
-    { value: '1', label: 'Enero' },
-    { value: '2', label: 'Febrero' },
-    { value: '3', label: 'Marzo' },
-    { value: '4', label: 'Abril' },
-    { value: '5', label: 'Mayo' },
-    { value: '6', label: 'Junio' },
-    { value: '7', label: 'Julio' },
-    { value: '8', label: 'Agosto' },
-    { value: '9', label: 'Septiembre' },
-    { value: '10', label: 'Octubre' },
-    { value: '11', label: 'Noviembre' },
-    { value: '12', label: 'Diciembre' }
-  ];
+
 
   filteredExpenses = computed(() => {
     let filtered = this.expenses();
 
-    if (this.filters.category) {
-      filtered = filtered.filter(e => e.categoryId.toString() === this.filters.category);
+    if (this.filters.category()) {
+      filtered = filtered.filter(e => e.categoryId.toString() === this.filters.category());
     }
 
-    if (this.filters.status) {
-      filtered = filtered.filter(e => e.statusId.toString() === this.filters.status);
+    if (this.filters.status()) {
+      filtered = filtered.filter(e => e.statusId.toString() === this.filters.status());
     }
 
-    if (this.filters.month) {
+    if (this.filters.startDate()) {
       filtered = filtered.filter(e => {
-        const expenseMonth = new Date(e.date).getMonth() + 1;
-        return expenseMonth.toString() === this.filters.month;
+        const expenseDate = new Date(e.date);
+        const startDate = new Date(this.filters.startDate());
+        return expenseDate >= startDate;
       });
     }
 
-    if (this.filters.search) {
-      const search = this.filters.search.toLowerCase();
+    if (this.filters.endDate()) {
+      filtered = filtered.filter(e => {
+        const expenseDate = new Date(e.date);
+        const endDate = new Date(this.filters.endDate());
+        return expenseDate <= endDate;
+      });
+    }
+
+    if (this.filters.provider()) {
+      filtered = filtered.filter(e => e.providerId?.toString() === this.filters.provider());
+    }
+
+    if (this.filters.search()) {
+      const search = this.filters.search().toLowerCase();
       filtered = filtered.filter(e => 
         e.description.toLowerCase().includes(search) ||
         e.providerName?.toLowerCase().includes(search) ||
@@ -200,8 +202,6 @@ export class ExpenseManagementComponent implements OnInit {
 
   applyFilters() {
     this.currentPage.set(1);
-    // Force recalculation of computed signals
-    this.filteredExpenses();
   }
 
   openCreateModal() {

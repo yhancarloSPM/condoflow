@@ -44,7 +44,13 @@ public class ExpenseService : IExpenseService
             CategoryName = e.Category.Name,
             StatusId = e.StatusId,
             StatusName = e.Status.Name,
-            StatusClass = GetStatusClass(e.Status.Code),
+            Status = new ExpenseStatusDto
+            {
+                Id = e.Status.Id,
+                Name = e.Status.Name,
+                Code = e.Status.Code,
+                IsActive = e.Status.IsActive
+            },
             ProviderId = e.ProviderId,
             ProviderName = e.Provider != null ? e.Provider.Name : null,
             Notes = e.Notes,
@@ -75,7 +81,13 @@ public class ExpenseService : IExpenseService
             CategoryName = expense.Category.Name,
             StatusId = expense.StatusId,
             StatusName = expense.Status.Name,
-            StatusClass = GetStatusClass(expense.Status.Code),
+            Status = new ExpenseStatusDto
+            {
+                Id = expense.Status.Id,
+                Name = expense.Status.Name,
+                Code = expense.Status.Code,
+                IsActive = expense.Status.IsActive
+            },
             ProviderId = expense.ProviderId,
             ProviderName = expense.Provider != null ? expense.Provider.Name : null,
             Notes = expense.Notes,
@@ -177,18 +189,7 @@ public class ExpenseService : IExpenseService
         });
     }
     
-    private string GetStatusClass(string statusCode)
-    {
-        return statusCode.ToLower() switch
-        {
-            "pending" => "pending",
-            "confirmed" => "approved",
-            "paid" => "paid",
-            "rejected" => "rejected",
-            "cancelled" => "rejected",
-            _ => "pending"
-        };
-    }
+
     
 
 }

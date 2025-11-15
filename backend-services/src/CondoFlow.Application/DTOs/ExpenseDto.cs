@@ -10,7 +10,7 @@ public class ExpenseDto
     public string CategoryName { get; set; } = string.Empty;
     public int StatusId { get; set; }
     public string StatusName { get; set; } = string.Empty;
-    public string StatusClass { get; set; } = string.Empty;
+    public ExpenseStatusDto Status { get; set; } = new();
     public int? ProviderId { get; set; }
     public string? ProviderName { get; set; }
     public string? Notes { get; set; }

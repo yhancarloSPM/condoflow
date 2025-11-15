@@ -222,9 +222,13 @@
 }
 
 .status-badge {
-  min-width: 85px !important;
+  width: 100px !important;
+  height: 28px !important;
   text-align: center !important;
-  display: inline-block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
 }
 
 .priority-badge {

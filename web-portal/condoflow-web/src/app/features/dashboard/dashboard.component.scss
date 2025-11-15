@@ -1,7 +1,56 @@
 .dashboard-layout { min-height: 100vh; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+
+.dashboard-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 16px;
+  padding: 0.5rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+.tab-button {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.tab-button:hover {
+  color: white;
+  background: rgba(255,255,255,0.1);
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease-in-out;
+  background: transparent;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .top-nav { background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.2); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3); }
 .nav-container { width: 100%; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 4rem; }
 .brand { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; user-select: none; }
+.brand:hover { opacity: 0.8; }
 .brand-icon { width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; color: #f97316; font-size: 1.5rem; }
 .brand-name { font-size: 1.5rem; font-weight: 700; color: white; }
 .user-section { display: flex; align-items: center; gap: 1rem; }
@@ -51,12 +100,32 @@
   margin-bottom: 2rem;
 }
 
+.financial-cards.yearly {
+  margin-bottom: 2rem;
+}
+
+.financial-card.yearly-income .card-icon {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.financial-card.yearly-expenses .card-icon {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.financial-card.yearly-balance .card-icon {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.financial-card.yearly-overdue .card-icon {
+  background: linear-gradient(135deg, #d97706, #b45309);
+}
+
 .financial-card {
   background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255,255,255,0.2);
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: 1rem;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
@@ -120,7 +189,7 @@
 }
 
 .financial-card .card-content h3 {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: white;
   margin: 0 0 0.25rem 0;
@@ -176,7 +245,7 @@
   color: #f59e0b;
   font-size: 0.875rem;
 }
-.chart-card { background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); border-radius: 24px; padding: 2rem; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3); }
+.chart-card { background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); border-radius: 24px; padding: 1.5rem; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3); }
 .chart-header {
   display: flex;
   align-items: center;
@@ -185,7 +254,7 @@
 }
 
 .chart-number {
-  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
   color: white;
   font-weight: 700;
   font-size: 0.875rem;
@@ -193,15 +262,24 @@
   border-radius: 8px;
   min-width: 2.5rem;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .chart-card h3 { margin: 0; font-size: 1.25rem; font-weight: 600; color: white; }
-.chart-container { position: relative; height: 300px; }
+.chart-container { position: relative; height: 250px; }
+
+@media (max-width: 1024px) {
+  .financial-cards { grid-template-columns: 1fr 1fr; }
+  .financial-cards.yearly { grid-template-columns: 1fr 1fr; }
+  .charts-grid { grid-template-columns: 1fr; }
+  .dashboard-tabs { flex-direction: column; gap: 0.5rem; }
+}
 
 @media (max-width: 768px) {
-  .financial-cards { grid-template-columns: 1fr 1fr; }
-  .charts-grid { grid-template-columns: 1fr; }
+  .financial-cards { grid-template-columns: 1fr; }
+  .financial-cards.yearly { grid-template-columns: 1fr; }
+  .main-content { padding: 1rem; }
+  .tab-button { padding: 0.5rem 1rem; font-size: 0.8rem; }
 }
 
 .alerts-panel {
