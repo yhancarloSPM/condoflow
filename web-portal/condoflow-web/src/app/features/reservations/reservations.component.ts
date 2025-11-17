@@ -7,11 +7,12 @@ import { ReservationService } from '../../core/services/reservation.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { CatalogService, CatalogItem } from '../../core/services/catalog.service';
 import { ReservationStatus } from '../../shared/enums/reservation-status.enum';
+import { NavbarComponent } from '../../shared/components/navbar.component';
 
 @Component({
   selector: 'app-reservations',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   templateUrl: './reservations.component.html',
   styleUrls: ['./reservations.component.scss']
 
@@ -26,7 +27,12 @@ export class ReservationsComponent implements OnInit {
   loading = signal(false);
   reservations = signal<any[]>([]);
   currentPage = signal(1);
-  pageSize = 8;
+  pageSize = 10;
+  statusFilter = '';
+  dateFromFilter = '';
+  dateToFilter = '';
+  allReservations: any[] = [];
+  filteredReservations = signal<any[]>([]);
   
   paginatedReservations = computed(() => {
     const start = (this.currentPage() - 1) * this.pageSize;
@@ -63,7 +69,35 @@ export class ReservationsComponent implements OnInit {
     this.currentUser.set(this.authService.user());
     this.loadCatalogs();
     this.loadReservations();
+    this.addTestData();
     await this.notificationService.startConnection();
+  }
+  
+  private addTestData() {
+    const testReservations = [
+      {
+        id: '1',
+        reservationDate: '2024-01-15',
+        startTime: '14:00:00',
+        endTime: '18:00:00',
+        eventTypeCode: 'birthday',
+        notes: 'Cumpleaños de mi hijo',
+        status: 'Confirmed',
+        createdAt: '2024-01-10'
+      },
+      {
+        id: '2',
+        reservationDate: '2024-01-20',
+        startTime: '10:00:00',
+        endTime: '14:00:00',
+        eventTypeCode: 'meeting',
+        notes: 'Reunión familiar',
+        status: 'Pending',
+        createdAt: '2024-01-12'
+      }
+    ];
+    this.allReservations = testReservations;
+    this.applyFilters();
   }
 
   private loadCatalogs() {
@@ -88,35 +122,89 @@ export class ReservationsComponent implements OnInit {
   }
 
   loadReservations() {
-    this.reservationService.getMyReservations().subscribe({
-      next: (response) => {
-        if (response.success) {
-          const sorted = (response.data || []).sort((a: any, b: any) => {
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-          });
-          this.reservations.set(sorted);
-        }
-      },
-      error: (error) => {
-        console.error('Error cargando reservas:', error);
-        this.reservations.set([]);
-      }
-    });
+    // Comentado temporalmente para mostrar datos de prueba
+    // this.reservationService.getMyReservations().subscribe({
+    //   next: (response) => {
+    //     if (response.success) {
+    //       const sorted = (response.data || []).sort((a: any, b: any) => {
+    //         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    //       });
+    //       this.allReservations = sorted;
+    //       this.applyFilters();
+    //     }
+    //   },
+    //   error: (error) => {
+    //     console.error('Error cargando reservas:', error);
+    //     this.reservations.set([]);
+    //   }
+    // });
+  }
+
+  applyFilters() {
+    let filtered = [...this.allReservations];
+    
+    if (this.statusFilter) {
+      filtered = filtered.filter(reservation => reservation.status === this.statusFilter);
+    }
+    
+    if (this.dateFromFilter) {
+      const fromDate = new Date(this.dateFromFilter);
+      filtered = filtered.filter(reservation => new Date(reservation.reservationDate) >= fromDate);
+    }
+    
+    if (this.dateToFilter) {
+      const toDate = new Date(this.dateToFilter);
+      toDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(reservation => new Date(reservation.reservationDate) <= toDate);
+    }
+    
+    this.filteredReservations.set(filtered);
+    this.reservations.set(filtered);
+    this.currentPage.set(1);
+  }
+
+  getStatusClass(status: string): string {
+    const statusMap: { [key: string]: string } = {
+      'Pending': 'pending',
+      'Confirmed': 'confirmed',
+      'Cancelled': 'cancelled',
+      'Rejected': 'rejected'
+    };
+    return statusMap[status] || 'pending';
+  }
+
+  getEventClass(eventCode: string): string {
+    const eventMap: { [key: string]: string } = {
+      'birthday': 'birthday',
+      'meeting': 'meeting',
+      'celebration': 'celebration',
+      'wedding': 'wedding',
+      'anniversary': 'anniversary',
+      'graduation': 'graduation',
+      'baby_shower': 'baby_shower',
+      'quinceañera': 'quinceañera',
+      'family_reunion': 'family_reunion',
+      'corporate': 'corporate',
+      'social': 'social',
+      'other': 'other'
+    };
+    return eventMap[eventCode] || 'other';
+  }
+
+  isValidTimeRange(): boolean {
+    if (!this.startTime || !this.endTime) return true;
+    return this.timeToMinutes(this.startTime) < this.timeToMinutes(this.endTime);
   }
 
   createReservation() {
     if (!this.selectedDateStr || !this.startTime || !this.endTime || !this.selectedEventType) return;
     
-
-    
-    this.loading.set(true);
-    
-    // Validar que no sean la misma hora
-    if (this.startTime === this.endTime) {
-      this.showErrorMessage('La hora de inicio debe ser diferente a la hora de fin');
-      this.loading.set(false);
+    if (!this.isValidTimeRange()) {
+      this.showErrorMessage('La hora de fin debe ser posterior a la hora de inicio');
       return;
     }
+    
+    this.loading.set(true);
     
     const reservation = {
       reservationDate: this.selectedDateStr,
@@ -206,10 +294,10 @@ export class ReservationsComponent implements OnInit {
 
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
-      [ReservationStatus.PENDING]: 'Pendiente',
-      [ReservationStatus.CONFIRMED]: 'Confirmada',
-      [ReservationStatus.CANCELLED]: 'Cancelada',
-      [ReservationStatus.REJECTED]: 'Rechazada'
+      'Pending': 'Pendiente',
+      'Confirmed': 'Confirmada',
+      'Cancelled': 'Cancelada',
+      'Rejected': 'Rechazada'
     };
     return statusMap[status] || status;
   }
@@ -324,6 +412,7 @@ export class ReservationsComponent implements OnInit {
   }
 
   timeToMinutes(time: string): number {
+    if (!time) return 0;
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
   }

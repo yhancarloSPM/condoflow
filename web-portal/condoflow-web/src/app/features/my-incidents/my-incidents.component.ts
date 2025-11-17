@@ -19,7 +19,12 @@ export class MyIncidentsComponent implements OnInit {
   loading = signal(false);
   incidents = signal<any[]>([]);
   currentPage = signal(1);
-  pageSize = 8;
+  pageSize = 10;
+  statusFilter = '';
+  dateFromFilter = '';
+  dateToFilter = '';
+  allIncidents: any[] = [];
+  filteredIncidents = signal<any[]>([]);
   
   paginatedIncidents = computed(() => {
     const start = (this.currentPage() - 1) * this.pageSize;
@@ -95,7 +100,8 @@ export class MyIncidentsComponent implements OnInit {
     this.incidentService.getMyIncidents().subscribe({
       next: (response) => {
         if (response.success) {
-          this.incidents.set(response.data || []);
+          this.allIncidents = response.data || [];
+          this.applyFilters();
         }
         this.updateCounts();
       },
@@ -105,6 +111,62 @@ export class MyIncidentsComponent implements OnInit {
         this.updateCounts();
       }
     });
+  }
+
+  applyFilters() {
+    let filtered = [...this.allIncidents];
+    
+    if (this.statusFilter) {
+      filtered = filtered.filter(incident => incident.status === this.statusFilter);
+    }
+    
+    if (this.dateFromFilter) {
+      const fromDate = new Date(this.dateFromFilter);
+      filtered = filtered.filter(incident => new Date(incident.createdAt) >= fromDate);
+    }
+    
+    if (this.dateToFilter) {
+      const toDate = new Date(this.dateToFilter);
+      toDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(incident => new Date(incident.createdAt) <= toDate);
+    }
+    
+    this.filteredIncidents.set(filtered);
+    this.incidents.set(filtered);
+    this.currentPage.set(1);
+  }
+
+  getStatusClass(status: string): string {
+    const statusMap: { [key: string]: string } = {
+      'reported': 'reported',
+      'in_progress': 'in_progress',
+      'resolved': 'resolved',
+      'cancelled': 'cancelled',
+      'rejected': 'cancelled'
+    };
+    return statusMap[status] || 'reported';
+  }
+
+  getCategoryClass(category: string): string {
+    const categoryMap: { [key: string]: string } = {
+      'electrical': 'electrical',
+      'plumbing': 'plumbing',
+      'maintenance': 'maintenance',
+      'security': 'security',
+      'cleaning': 'cleaning',
+      'other': 'other'
+    };
+    return categoryMap[category] || 'other';
+  }
+
+  getPriorityClass(priority: string): string {
+    const priorityMap: { [key: string]: string } = {
+      'low': 'low',
+      'medium': 'medium',
+      'high': 'high',
+      'urgent': 'urgent'
+    };
+    return priorityMap[priority] || 'medium';
   }
 
   createIncident() {
