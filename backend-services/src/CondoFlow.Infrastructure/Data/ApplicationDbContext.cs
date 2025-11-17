@@ -28,6 +28,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
     public DbSet<Provider> Providers { get; set; }
     public DbSet<AnnouncementType> AnnouncementTypes { get; set; }
+    public DbSet<Poll> Polls { get; set; }
+    public DbSet<PollOption> PollOptions { get; set; }
+    public DbSet<PollVote> PollVotes { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -471,6 +474,56 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             new { Id = 2, Code = "event", Name = "Evento", Description = "Comunicado sobre eventos programados", IsActive = true, Order = 2, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
             new { Id = 3, Code = "notice", Name = "Aviso", Description = "Avisos importantes para los propietarios", IsActive = true, Order = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
         );
+        
+        // Configurar Poll
+        modelBuilder.Entity<Poll>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(1000).IsRequired();
+            entity.Property(e => e.Type).HasConversion<int>().IsRequired();
+            entity.Property(e => e.StartDate).IsRequired();
+            entity.Property(e => e.EndDate).IsRequired();
+            entity.Property(e => e.IsActive).IsRequired();
+            entity.Property(e => e.CreatedBy).HasMaxLength(450).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+        });
+        
+        // Configurar PollOption
+        modelBuilder.Entity<PollOption>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Text).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Order).IsRequired();
+            
+            entity.HasOne(e => e.Poll)
+                  .WithMany(p => p.Options)
+                  .HasForeignKey(e => e.PollId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // Configurar PollVote
+        modelBuilder.Entity<PollVote>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.UserId).HasMaxLength(450).IsRequired();
+            entity.Property(e => e.VotedAt).IsRequired();
+            
+            entity.HasOne(e => e.Poll)
+                  .WithMany(p => p.Votes)
+                  .HasForeignKey(e => e.PollId)
+                  .OnDelete(DeleteBehavior.Cascade);
+                  
+            entity.HasOne(e => e.PollOption)
+                  .WithMany(o => o.Votes)
+                  .HasForeignKey(e => e.PollOptionId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            
+            // Un usuario solo puede votar una vez por encuesta
+            entity.HasIndex(e => new { e.PollId, e.UserId })
+                  .IsUnique()
+                  .HasDatabaseName("IX_PollVote_Poll_User_Unique");
+        });
         
 
     }

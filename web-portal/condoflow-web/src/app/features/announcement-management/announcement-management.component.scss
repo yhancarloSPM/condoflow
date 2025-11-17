@@ -195,38 +195,38 @@
 }
 
 .category-general {
-  background: rgba(16, 185, 129, 0.3);
-  color: #34d399;
+  background: rgba(16, 185, 129, 0.8);
+  color: white;
 }
 
 .category-evento {
-  background: rgba(245, 158, 11, 0.3);
-  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.8);
+  color: white;
 }
 
 .category-aviso {
-  background: rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  background: rgba(255, 107, 107, 0.8);
+  color: white;
 }
 
 .category-urgente {
-  background: rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  background: rgba(255, 107, 107, 0.8);
+  color: white;
 }
 
 .category-normal {
-  background: rgba(107, 114, 128, 0.3);
-  color: #9ca3af;
+  background: rgba(107, 114, 128, 0.8);
+  color: white;
 }
 
 .urgent-si {
-  background: rgba(239, 68, 68, 0.4);
-  color: #ef4444;
+  background: rgba(255, 107, 107, 0.8);
+  color: white;
 }
 
 .urgent-no {
-  background: rgba(107, 114, 128, 0.4);
-  color: #6b7280;
+  background: rgba(107, 114, 128, 0.8);
+  color: white;
 }
 
 :host ::ng-deep .bg-success {
@@ -235,7 +235,7 @@
 }
 
 :host ::ng-deep .bg-danger {
-  background-color: rgba(239, 68, 68, 0.8) !important;
+  background-color: rgba(255, 107, 107, 0.8) !important;
   color: white !important;
 }
 

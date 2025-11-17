@@ -2,27 +2,63 @@
   <app-navbar></app-navbar>
 
   <div class="main-content">
-    <!-- Dashboard Tabs -->
-    <div class="dashboard-tabs">
-      <button 
-        class="tab-button" 
-        [class.active]="activeTab() === 'monthly'"
-        (click)="onTabChange('monthly')">
-        <i class="pi pi-calendar"></i>
-        Dashboard Mensual
-      </button>
-      <button 
-        class="tab-button" 
-        [class.active]="activeTab() === 'yearly'"
-        (click)="onTabChange('yearly')">
-        <i class="pi pi-chart-line"></i>
-        Dashboard Anual
-      </button>
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+      <div class="dashboard-tabs">
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab() === 'monthly'"
+          (click)="onTabChange('monthly')">
+          <i class="pi pi-calendar"></i>
+          Dashboard Mensual
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab() === 'yearly'"
+          (click)="onTabChange('yearly')">
+          <i class="pi pi-chart-line"></i>
+          Dashboard Anual
+        </button>
+      </div>
+      
+      <!-- Filtros Compactos -->
+      <div class="compact-filters" *ngIf="activeTab() === 'monthly'">
+        <select [ngModel]="selectedMonth()" (ngModelChange)="selectedMonth.set(+$event); updateCharts()" class="compact-select">
+          <option value="1">Enero</option>
+          <option value="2">Febrero</option>
+          <option value="3">Marzo</option>
+          <option value="4">Abril</option>
+          <option value="5">Mayo</option>
+          <option value="6">Junio</option>
+          <option value="7">Julio</option>
+          <option value="8">Agosto</option>
+          <option value="9">Septiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+        
+        <select [ngModel]="selectedYear()" (ngModelChange)="selectedYear.set(+$event); updateCharts()" class="compact-select">
+          <option value="2023">2023</option>
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+        </select>
+      </div>
+      
+      <div class="compact-filters" *ngIf="activeTab() === 'yearly'">
+        <select [ngModel]="selectedYear()" (ngModelChange)="selectedYear.set(+$event); updateCharts()" class="compact-select">
+          <option value="2023">2023</option>
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+        </select>
+      </div>
     </div>
 
     <!-- Monthly Dashboard -->
     <div class="tab-content" *ngIf="activeTab() === 'monthly'">
-
+      
 
 
     <!-- Indicadores Financieros Mensuales -->
@@ -129,6 +165,9 @@
 
     <!-- Yearly Dashboard -->
     <div class="tab-content" *ngIf="activeTab() === 'yearly'">
+      
+
+      
       <!-- Indicadores Financieros Anuales -->
       <div class="financial-cards yearly">
         <div class="financial-card yearly-income">

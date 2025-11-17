@@ -180,10 +180,17 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .form-control:focus {
       outline: none;
-      border-color: #9ca3af;
+      border-color: #1e3c72;
       background: white;
-      box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.1);
+      box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
     }
+
+    .form-control.is-invalid {
+      border-color: #dc2626;
+      background: #fef2f2;
+    }
+
+
 
     .form-control::placeholder {
       color: #9ca3af;
@@ -228,6 +235,17 @@ import { AuthService } from '../../../core/services/auth.service';
       display: flex;
       align-items: center;
     }
+
+    .field-error {
+      color: #dc2626;
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+
 
     .form-footer {
       text-align: center;
@@ -316,8 +334,22 @@ import { AuthService } from '../../../core/services/auth.service';
                 formControlName="email"
                 type="email"
                 class="form-control"
+                [class.is-invalid]="isFieldInvalid('email')"
+
                 placeholder="tu@email.com"
               />
+              @if (isFieldInvalid('email')) {
+                <div class="field-error">
+                  <i class="pi pi-exclamation-circle"></i>
+                  @if (loginForm.get('email')?.errors?.['required']) {
+                    El correo electrónico es requerido
+                  }
+                  @if (loginForm.get('email')?.errors?.['email']) {
+                    Ingresa un correo electrónico válido
+                  }
+                </div>
+              }
+
             </div>
             
             <div class="form-group">
@@ -330,6 +362,8 @@ import { AuthService } from '../../../core/services/auth.service';
                   formControlName="password"
                   [type]="showPassword() ? 'text' : 'password'"
                   class="form-control"
+                  [class.is-invalid]="isFieldInvalid('password')"
+  
                   placeholder="Tu contraseña"
                   style="padding-right: 3rem;"
                 />
@@ -341,6 +375,13 @@ import { AuthService } from '../../../core/services/auth.service';
                   <i [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'" style="font-size: 1.1rem;"></i>
                 </button>
               </div>
+              @if (isFieldInvalid('password')) {
+                <div class="field-error">
+                  <i class="pi pi-exclamation-circle"></i>
+                  La contraseña es requerida
+                </div>
+              }
+
             </div>
 
             @if (errorMessage()) {
@@ -397,6 +438,16 @@ export class LoginComponent {
 
   togglePassword(): void {
     this.showPassword.set(!this.showPassword());
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.loginForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  isFieldValid(fieldName: string): boolean {
+    const field = this.loginForm.get(fieldName);
+    return !!(field && field.valid && (field.dirty || field.touched));
   }
 
   onSubmit(): void {

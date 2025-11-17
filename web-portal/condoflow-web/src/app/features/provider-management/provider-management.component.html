@@ -80,7 +80,7 @@
                 <td>{{ provider.rnc || 'N/A' }}</td>
                 <td>
                   <span class="badge status-badge" [ngClass]="provider.isActive ? 'bg-success' : 'bg-danger'">
-                    {{ provider.isActive ? 'Activo' : 'Inactivo' }}
+                    {{ (provider.isActive ? 'Activo' : 'Inactivo').toUpperCase() }}
                   </span>
                 </td>
                 <td>
@@ -90,7 +90,7 @@
                       class="btn-edit-reported"
                       (click)="editProvider(provider)"
                       title="Editar">
-                      <i class="pi pi-refresh" [style.color]="provider.isActive ? '#ef4444' : '#10b981'"></i>
+                      <i class="pi pi-refresh" [style.color]="provider.isActive ? '#ff6b6b' : '#10b981'"></i>
                     </button>
                     <button 
                       type="button" 

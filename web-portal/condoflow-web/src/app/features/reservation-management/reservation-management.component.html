@@ -34,19 +34,19 @@
             <h5 class="mb-0 text-white">Reservas del Gazebo</h5>
             <div class="d-flex gap-2">
               <div class="text-center">
-                <div class="badge bg-warning text-dark fw-bold">{{ statusCounts().pending }}</div>
+                <div class="badge bg-warning text-dark fw-bold total-badge">{{ statusCounts().pending }}</div>
                 <div><small class="text-white">Pendientes</small></div>
               </div>
               <div class="text-center">
-                <div class="badge bg-success text-white fw-bold">{{ statusCounts().confirmed }}</div>
+                <div class="badge bg-success text-white fw-bold total-badge">{{ statusCounts().confirmed }}</div>
                 <div><small class="text-white">Confirmadas</small></div>
               </div>
               <div class="text-center">
-                <div class="badge bg-secondary text-white fw-bold">{{ statusCounts().cancelled }}</div>
+                <div class="badge bg-secondary text-white fw-bold total-badge">{{ statusCounts().cancelled }}</div>
                 <div><small class="text-white">Canceladas</small></div>
               </div>
               <div class="text-center">
-                <div class="badge bg-danger text-white fw-bold">{{ statusCounts().rejected }}</div>
+                <div class="badge bg-danger text-white fw-bold total-badge">{{ statusCounts().rejected }}</div>
                 <div><small class="text-white">Rechazadas</small></div>
               </div>
             </div>

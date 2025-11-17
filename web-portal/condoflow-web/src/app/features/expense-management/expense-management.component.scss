@@ -356,7 +356,7 @@
 }
 
 :host ::ng-deep .bg-danger {
-  background-color: rgba(239, 68, 68, 0.8) !important;
+  background-color: rgba(255, 107, 107, 0.8) !important;
   color: white !important;
 }
 
@@ -371,33 +371,33 @@
 }
 
 .category-mantenimiento {
-  background: rgba(245, 158, 11, 0.3);
-  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.8);
+  color: white;
 }
 
 .category-limpieza {
-  background: rgba(16, 185, 129, 0.3);
-  color: #34d399;
+  background: rgba(16, 185, 129, 0.8);
+  color: white;
 }
 
 .category-seguridad {
-  background: rgba(59, 130, 246, 0.3);
-  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.8);
+  color: white;
 }
 
 .category-servicios {
-  background: rgba(139, 92, 246, 0.3);
-  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.8);
+  color: white;
 }
 
 .category-administracion {
-  background: rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  background: rgba(239, 68, 68, 0.8);
+  color: white;
 }
 
 .category-reparaciones {
-  background: rgba(249, 115, 22, 0.3);
-  color: #fb923c;
+  background: rgba(249, 115, 22, 0.8);
+  color: white;
 }
 
 .action-buttons {
@@ -407,7 +407,6 @@
 
 .btn-edit-reported {
   background: transparent;
-  color: #3b82f6;
   border: none;
   width: 2.2rem;
   height: 2.2rem;
@@ -419,7 +418,7 @@
   font-size: 1.2rem;
 
   &:hover:not(:disabled) {
-    color: #2563eb;
+    opacity: 0.8;
     transform: translateY(-1px);
   }
 

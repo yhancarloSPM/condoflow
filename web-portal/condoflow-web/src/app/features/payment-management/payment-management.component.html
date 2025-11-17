@@ -82,15 +82,15 @@
             <h5 class="mb-0 text-white">Pagos Recibidos</h5>
             <div class="d-flex gap-2">
               <div class="text-center">
-                <div class="badge bg-warning text-white fw-bold">{{ getPaymentsByStatus(PaymentStatus.PENDING).length }}</div>
+                <div class="badge bg-warning text-white fw-bold total-badge">{{ getPaymentsByStatus(PaymentStatus.PENDING).length }}</div>
                 <div><small class="text-white">En Revisión</small></div>
               </div>
               <div class="text-center">
-                <div class="badge bg-success text-white fw-bold">{{ getPaymentsByStatus(PaymentStatus.APPROVED).length }}</div>
+                <div class="badge bg-success text-white fw-bold total-badge">{{ getPaymentsByStatus(PaymentStatus.APPROVED).length }}</div>
                 <div><small class="text-white">Aprobados</small></div>
               </div>
               <div class="text-center">
-                <div class="badge bg-danger text-white fw-bold">{{ getPaymentsByStatus(PaymentStatus.REJECTED).length }}</div>
+                <div class="badge bg-danger text-white fw-bold total-badge">{{ getPaymentsByStatus(PaymentStatus.REJECTED).length }}</div>
                 <div><small class="text-white">Rechazados</small></div>
               </div>
             </div>

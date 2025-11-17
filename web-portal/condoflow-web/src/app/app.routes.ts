@@ -23,6 +23,7 @@ import { IncidentManagementComponent } from './features/incident-management/inci
 import { ExpenseManagementComponent } from './features/expense-management/expense-management.component';
 import { ProviderManagementComponent } from './features/provider-management/provider-management.component';
 import { FinancialReportComponent } from './features/reports/financial-report/financial-report.component';
+import { PollsComponent } from './features/polls/polls.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/welcome', pathMatch: 'full' },
@@ -51,6 +52,7 @@ export const routes: Routes = [
   { path: 'incident-management', component: IncidentManagementComponent },
   { path: 'expense-management', component: ExpenseManagementComponent },
   { path: 'provider-management', component: ProviderManagementComponent },
+  { path: 'polls', component: PollsComponent },
   { path: 'contact', redirectTo: '/my-profile', pathMatch: 'full' },
   { path: '**', redirectTo: '/welcome' }
 ];

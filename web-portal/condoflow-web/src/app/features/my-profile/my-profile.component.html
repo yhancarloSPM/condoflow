@@ -1,0 +1,243 @@
+<div class="management-layout">
+  <app-navbar></app-navbar>
+
+  <div class="main-content">
+    <div class="container-fluid">
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="header-card">
+            <div class="header-content">
+              <div class="header-info">
+                <div class="header-icon">
+                  <i class="pi pi-user"></i>
+                </div>
+                <div class="header-text">
+                  <h2 class="header-title">Mi Perfil</h2>
+                  <p class="header-subtitle">Gestiona tu información personal y configuración</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-tabs-card card">
+        <div class="card-header">
+          <div class="profile-tabs">
+            <button 
+              class="tab-button" 
+              [class.active]="activeTab() === 'info'"
+              (click)="setActiveTab('info')">
+              <i class="pi pi-user"></i>
+              Información
+            </button>
+            <button 
+              class="tab-button" 
+              [class.active]="activeTab() === 'edit'"
+              (click)="setActiveTab('edit')">
+              <i class="pi pi-pencil"></i>
+              Editar
+            </button>
+            <button 
+              class="tab-button" 
+              [class.active]="activeTab() === 'security'"
+              (click)="setActiveTab('security')">
+              <i class="pi pi-shield"></i>
+              Seguridad
+            </button>
+            <button 
+              class="tab-button" 
+              [class.active]="activeTab() === 'notifications'"
+              (click)="setActiveTab('notifications')">
+              <i class="pi pi-bell"></i>
+              Notificaciones
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <!-- Tab: Información -->
+          @if (activeTab() === 'info') {
+            <div class="profile-info-section">
+              <div class="profile-header-section">
+                <div class="profile-avatar">
+                  <div class="avatar-circle">{{ getUserInitials() }}</div>
+                </div>
+                <div class="profile-details">
+                  <h3>{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</h3>
+                  <p class="profile-email">{{ currentUser()?.email }}</p>
+                </div>
+              </div>
+
+              <div class="info-sections">
+                <div class="info-section">
+                  <h4>Información Personal</h4>
+                  <div class="info-row">
+                    <span class="label"><i class="pi pi-user me-2"></i>Nombre Completo</span>
+                    <span class="value">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="label"><i class="pi pi-envelope me-2"></i>Email</span>
+                    <span class="value">{{ currentUser()?.email }}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="label"><i class="pi pi-phone me-2"></i>Teléfono</span>
+                    <span class="value">{{ formatPhoneNumber(userDetails()?.phoneNumber) || 'No especificado' }}</span>
+                  </div>
+                </div>
+                
+                <div class="info-section">
+                  <h4>Información del Apartamento</h4>
+                  <div class="info-row">
+                    <span class="label"><i class="pi pi-home me-2"></i>Ubicación</span>
+                    <span class="value">Bloque {{ userDetails()?.block }}, Apartamento {{ userDetails()?.apartment }}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="label"><i class="pi pi-check-circle me-2"></i>Estado</span>
+                    <span class="badge status-badge" [class]="userDetails()?.isApproved ? 'bg-success' : 'bg-warning'">
+                      {{ userDetails()?.isApproved ? 'APROBADO' : 'PENDIENTE' }}
+                    </span>
+                  </div>
+                  <div class="info-row">
+                    <span class="label"><i class="pi pi-calendar me-2"></i>Miembro desde</span>
+                    <span class="value">{{ formatDate(userDetails()?.createdAt) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Tab: Editar Perfil -->
+          @if (activeTab() === 'edit') {
+            <div class="edit-profile-section">
+              <form [formGroup]="editForm" (ngSubmit)="onSaveProfile()">
+                <div class="form-section">
+                  <h4>Editar Información Personal</h4>
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label class="form-label"><i class="pi pi-user me-2"></i>Nombre</label>
+                      <input type="text" formControlName="firstName" class="form-control" placeholder="Ingresa tu nombre">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><i class="pi pi-user me-2"></i>Apellido</label>
+                      <input type="text" formControlName="lastName" class="form-control" placeholder="Ingresa tu apellido">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><i class="pi pi-phone me-2"></i>Teléfono</label>
+                      <input type="tel" formControlName="phoneNumber" class="form-control" placeholder="Ej: 8091234567">
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="form-actions">
+                  <button type="button" class="btn btn-outline-secondary modal-btn" (click)="resetForm()">
+                    Cancelar
+                  </button>
+                  <button type="submit" class="btn btn-outline-success modal-btn" [disabled]="editForm.invalid || saving()">
+                    @if (saving()) {
+                      <span class="spinner-border spinner-border-sm me-1"></span>
+                      Guardando...
+                    } @else {
+                      Guardar Cambios
+                    }
+                  </button>
+                </div>
+              </form>
+            </div>
+          }
+
+          <!-- Tab: Seguridad -->
+          @if (activeTab() === 'security') {
+            <div class="security-section">
+              <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+                <div class="form-section">
+                  <h4>Cambiar Contraseña</h4>
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label class="form-label"><i class="pi pi-lock me-2"></i>Contraseña Actual</label>
+                      <input type="password" formControlName="currentPassword" class="form-control" placeholder="Ingresa tu contraseña actual">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><i class="pi pi-key me-2"></i>Nueva Contraseña</label>
+                      <input type="password" formControlName="newPassword" class="form-control" placeholder="Ingresa tu nueva contraseña">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><i class="pi pi-shield me-2"></i>Confirmar Contraseña</label>
+                      <input type="password" formControlName="confirmPassword" class="form-control" placeholder="Confirma tu nueva contraseña">
+                      @if (passwordForm.get('confirmPassword')?.errors?.['passwordMismatch'] && passwordForm.get('confirmPassword')?.touched) {
+                        <div class="invalid-feedback d-block">Las contraseñas no coinciden</div>
+                      }
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="form-actions">
+                  <button type="button" class="btn btn-outline-secondary modal-btn" (click)="resetPasswordForm()">
+                    Cancelar
+                  </button>
+                  <button type="submit" class="btn btn-outline-success modal-btn" [disabled]="passwordForm.invalid || changingPassword()">
+                    @if (changingPassword()) {
+                      <span class="spinner-border spinner-border-sm me-1"></span>
+                      Cambiando...
+                    } @else {
+                      Cambiar Contraseña
+                    }
+                  </button>
+                </div>
+              </form>
+            </div>
+          }
+
+          <!-- Tab: Notificaciones -->
+          @if (activeTab() === 'notifications') {
+            <div class="notifications-section">
+              <div class="form-section">
+                <h4>Preferencias de Notificaciones</h4>
+                <div class="notification-settings">
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <span class="setting-title"><i class="pi pi-credit-card me-2"></i>Notificaciones de Pagos</span>
+                      <span class="setting-desc">Recibir notificaciones cuando se procesen pagos</span>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" [(ngModel)]="notificationSettings.payments">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <span class="setting-title"><i class="pi pi-clock me-2"></i>Recordatorios de Vencimiento</span>
+                      <span class="setting-desc">Recordatorios antes del vencimiento de deudas</span>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" [(ngModel)]="notificationSettings.reminders">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <span class="setting-title"><i class="pi pi-megaphone me-2"></i>Anuncios del Condominio</span>
+                      <span class="setting-desc">Notificaciones de anuncios y comunicados</span>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" [(ngModel)]="notificationSettings.announcements">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+                
+                <div class="form-actions">
+                  <button type="button" class="btn btn-outline-success modal-btn" (click)="saveNotificationSettings()">
+                    Guardar Preferencias
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

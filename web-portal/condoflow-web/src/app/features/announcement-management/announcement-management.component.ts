@@ -308,7 +308,7 @@ export class AnnouncementManagementComponent implements OnInit {
     switch (typeName.toLowerCase()) {
       case 'general': return '#10b981';
       case 'evento': return '#ffc107';
-      case 'aviso': return '#ef4444';
+      case 'aviso': return '#ff6b6b';
       default: return '#6c757d';
     }
   }

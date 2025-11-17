@@ -23,8 +23,8 @@ export class FinancialReportComponent implements OnInit {
   exportLoading = signal(false);
   payments = signal<any[]>([]);
   expenses = signal<any[]>([]);
-  selectedYear = '';
-  selectedMonth = '';
+  selectedYear = signal('');
+  selectedMonth = signal('');
   years = signal<string[]>([]);
   months = signal<string[]>([]);
   currentPage = signal(1);
@@ -95,42 +95,72 @@ export class FinancialReportComponent implements OnInit {
 
   extractYearsAndMonths() {
     const yearsSet = new Set<string>();
-    const monthsSet = new Set<string>();
     
     // Extraer años y meses de pagos
     this.payments().forEach(payment => {
       // Usar el período de la deuda si está disponible, sino usar fecha de pago
-      let year, month;
+      let year;
       if (payment.debtYear && payment.debtMonth) {
         year = payment.debtYear;
-        month = payment.debtMonth;
       } else {
         const date = new Date(payment.paymentDate);
         year = date.getFullYear();
-        month = date.getMonth() + 1;
       }
       
       yearsSet.add(year.toString());
-      monthsSet.add(month.toString());
     });
     
     // Extraer años y meses de gastos
     this.expenses().forEach(expense => {
-      const date = new Date(expense.date); // Usar 'date' en lugar de 'expenseDate'
+      const date = new Date(expense.date);
       yearsSet.add(date.getFullYear().toString());
-      monthsSet.add((date.getMonth() + 1).toString());
     });
     
     this.years.set(Array.from(yearsSet).sort().reverse());
-    this.months.set(Array.from(monthsSet).sort((a, b) => parseInt(a) - parseInt(b)));
+    // Mostrar todos los meses (1-12)
+    this.months.set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
   }
 
   financialData = computed(() => {
+    // Obtener todos los años disponibles
+    const allYears = new Set<number>();
+    
+    this.payments().forEach(payment => {
+      let year;
+      if (payment.debtYear && payment.debtMonth) {
+        year = payment.debtYear;
+      } else {
+        const date = new Date(payment.paymentDate);
+        year = date.getFullYear();
+      }
+      allYears.add(year);
+    });
+    
+    this.expenses().forEach(expense => {
+      const date = new Date(expense.date);
+      allYears.add(date.getFullYear());
+    });
+    
+    // Crear todos los períodos posibles
     const periodsMap = new Map();
+    
+    // Generar todos los meses para cada año
+    allYears.forEach(year => {
+      for (let month = 1; month <= 12; month++) {
+        const key = `${year}-${month.toString().padStart(2, '0')}`;
+        periodsMap.set(key, {
+          year,
+          month,
+          monthName: this.getMonthName(month),
+          income: 0,
+          expenses: 0,
+          balance: 0
+        });
+      }
+    });
     
     // Procesar pagos (ingresos)
     this.payments().forEach(payment => {
-      // Usar el período de la deuda si está disponible, sino usar fecha de pago
       let year, month;
       if (payment.debtYear && payment.debtMonth) {
         year = payment.debtYear;
@@ -142,42 +172,23 @@ export class FinancialReportComponent implements OnInit {
       }
       
       const key = `${year}-${month.toString().padStart(2, '0')}`;
-      
-      if (!periodsMap.has(key)) {
-        periodsMap.set(key, {
-          year,
-          month,
-          monthName: this.getMonthName(month),
-          income: 0,
-          expenses: 0,
-          balance: 0
-        });
+      if (periodsMap.has(key)) {
+        const period = periodsMap.get(key);
+        period.income += payment.amount;
       }
-      
-      const period = periodsMap.get(key);
-      period.income += payment.amount;
     });
     
     // Procesar gastos
     this.expenses().forEach(expense => {
-      const date = new Date(expense.date); // Usar 'date' en lugar de 'expenseDate'
+      const date = new Date(expense.date);
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
       const key = `${year}-${month.toString().padStart(2, '0')}`;
       
-      if (!periodsMap.has(key)) {
-        periodsMap.set(key, {
-          year,
-          month,
-          monthName: this.getMonthName(month),
-          income: 0,
-          expenses: 0,
-          balance: 0
-        });
+      if (periodsMap.has(key)) {
+        const period = periodsMap.get(key);
+        period.expenses += expense.amount || 0;
       }
-      
-      const period = periodsMap.get(key);
-      period.expenses += expense.amount || 0;
     });
     
     // Calcular balance y filtrar
@@ -187,12 +198,12 @@ export class FinancialReportComponent implements OnInit {
     }));
     
     // Aplicar filtros
-    if (this.selectedYear) {
-      periods = periods.filter(p => p.year.toString() === this.selectedYear);
+    if (this.selectedYear()) {
+      periods = periods.filter(p => p.year.toString() === this.selectedYear());
     }
     
-    if (this.selectedMonth) {
-      periods = periods.filter(p => p.month.toString() === this.selectedMonth);
+    if (this.selectedMonth()) {
+      periods = periods.filter(p => p.month.toString() === this.selectedMonth());
     }
     
     // Ordenar por año y mes descendente

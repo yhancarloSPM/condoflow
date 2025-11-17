@@ -31,6 +31,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('projectionChart', { static: false }) projectionChartRef!: ElementRef<HTMLCanvasElement>;
 
   activeTab = signal<string>('monthly');
+  selectedMonth = signal<number>(new Date().getMonth() + 1);
+  selectedYear = signal<number>(new Date().getFullYear());
   
   currentUser = signal<any>(null);
   debts = signal<any[]>([]);
@@ -244,16 +246,16 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   
   getMonthlyIncomeData(): number[] {
-    const currentYear = new Date().getFullYear();
     const monthlyData = [];
     
     for (let month = 1; month <= 12; month++) {
       const monthlyIncome = this.debts()
         .filter(d => {
-          const debtDate = new Date(d.createdAt || d.dueDate);
-          return d.status === 'Paid' && 
-                 debtDate.getMonth() + 1 === month &&
-                 debtDate.getFullYear() === currentYear;
+          if (d.status !== 'Paid') return false;
+          // Usar el período de la deuda, no la fecha de pago
+          const debtDate = new Date(d.dueDate || d.createdAt);
+          return debtDate.getMonth() + 1 === month &&
+                 debtDate.getFullYear() === this.selectedYear();
         })
         .reduce((sum, d) => sum + (d.amount || 0), 0);
       monthlyData.push(monthlyIncome);
@@ -271,7 +273,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     return this.debts().filter(d => d.status === 'Paid').length;
   }
   totalOverdue() { 
-    return this.debts().filter(d => d.status === 'Overdue').length;
+    return new Set(this.debts().filter(d => d.status === 'Overdue').map(d => d.apartment)).size;
   }
   
   getAvgResponseTime(): number {
@@ -420,34 +422,33 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   
   // Métodos Financieros
   getTotalIncome(): number {
-    const currentMonth = new Date().getMonth() + 1;
-    const currentYear = new Date().getFullYear();
     return this.debts()
       .filter(d => {
-        const debtDate = new Date(d.createdAt || d.dueDate);
-        return d.status === 'Paid' && 
-               debtDate.getMonth() + 1 === currentMonth &&
-               debtDate.getFullYear() === currentYear;
+        if (d.status !== 'Paid') return false;
+        // Usar el período de la deuda, no la fecha de pago
+        const debtDate = new Date(d.dueDate || d.createdAt);
+        return debtDate.getMonth() + 1 === this.selectedMonth() &&
+               debtDate.getFullYear() === this.selectedYear();
       })
       .reduce((sum, d) => sum + (d.amount || 0), 0);
   }
   
   getYearlyIncome(): number {
-    const currentYear = new Date().getFullYear();
     return this.debts()
       .filter(d => {
-        const debtDate = new Date(d.createdAt || d.dueDate);
-        return d.status === 'Paid' && debtDate.getFullYear() === currentYear;
+        if (d.status !== 'Paid') return false;
+        // Usar el período de la deuda, no la fecha de pago
+        const debtDate = new Date(d.dueDate || d.createdAt);
+        return debtDate.getFullYear() === this.selectedYear();
       })
       .reduce((sum, d) => sum + (d.amount || 0), 0);
   }
   
   getYearlyExpenses(): number {
-    const currentYear = new Date().getFullYear();
     return this.expenses()
       .filter(e => {
         const expenseDate = new Date(e.createdAt || e.date);
-        return e.status?.code === 'paid' && expenseDate.getFullYear() === currentYear;
+        return e.status?.code === 'paid' && expenseDate.getFullYear() === this.selectedYear();
       })
       .reduce((sum, e) => sum + (e.amount || 0), 0);
   }
@@ -462,11 +463,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   
   getYearlyOverdueAmount(): number {
-    const currentYear = new Date().getFullYear();
     return this.debts()
       .filter(d => {
         const debtDate = new Date(d.createdAt || d.dueDate);
-        return d.status === 'Overdue' && debtDate.getFullYear() === currentYear;
+        return d.status === 'Overdue' && debtDate.getFullYear() === this.selectedYear();
       })
       .reduce((sum, d) => sum + (d.amount || 0), 0);
   }
@@ -476,15 +476,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   
   getTotalExpenses(): number {
-    const currentMonth = new Date().getMonth() + 1;
-    const currentYear = 2025;
-    
     return this.expenses()
       .filter(e => {
         const expenseDate = new Date(e.date);
         return e.status?.code === 'paid' &&
-               expenseDate.getMonth() + 1 === currentMonth &&
-               expenseDate.getFullYear() === currentYear;
+               expenseDate.getMonth() + 1 === this.selectedMonth() &&
+               expenseDate.getFullYear() === this.selectedYear();
       })
       .reduce((sum, e) => sum + (e.amount || 0), 0);
   }
@@ -495,14 +492,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   
   getOverdueAmount(): number {
     if (this.activeTab() === 'monthly') {
-      const currentMonth = new Date().getMonth() + 1;
-      const currentYear = new Date().getFullYear();
       return this.debts()
         .filter(d => {
-          const debtDate = new Date(d.createdAt || d.dueDate);
+          const debtDate = new Date(d.dueDate || d.createdAt);
           return d.status === 'Overdue' && 
-                 debtDate.getMonth() + 1 === currentMonth &&
-                 debtDate.getFullYear() === currentYear;
+                 debtDate.getMonth() + 1 === this.selectedMonth() &&
+                 debtDate.getFullYear() === this.selectedYear();
         })
         .reduce((sum, d) => sum + (d.amount || 0), 0);
     } else {
@@ -514,25 +509,25 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   
   getPaidApartments(): number {
     if (this.activeTab() === 'monthly') {
-      const currentMonth = new Date().getMonth() + 1;
-      const currentYear = new Date().getFullYear();
       return new Set(
         this.debts()
           .filter(d => {
-            const debtDate = new Date(d.createdAt || d.dueDate);
-            return d.status === 'Paid' && 
-                   debtDate.getMonth() + 1 === currentMonth &&
-                   debtDate.getFullYear() === currentYear;
+            if (d.status !== 'Paid') return false;
+            // Usar el período de la deuda, no la fecha de pago
+            const debtDate = new Date(d.dueDate || d.createdAt);
+            return debtDate.getMonth() + 1 === this.selectedMonth() &&
+                   debtDate.getFullYear() === this.selectedYear();
           })
           .map(d => d.apartment)
       ).size;
     } else {
-      const currentYear = new Date().getFullYear();
       return new Set(
         this.debts()
           .filter(d => {
-            const debtDate = new Date(d.createdAt || d.dueDate);
-            return d.status === 'Paid' && debtDate.getFullYear() === currentYear;
+            if (d.status !== 'Paid') return false;
+            // Usar el período de la deuda, no la fecha de pago
+            const debtDate = new Date(d.dueDate || d.createdAt);
+            return debtDate.getFullYear() === this.selectedYear();
           })
           .map(d => d.apartment)
       ).size;
@@ -869,7 +864,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   
   getMonthlyExpenseData(): number[] {
-    const currentYear = new Date().getFullYear();
     const monthlyData = [];
     
     for (let month = 1; month <= 12; month++) {
@@ -878,7 +872,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           const expenseDate = new Date(e.createdAt || e.date);
           return e.status?.code === 'paid' &&
                  expenseDate.getMonth() + 1 === month &&
-                 expenseDate.getFullYear() === currentYear;
+                 expenseDate.getFullYear() === this.selectedYear();
         })
         .reduce((sum, e) => sum + (e.amount || 0), 0);
       monthlyData.push(monthlyExpenses);

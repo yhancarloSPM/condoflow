@@ -15,10 +15,11 @@ import { NavbarComponent } from '../../shared/components/navbar.component';
   styleUrls: ['./my-payments.component.scss']
 })
 export class MyPaymentsComponent implements OnInit {
+  activeTab = 'payment';
   currentUser = signal<any>(null);
   payments = signal<any[]>([]);
   currentPage = signal(1);
-  pageSize = 8;
+  pageSize = 10;
   totalPages = signal(1);
   loading = signal(false);
   submitting = signal(false);
@@ -34,7 +35,9 @@ export class MyPaymentsComponent implements OnInit {
   selectedDebtId = '';
   preloadDebtId = '';
   preloadAmount = '';
-  statusFilter = signal<string>('');
+  statusFilter = '';
+  dateFromFilter = '';
+  dateToFilter = '';
 
   constructor(
     private authService: AuthService,
@@ -53,36 +56,33 @@ export class MyPaymentsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.currentUser.set(this.authService.currentUser());
+    const user = this.authService.currentUser();
+    console.log('Current user in MyPayments:', user);
+    this.currentUser.set(user);
+    
     this.paymentForm.patchValue({
       paymentDate: new Date().toISOString().split('T')[0]
     });
     
-    // Leer query parameters
-    this.route.queryParams.subscribe(params => {
-      if (params['debtId']) {
-        this.preloadDebtId = params['debtId'];
-        this.preloadAmount = params['amount'];
-      }
-      if (params['status']) {
-        this.statusFilter.set(params['status']);
-      }
-    });
-    
-    // Cargar conceptos, deudas y pagos
-    this.loadPaymentConcepts();
-    this.loadAvailableDebts().then(() => {
-      this.loadPayments();
-    });
+    if (user?.ownerId) {
+      this.loadPaymentConcepts();
+      this.loadAvailableDebts().then(() => {
+        this.loadPayments();
+      });
+    } else {
+      console.error('No owner ID found for user');
+    }
   }
 
   isFormValid(): boolean {
+    const hasFile = !!this.selectedFile;
     if (this.paymentType === 'debt') {
       return !!(this.selectedDebtId && 
                this.paymentForm.get('paymentDate')?.valid && 
-               this.paymentForm.get('paymentMethod')?.valid);
+               this.paymentForm.get('paymentMethod')?.valid &&
+               hasFile);
     }
-    return this.paymentForm.valid;
+    return this.paymentForm.valid && hasFile;
   }
 
   loadPayments() {
@@ -120,21 +120,8 @@ export class MyPaymentsComponent implements OnInit {
             };
           });
           
-          // Aplicar filtro de estado si existe
-          let filteredPayments = allPayments;
-          if (this.statusFilter()) {
-            filteredPayments = this.filterPaymentsByStatus(allPayments, this.statusFilter());
-          }
-          
-          this.filteredPayments.set(filteredPayments);
-          const totalItems = filteredPayments.length;
-          this.totalPages.set(Math.ceil(totalItems / this.pageSize));
-          
-          const startIndex = (this.currentPage() - 1) * this.pageSize;
-          const endIndex = startIndex + this.pageSize;
-          const paginatedPayments = filteredPayments.slice(startIndex, endIndex);
-          
-          this.payments.set(paginatedPayments);
+          this.allPayments = allPayments;
+          this.applyFilters();
         }
         this.loading.set(false);
       },
@@ -432,16 +419,33 @@ export class MyPaymentsComponent implements OnInit {
   Math = Math;
 
   filteredPayments = signal<any[]>([]);
+  allPayments: any[] = [];
 
-  filterPaymentsByStatus(payments: any[], status: string): any[] {
-    const statusMap: { [key: string]: string[] } = {
-      'pending': ['pending'],    // En Revisión
-      'paid': ['approved'],      // Aprobados
-      'overdue': ['rejected']    // Rechazados
-    };
+  applyFilters() {
+    let filtered = [...this.allPayments];
     
-    const targetStatuses = statusMap[status] || [];
-    return payments.filter(payment => targetStatuses.includes(payment.status));
+    if (this.statusFilter) {
+      filtered = filtered.filter(payment => payment.status === this.statusFilter);
+    }
+    
+    if (this.dateFromFilter) {
+      const fromDate = new Date(this.dateFromFilter);
+      filtered = filtered.filter(payment => payment.date >= fromDate);
+    }
+    
+    if (this.dateToFilter) {
+      const toDate = new Date(this.dateToFilter);
+      toDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(payment => payment.date <= toDate);
+    }
+    
+    this.filteredPayments.set(filtered);
+    const totalItems = filtered.length;
+    this.totalPages.set(Math.ceil(totalItems / this.pageSize));
+    this.currentPage.set(1);
+    
+    const paginatedPayments = filtered.slice(0, this.pageSize);
+    this.payments.set(paginatedPayments);
   }
 
   getPageNumbers(): (number | string)[] {
@@ -477,5 +481,15 @@ export class MyPaymentsComponent implements OnInit {
     }
     
     return pages;
+  }
+
+  getMethodClass(method: string): string {
+    const methodMap: { [key: string]: string } = {
+      'Transferencia': 'transferencia',
+      'Efectivo': 'efectivo', 
+      'Cheque': 'cheque',
+      'Tarjeta': 'tarjeta'
+    };
+    return methodMap[method] || 'transferencia';
   }
 }

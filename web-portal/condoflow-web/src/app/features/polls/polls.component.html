@@ -1,0 +1,344 @@
+<div class="dashboard-layout">
+  <app-navbar></app-navbar>
+  <p-toast></p-toast>
+  
+  <div class="main-content">
+    <div class="polls-section">
+      <div class="polls-header">
+        <div class="header-info">
+          <div class="header-icon">
+            <i class="pi pi-list-check"></i>
+          </div>
+          <div class="header-text">
+            <h1 class="header-title">Encuestas y Votaciones</h1>
+            <p class="header-subtitle">Gestiona las votaciones del condominio</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-primary" *ngIf="isAdmin()" (click)="openCreateModal()">
+            <i class="pi pi-plus"></i> Nueva Encuesta
+          </button>
+        </div>
+      </div>
+
+      <div class="polls-grid" *ngIf="!loading(); else loadingTemplate">
+        <div class="poll-card" 
+             [class.poll-active]="poll.stats.status === 'Active'"
+             [class.poll-closed]="poll.stats.status === 'Closed'"
+             *ngFor="let poll of paginatedPolls()">
+          <div class="poll-header">
+            <div class="poll-actions">
+              <span class="poll-status" [class]="'status-' + poll.stats.status.toLowerCase()">
+                {{ (poll.stats.status === 'Active' ? 'ACTIVA' : 
+                   poll.stats.status === 'Closed' ? 'CERRADA' : 'PENDIENTE') }}
+              </span>
+              <div *ngIf="isAdmin()">
+                <button class="btn btn-sm btn-secondary" 
+                        *ngIf="poll.stats.status === 'Active'"
+                        (click)="editPoll(poll)">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-warning" 
+                        *ngIf="poll.stats.status === 'Active'"
+                        (click)="closePoll(poll)">
+                  <i class="pi pi-times-circle"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" 
+                        *ngIf="poll.stats.status === 'Active'"
+                        (click)="deletePoll(poll)">
+                  <i class="pi pi-trash"></i>
+                </button>
+              </div>
+            </div>
+            <h3>{{ poll.title }}</h3>
+          </div>
+
+          <p class="poll-description">{{ poll.description }}</p>
+
+          <div class="poll-stats">
+            <div class="stat-item">
+              <span class="stat-number">{{ poll.stats.totalVotes }}</span>
+              <span class="stat-label">votos</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">{{ poll.stats.participationRate }}%</span>
+              <span class="stat-label">participación</span>
+            </div>
+            <div class="stat-item" *ngIf="poll.quorumRequired">
+              <span class="stat-number" [style.color]="poll.stats.hasQuorum ? '#10B981' : '#EF4444'">
+                {{ poll.stats.hasQuorum ? '✓' : poll.quorumRequired }}
+              </span>
+              <span class="stat-label">quórum</span>
+            </div>
+          </div>
+
+          <div class="poll-options">
+            <div class="option-item" *ngFor="let option of poll.options" 
+                 [ngClass]="{ 'user-voted': poll.userVoteOptionId === option.id }">
+              <div class="option-header">
+                <span class="option-text">{{ option.text }}</span>
+                <span class="option-percentage">{{ option.percentage }}%</span>
+              </div>
+              <div class="option-bar">
+                <div class="option-progress" [style.width.%]="option.percentage"></div>
+              </div>
+              <div class="option-votes">{{ option.voteCount }} votos</div>
+              
+              <div class="voters-list" *ngIf="!poll.isAnonymous && option.voters.length > 0">
+                <div class="voter-item" *ngFor="let voter of option.voters">
+                  <span class="voter-name">{{ voter.ownerName }}</span>
+                  <span class="voter-apartment">{{ voter.apartment }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="poll-voting" *ngIf="poll.stats.status === 'Active' && !poll.hasUserVoted && !isAdmin()">
+            <h4>Tu voto:</h4>
+            <div class="voting-options" *ngIf="poll.type === 'Simple'">
+              <button class="btn btn-outline-primary vote-btn" 
+                      *ngFor="let option of poll.options"
+                      (click)="vote(poll, option.id)">
+                {{ option.text }}
+              </button>
+            </div>
+            <div class="voting-options-multiple" *ngIf="poll.type === 'Multiple'">
+              <div class="option-checkbox" *ngFor="let option of poll.options">
+                <input type="checkbox" 
+                       [id]="'option-' + option.id" 
+                       [value]="option.id"
+                       (change)="toggleMultipleOption(option.id, $event)">
+                <label [for]="'option-' + option.id">{{ option.text }}</label>
+              </div>
+              <button class="btn btn-primary" 
+                      (click)="submitMultipleVote(poll)"
+                      [disabled]="selectedOptions.length === 0">
+                Votar
+              </button>
+            </div>
+          </div>
+
+          <div class="poll-voted" *ngIf="poll.hasUserVoted && !isAdmin()">
+            <i class="pi pi-check-circle text-success"></i>
+            <span>Ya has votado en esta encuesta</span>
+          </div>
+          
+
+        </div>
+      </div>
+
+      <ng-template #loadingTemplate>
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Cargando encuestas...</p>
+        </div>
+      </ng-template>
+
+      <div class="empty-state" *ngIf="!loading() && polls().length === 0">
+        <i class="pi pi-list-check" style="font-size: 3rem;"></i>
+        <h3>No hay encuestas disponibles</h3>
+        <p>Crea la primera encuesta para comenzar</p>
+      </div>
+      
+      <div class="pagination-container" *ngIf="polls().length > pollsPerPage">
+        <div class="d-flex justify-content-between align-items-center pt-2">
+          <small style="color: rgba(255,255,255,0.8);">Mostrando {{ getStartIndex() + 1 }} - {{ getEndIndex() }} de {{ polls().length }} encuestas</small>
+          <div class="pagination">
+            <button 
+              class="pagination-btn"
+              [disabled]="currentPage === 1"
+              (click)="goToPage(currentPage - 1)">
+              <i class="pi pi-chevron-left"></i>
+            </button>
+            
+            <ng-container *ngFor="let page of getVisiblePages()">
+              <button 
+                *ngIf="page !== -1"
+                class="pagination-btn"
+                [class.active]="page === currentPage"
+                (click)="goToPage(page)">
+                {{ page }}
+              </button>
+              <span *ngIf="page === -1" class="pagination-dots">...</span>
+            </ng-container>
+            
+            <button 
+              class="pagination-btn"
+              [disabled]="currentPage === totalPages"
+              (click)="goToPage(currentPage + 1)">
+              <i class="pi pi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Poll Modal -->
+<div class="modal-overlay" *ngIf="showCreateModal()" (click)="closeCreateModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title-container">
+        <i class="pi pi-list-check" style="margin-right: 0.5rem;"></i>
+        <h3>{{ isEditing() ? 'Editar Encuesta' : 'Nueva Encuesta' }}</h3>
+      </div>
+      <button class="btn-close" (click)="closeCreateModal()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <form (ngSubmit)="createPoll()" class="modal-body">
+      <div class="form-group">
+        <label for="title">Título *</label>
+        <input type="text" id="title" [(ngModel)]="newPoll.title" 
+               name="title" class="form-control" 
+               placeholder="Ej: Aprobación del presupuesto 2024" required>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Descripción *</label>
+        <textarea id="description" [(ngModel)]="newPoll.description" 
+                  name="description" class="form-control" rows="3" 
+                  placeholder="Describe los detalles de la encuesta..." required></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="type">Tipo</label>
+          <select id="type" [(ngModel)]="newPoll.type" name="type" class="form-control">
+            <option value="1">Votación Simple</option>
+            <option value="2">Votación Múltiple</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="quorum">Quórum Requerido (opcional)</label>
+          <input type="number" id="quorum" [(ngModel)]="newPoll.quorumRequired" 
+                 name="quorum" class="form-control" min="1" placeholder="Número mínimo de votos">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="startDate">Fecha de Inicio *</label>
+          <input type="datetime-local" id="startDate" [(ngModel)]="newPoll.startDate" 
+                 name="startDate" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label for="endDate">Fecha de Fin *</label>
+          <input type="datetime-local" id="endDate" [(ngModel)]="newPoll.endDate" 
+                 name="endDate" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Opciones *</label>
+        <div class="options-list">
+          <div class="option-input" *ngFor="let option of newPoll.options; let i = index; trackBy: trackByIndex">
+            <input type="text" [(ngModel)]="newPoll.options[i]" 
+                   [name]="'option' + i" class="form-control" 
+                   [placeholder]="'Opción ' + (i + 1)">
+            <button type="button" class="btn btn-sm btn-danger" 
+                    (click)="removeOption(i)" 
+                    [disabled]="newPoll.options.length <= 2">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-secondary" (click)="addOption()">
+          <i class="pi pi-plus"></i> Agregar Opción
+        </button>
+      </div>
+
+      <div class="form-group">
+        <div class="form-check">
+          <input type="checkbox" id="showResults" [(ngModel)]="newPoll.showResults" 
+                 name="showResults" class="form-check-input">
+          <label for="showResults" class="form-check-label">
+            Mostrar resultados en tiempo real
+          </label>
+        </div>
+
+        <div class="form-check">
+          <input type="checkbox" id="isAnonymous" [(ngModel)]="newPoll.isAnonymous" 
+                 name="isAnonymous" class="form-check-input">
+          <label for="isAnonymous" class="form-check-label">
+            Votación anónima
+          </label>
+        </div>
+
+        <div class="form-check">
+          <input type="checkbox" id="allowOther" [(ngModel)]="newPoll.allowOther" 
+                 name="allowOther" class="form-check-input">
+          <label for="allowOther" class="form-check-label">
+            Permitir opción "Otro" personalizada
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="loading()">
+          <span *ngIf="loading()" class="spinner-sm"></span>
+          Crear Encuesta
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Poll Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showDeleteModal()" (click)="closeDeleteModal()">
+  <div class="modal-content confirmation-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title-container">
+        <i class="pi pi-trash" style="color: #ff6b6b; margin-right: 0.5rem;"></i>
+        <h3>Eliminar Encuesta</h3>
+      </div>
+      <button class="btn-close" (click)="closeDeleteModal()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>¿Estás seguro de que deseas eliminar la encuesta "{{ pollToDelete()?.title }}"?</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
+        Cancelar
+      </button>
+      <button type="button" class="btn btn-danger" (click)="confirmDeletePoll()">
+        <i class="pi pi-trash"></i> Eliminar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Close Poll Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showCloseModal()" (click)="closeCloseModal()">
+  <div class="modal-content confirmation-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title-container">
+        <i class="pi pi-times-circle" style="color: #f97316; margin-right: 0.5rem;"></i>
+        <h3>Cerrar Encuesta</h3>
+      </div>
+      <button class="btn-close" (click)="closeCloseModal()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>¿Estás seguro de que deseas cerrar la encuesta "{{ pollToClose()?.title }}"?</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeCloseModal()">
+        Cancelar
+      </button>
+      <button type="button" class="btn btn-warning" (click)="confirmClosePoll()">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>

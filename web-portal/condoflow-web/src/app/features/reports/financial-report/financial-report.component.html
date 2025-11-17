@@ -25,7 +25,7 @@
             <div class="filters-group">
               <div class="filter-group">
                 <label>Año</label>
-                <select [(ngModel)]="selectedYear" class="filter-select">
+                <select [ngModel]="selectedYear()" (ngModelChange)="selectedYear.set($event)" class="filter-select">
                   <option value="">Todos los años</option>
                   <option *ngFor="let year of years()" [value]="year">{{year}}</option>
                 </select>
@@ -33,7 +33,7 @@
               
               <div class="filter-group">
                 <label>Mes</label>
-                <select [(ngModel)]="selectedMonth" class="filter-select">
+                <select [ngModel]="selectedMonth()" (ngModelChange)="selectedMonth.set($event)" class="filter-select">
                   <option value="">Todos los meses</option>
                   <option *ngFor="let month of months()" [value]="month">{{getMonthName(+month)}}</option>
                 </select>
@@ -104,7 +104,7 @@
         @if (loading()) {
           <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
             <div class="spinner"></div>
-            <p class="text-muted">Cargando datos financieros...</p>
+            <p style="color: white;">Cargando datos financieros...</p>
           </div>
         } @else {
           <div class="table-container">
@@ -156,7 +156,7 @@
           @if (financialData().totalCount > itemsPerPage) {
             <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;">
               <div>
-                <small class="text-muted">
+                <small style="color: white;">
                   Mostrando {{ (currentPage() - 1) * itemsPerPage + 1 }} - 
                   {{ Math.min(currentPage() * itemsPerPage, financialData().totalCount) }} 
                   de {{ financialData().totalCount }} registros

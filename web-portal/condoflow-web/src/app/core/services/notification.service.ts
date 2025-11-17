@@ -60,8 +60,12 @@ export class NotificationService {
 
   private addNotification(notification: Notification): void {
     const current = this.notifications();
-    this.notifications.set([notification, ...current]);
-    this.updateUnreadCount();
+    // Verificar si la notificación ya existe
+    const exists = current.some(n => n.id === notification.id);
+    if (!exists) {
+      this.notifications.set([notification, ...current]);
+      this.updateUnreadCount();
+    }
   }
 
   async markAsRead(notificationId: string): Promise<void> {

@@ -310,3 +310,14 @@ a:hover {
     font-size: 0.75rem !important;
   }
 }
+
+/* Global Badge Styles for Management Pages */
+.total-badge {
+  min-width: 60px !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}

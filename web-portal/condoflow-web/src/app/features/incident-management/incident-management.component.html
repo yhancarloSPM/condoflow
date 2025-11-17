@@ -29,29 +29,29 @@
       </div>
 
       <div class="incidents-card card">
-        <div class="card-header bg-white">
+        <div class="card-header">
           <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 text-dark">Incidencias de Áreas Comunes</h5>
+            <h5 class="mb-0 text-white">Incidencias de Áreas Comunes</h5>
             <div class="d-flex gap-2">
               <div class="text-center">
-                <div class="badge bg-warning text-dark fw-bold">{{ statusCounts().reported }}</div>
-                <div><small class="text-muted">Reportadas</small></div>
+                <div class="badge bg-warning text-dark fw-bold total-badge">{{ statusCounts().reported }}</div>
+                <div><small class="text-white">Reportadas</small></div>
               </div>
               <div class="text-center">
-                <div class="badge bg-info text-white fw-bold">{{ statusCounts().inProgress }}</div>
-                <div><small class="text-muted">En Proceso</small></div>
+                <div class="badge bg-info text-white fw-bold total-badge">{{ statusCounts().inProgress }}</div>
+                <div><small class="text-white">En Proceso</small></div>
               </div>
               <div class="text-center">
-                <div class="badge bg-success text-white fw-bold">{{ statusCounts().resolved }}</div>
-                <div><small class="text-muted">Resueltas</small></div>
+                <div class="badge bg-success text-white fw-bold total-badge">{{ statusCounts().resolved }}</div>
+                <div><small class="text-white">Resueltas</small></div>
               </div>
               <div class="text-center">
-                <div class="badge bg-danger text-white fw-bold">{{ statusCounts().rejected }}</div>
-                <div><small class="text-muted">Rechazadas</small></div>
+                <div class="badge bg-danger text-white fw-bold total-badge">{{ statusCounts().rejected }}</div>
+                <div><small class="text-white">Rechazadas</small></div>
               </div>
               <div class="text-center">
-                <div class="badge bg-secondary text-white fw-bold">{{ statusCounts().cancelled }}</div>
-                <div><small class="text-muted">Canceladas</small></div>
+                <div class="badge bg-secondary text-white fw-bold total-badge">{{ statusCounts().cancelled }}</div>
+                <div><small class="text-white">Canceladas</small></div>
               </div>
             </div>
           </div>

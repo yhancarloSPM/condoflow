@@ -250,23 +250,23 @@
 }
 
 .priority-low {
-  background: rgba(16, 185, 129, 0.3);
-  color: #34d399;
+  background: rgba(16, 185, 129, 0.8);
+  color: white;
 }
 
 .priority-medium {
-  background: rgba(245, 158, 11, 0.3);
-  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.8);
+  color: white;
 }
 
 .priority-high {
-  background: rgba(249, 115, 22, 0.3);
-  color: #fb923c;
+  background: rgba(249, 115, 22, 0.8);
+  color: white;
 }
 
 .priority-critical {
-  background: rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  background: rgba(255, 107, 107, 0.8);
+  color: white;
 }
 
 :host ::ng-deep .bg-warning {
@@ -285,7 +285,7 @@
 }
 
 :host ::ng-deep .bg-danger {
-  background-color: rgba(239, 68, 68, 0.8) !important;
+  background-color: rgba(255, 107, 107, 0.8) !important;
   color: white !important;
 }
 
@@ -711,4 +711,14 @@
 @keyframes spin { 
   0% { transform: rotate(0deg); } 
   100% { transform: rotate(360deg); } 
+}
+
+.total-badge {
+  min-width: 60px !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
