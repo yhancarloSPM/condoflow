@@ -365,7 +365,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(200);
             entity.Property(e => e.IsActive).IsRequired();
-            entity.Property(e => e.Order).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
             
             entity.HasIndex(e => e.Code)
@@ -470,9 +469,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         
         // Seed AnnouncementTypes
         modelBuilder.Entity<AnnouncementType>().HasData(
-            new { Id = 1, Code = "general", Name = "General", Description = "Comunicado general informativo", IsActive = true, Order = 1, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new { Id = 2, Code = "event", Name = "Evento", Description = "Comunicado sobre eventos programados", IsActive = true, Order = 2, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new { Id = 3, Code = "notice", Name = "Aviso", Description = "Avisos importantes para los propietarios", IsActive = true, Order = 3, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+            new { Id = 1, Code = "informativo", Name = "INFORMATIVO", Description = "Comunicado informativo general", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 2, Code = "event", Name = "EVENTO", Description = "Comunicado sobre eventos programados", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+            new { Id = 3, Code = "notice", Name = "AVISO", Description = "Avisos importantes para los propietarios", IsActive = true, CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
         );
         
         // Configurar Poll

@@ -88,28 +88,30 @@ import { NotificationService } from '../../core/services/notification.service';
             </div>
           </div>
 
-          <div class="user-info">
-            <div class="user-avatar">
-              {{ getUserInitials() }}
+          @if (currentUser()) {
+            <div class="user-info">
+              <div class="user-avatar">
+                {{ getUserInitials() }}
+              </div>
+              <div class="user-details">
+                <span class="user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span>
+                <span class="user-role">{{ isAdmin() ? 'Administrador' : 'Propietario' }}</span>
+              </div>
             </div>
-            <div class="user-details">
-              <span class="user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span>
-              <span class="user-role">{{ isAdmin() ? 'Administrador' : 'Propietario' }}</span>
-            </div>
-          </div>
-          <button 
-            type="button" 
-            class="logout-button"
-            (click)="logout()"
-            title="Cerrar Sesión">
-            <i class="pi pi-sign-out"></i>
-          </button>
+            <button 
+              type="button" 
+              class="logout-button"
+              (click)="logout()"
+              title="Cerrar Sesión">
+              <i class="pi pi-sign-out"></i>
+            </button>
+          }
         </div>
       </div>
     </nav>
   `,
   styles: [`
-    .top-nav { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+    .top-nav { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
     .nav-container { width: 100%; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 4rem; }
     .brand { display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s ease; cursor: pointer !important; z-index: 9999; position: relative; user-select: none; }
     .brand:hover { opacity: 0.8; transform: translateY(-1px); }

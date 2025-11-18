@@ -28,6 +28,7 @@ export class ReservationsComponent implements OnInit {
   reservations = signal<any[]>([]);
   currentPage = signal(1);
   pageSize = 10;
+  eventTypeFilter = '';
   statusFilter = '';
   dateFromFilter = '';
   dateToFilter = '';
@@ -74,30 +75,32 @@ export class ReservationsComponent implements OnInit {
   }
   
   private addTestData() {
-    const testReservations = [
-      {
-        id: '1',
-        reservationDate: '2024-01-15',
-        startTime: '14:00:00',
-        endTime: '18:00:00',
-        eventTypeCode: 'birthday',
-        notes: 'Cumpleaños de mi hijo',
-        status: 'Confirmed',
-        createdAt: '2024-01-10'
-      },
-      {
-        id: '2',
-        reservationDate: '2024-01-20',
-        startTime: '10:00:00',
-        endTime: '14:00:00',
-        eventTypeCode: 'meeting',
-        notes: 'Reunión familiar',
-        status: 'Pending',
-        createdAt: '2024-01-12'
-      }
-    ];
-    this.allReservations = testReservations;
-    this.applyFilters();
+    if (this.allReservations.length === 0) {
+      const testReservations = [
+        {
+          id: '1',
+          reservationDate: '2024-01-15',
+          startTime: '14:00:00',
+          endTime: '18:00:00',
+          eventTypeCode: 'birthday',
+          notes: 'Cumpleaños de mi hijo',
+          status: 'Confirmed',
+          createdAt: '2024-01-10'
+        },
+        {
+          id: '2',
+          reservationDate: '2024-01-20',
+          startTime: '10:00:00',
+          endTime: '14:00:00',
+          eventTypeCode: 'meeting',
+          notes: 'Reunión familiar',
+          status: 'Pending',
+          createdAt: '2024-01-12'
+        }
+      ];
+      this.allReservations = testReservations;
+      this.applyFilters();
+    }
   }
 
   private loadCatalogs() {
@@ -122,26 +125,29 @@ export class ReservationsComponent implements OnInit {
   }
 
   loadReservations() {
-    // Comentado temporalmente para mostrar datos de prueba
-    // this.reservationService.getMyReservations().subscribe({
-    //   next: (response) => {
-    //     if (response.success) {
-    //       const sorted = (response.data || []).sort((a: any, b: any) => {
-    //         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    //       });
-    //       this.allReservations = sorted;
-    //       this.applyFilters();
-    //     }
-    //   },
-    //   error: (error) => {
-    //     console.error('Error cargando reservas:', error);
-    //     this.reservations.set([]);
-    //   }
-    // });
+    this.reservationService.getMyReservations().subscribe({
+      next: (response) => {
+        if (response.success) {
+          const sorted = (response.data || []).sort((a: any, b: any) => {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          });
+          this.allReservations = sorted;
+          this.applyFilters();
+        }
+      },
+      error: (error) => {
+        console.error('Error cargando reservas:', error);
+        this.reservations.set([]);
+      }
+    });
   }
 
   applyFilters() {
     let filtered = [...this.allReservations];
+    
+    if (this.eventTypeFilter) {
+      filtered = filtered.filter(reservation => reservation.eventTypeCode === this.eventTypeFilter);
+    }
     
     if (this.statusFilter) {
       filtered = filtered.filter(reservation => reservation.status === this.statusFilter);
@@ -213,12 +219,6 @@ export class ReservationsComponent implements OnInit {
       eventTypeCode: this.selectedEventType,
       notes: this.notes
     };
-    
-    console.log('=== RESERVATION DATA BEING SENT ===');
-    console.log('Reservation object:', reservation);
-    console.log('Selected event type:', this.selectedEventType);
-    console.log('Available event types:', this.eventTypes());
-    console.log('====================================');
     
     this.reservationService.createReservation(reservation).subscribe({
       next: (response) => {
@@ -415,5 +415,13 @@ export class ReservationsComponent implements OnInit {
     if (!time) return 0;
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
+  }
+  
+  selectedReservation = signal<any>(null);
+  showDetailModal = signal(false);
+  
+  viewReservationDetail(reservation: any) {
+    this.selectedReservation.set(reservation);
+    this.showDetailModal.set(true);
   }
 }

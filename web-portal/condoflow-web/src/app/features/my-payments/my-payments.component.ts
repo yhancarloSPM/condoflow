@@ -36,6 +36,7 @@ export class MyPaymentsComponent implements OnInit {
   preloadDebtId = '';
   preloadAmount = '';
   statusFilter = '';
+  methodFilter = '';
   dateFromFilter = '';
   dateToFilter = '';
 
@@ -426,6 +427,10 @@ export class MyPaymentsComponent implements OnInit {
     
     if (this.statusFilter) {
       filtered = filtered.filter(payment => payment.status === this.statusFilter);
+    }
+    
+    if (this.methodFilter) {
+      filtered = filtered.filter(payment => payment.paymentMethod === this.methodFilter);
     }
     
     if (this.dateFromFilter) {

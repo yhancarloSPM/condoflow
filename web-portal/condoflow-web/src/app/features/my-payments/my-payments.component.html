@@ -153,6 +153,17 @@
               </div>
               
               <div class="filter-group">
+                <label class="filter-label">Método:</label>
+                <select class="filter-select" [(ngModel)]="methodFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                  <option value="">Todos</option>
+                  <option value="Transferencia">Transferencia</option>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Cheque">Cheque</option>
+                  <option value="Tarjeta">Tarjeta</option>
+                </select>
+              </div>
+              
+              <div class="filter-group">
                 <label class="filter-label">Desde:</label>
                 <input type="date" class="filter-select" [(ngModel)]="dateFromFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
               </div>
@@ -215,7 +226,7 @@
                         <td class="text-center">
                           @if (payment.receiptUrl) {
                             <button type="button" class="btn-action" (click)="viewReceipt(payment)" title="Ver comprobante">
-                              <i class="pi pi-file"></i>
+                              <i class="pi pi-image"></i>
                             </button>
                           }
                         </td>

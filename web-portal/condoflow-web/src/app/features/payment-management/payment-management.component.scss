@@ -270,14 +270,14 @@
   background: transparent;
   color: #10b981;
   border: none;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 
   &:hover:not(:disabled) {
     color: #059669;
@@ -295,14 +295,14 @@
   background: transparent;
   color: #ff6b6b;
   border: none;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 
   &:hover:not(:disabled) {
     color: #ff4444;

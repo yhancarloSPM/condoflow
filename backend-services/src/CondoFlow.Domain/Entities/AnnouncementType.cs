@@ -20,7 +20,5 @@ public class AnnouncementType
     
     public bool IsActive { get; set; } = true;
     
-    public int Order { get; set; }
-    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

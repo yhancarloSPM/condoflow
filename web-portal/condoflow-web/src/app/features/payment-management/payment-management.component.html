@@ -127,15 +127,14 @@
                       <td>{{ payment.ownerName }}</td>
                       <td>
                         <div class="d-flex align-items-center gap-2">
-                          <div>
-                            ${{ payment.amount.toFixed(2) }}
-                            <small class="currency">{{ payment.currency || 'DOP' }}</small>
+                          <div class="amount-cell">
+                            RD$ {{ payment.amount.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}
                           </div>
                           <button 
                             class="btn-receipt-compact" 
                             (click)="viewReceipt(payment)" 
                             title="Ver comprobante">
-                            <i class="pi pi-file-pdf" style="color: #10b981; font-size: 0.875rem;"></i>
+                            <i class="pi pi-image" style="color: #10b981; font-size: 0.875rem;"></i>
                           </button>
                         </div>
                       </td>
@@ -158,45 +157,60 @@
                       </td>
                       <td style="padding-right: 1.5rem;">
                         <div class="d-flex gap-1 justify-content-end">
-                          @if (payment.status === PaymentStatus.PENDING) {
-                            <button 
-                              class="btn-edit-reported" 
-                              (click)="showApprovalModal(payment)"
-                              [disabled]="processingPayment() === payment.id"
-                              title="Aprobar">
-                              @if (processingPayment() === payment.id && actionType() === PaymentAction.APPROVE) {
-                                <span class="spinner-border spinner-border-sm"></span>
-                              } @else {
-                                <i class="pi pi-check-circle"></i>
-                              }
-                            </button>
-                            <button 
-                              class="btn-edit-progress" 
-                              (click)="showRejectionModal(payment)"
-                              [disabled]="processingPayment() === payment.id"
-                              title="Rechazar">
-                              @if (processingPayment() === payment.id && actionType() === PaymentAction.REJECT) {
-                                <span class="spinner-border spinner-border-sm"></span>
-                              } @else {
+                          @if (isAdmin()) {
+                            @if (payment.status === PaymentStatus.PENDING) {
+                              <button 
+                                class="btn-edit-reported" 
+                                (click)="showApprovalModal(payment)"
+                                [disabled]="processingPayment() === payment.id"
+                                title="Aprobar">
+                                @if (processingPayment() === payment.id && actionType() === PaymentAction.APPROVE) {
+                                  <span class="spinner-border spinner-border-sm"></span>
+                                } @else {
+                                  <i class="pi pi-check-circle"></i>
+                                }
+                              </button>
+                              <button 
+                                class="btn-edit-progress" 
+                                (click)="showRejectionModal(payment)"
+                                [disabled]="processingPayment() === payment.id"
+                                title="Rechazar">
+                                @if (processingPayment() === payment.id && actionType() === PaymentAction.REJECT) {
+                                  <span class="spinner-border spinner-border-sm"></span>
+                                } @else {
+                                  <i class="pi pi-trash"></i>
+                                }
+                              </button>
+                            } @else if (payment.status === PaymentStatus.APPROVED) {
+                              <button 
+                                class="btn-edit-progress" 
+                                (click)="showRejectionModal(payment)"
+                                title="Rechazar">
                                 <i class="pi pi-trash"></i>
-                              }
-                            </button>
-                          } @else if (payment.status === PaymentStatus.APPROVED) {
-                            <button 
-                              class="btn-edit-progress" 
-                              (click)="showRejectionModal(payment)"
-                              title="Rechazar">
-                              <i class="pi pi-trash"></i>
-                            </button>
-                          } @else if (payment.status === PaymentStatus.REJECTED) {
-                            <button 
-                              class="btn-edit-reported" 
-                              (click)="showApprovalModal(payment)"
-                              title="Aprobar">
-                              <i class="pi pi-check-circle"></i>
-                            </button>
+                              </button>
+                            } @else if (payment.status === PaymentStatus.REJECTED) {
+                              <button 
+                                class="btn-edit-reported" 
+                                (click)="showApprovalModal(payment)"
+                                title="Aprobar">
+                                <i class="pi pi-check-circle"></i>
+                              </button>
+                            }
+                          } @else {
+                            @if (payment.status === PaymentStatus.PENDING) {
+                              <span class="btn-action-icon" title="En revisión">
+                                <i class="pi pi-clock" style="color: #f59e0b; font-size: 1rem;"></i>
+                              </span>
+                            } @else if (payment.status === PaymentStatus.APPROVED) {
+                              <span class="btn-action-icon" title="Aprobado">
+                                <i class="pi pi-check-circle" style="color: #10b981; font-size: 1rem;"></i>
+                              </span>
+                            } @else if (payment.status === PaymentStatus.REJECTED) {
+                              <span class="btn-action-icon" title="Rechazado">
+                                <i class="pi pi-times-circle" style="color: #ff6b6b; font-size: 1rem;"></i>
+                              </span>
+                            }
                           }
-
                         </div>
                       </td>
                     </tr>
@@ -275,8 +289,7 @@
                   <small class="text-muted">{{ selectedPayment()?.ownerName }}</small>
                 </div>
                 <div class="text-end">
-                  <div class="fw-bold text-success">${{ selectedPayment()?.amount?.toFixed(2) }}</div>
-                  <small class="text-muted">{{ selectedPayment()?.currency || 'DOP' }}</small>
+                  <div class="fw-bold text-success">RD$ {{ selectedPayment()?.amount?.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</div>
                 </div>
               </div>
             </div>
@@ -329,8 +342,7 @@
                   <small class="text-muted">{{ selectedPayment()?.ownerName }}</small>
                 </div>
                 <div class="text-end">
-                  <div class="fw-bold text-danger">${{ selectedPayment()?.amount?.toFixed(2) }}</div>
-                  <small class="text-muted">{{ selectedPayment()?.currency || 'DOP' }}</small>
+                  <div class="fw-bold text-danger">RD$ {{ selectedPayment()?.amount?.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</div>
                 </div>
               </div>
             </div>

@@ -50,6 +50,9 @@ export class PaymentManagementComponent implements OnInit {
   PaymentStatus = PaymentStatus;
   PaymentAction = PaymentAction;
   
+  // User role check
+  isAdmin = computed(() => this.currentUser()?.role === 'Admin');
+  
   // Computed properties
   statusCounts = computed((): PaymentStatusCounts => {
     const payments = this.payments();

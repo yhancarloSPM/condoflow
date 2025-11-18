@@ -290,7 +290,12 @@
 }
 
 :host ::ng-deep .bg-secondary {
-  background-color: rgba(107, 114, 128, 0.8) !important;
+  background-color: rgba(156, 163, 175, 0.8) !important;
+  color: white !important;
+}
+
+:host ::ng-deep .bg-rejected {
+  background-color: rgba(255, 107, 107, 0.8) !important;
   color: white !important;
 }
 
@@ -320,14 +325,14 @@
   background: transparent;
   color: #ffdd44;
   border: none;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 
   &:hover {
     color: #ffcc00;
@@ -339,14 +344,14 @@
   background: transparent;
   color: #66bbff;
   border: none;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 
   &:hover {
     color: #4499ff;

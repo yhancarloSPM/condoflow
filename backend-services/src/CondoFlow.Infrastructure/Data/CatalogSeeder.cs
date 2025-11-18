@@ -78,7 +78,7 @@ public static class CatalogSeeder
                     Code = eventType.Code,
                     Name = eventType.Name,
                     Description = eventType.Description,
-                    Order = eventType.Order,
+
                     IsActive = true
                 });
             }

@@ -21,6 +21,8 @@ export class MyIncidentsComponent implements OnInit {
   currentPage = signal(1);
   pageSize = 10;
   statusFilter = '';
+  categoryFilter = '';
+  priorityFilter = '';
   dateFromFilter = '';
   dateToFilter = '';
   allIncidents: any[] = [];
@@ -97,24 +99,38 @@ export class MyIncidentsComponent implements OnInit {
   }
 
   loadIncidents() {
+    const user = this.authService.currentUser();
+    if (!user?.ownerId) return;
+    
+    this.loading.set(true);
     this.incidentService.getMyIncidents().subscribe({
-      next: (response) => {
+      next: (response: any) => {
         if (response.success) {
           this.allIncidents = response.data || [];
           this.applyFilters();
+          this.updateCounts();
         }
-        this.updateCounts();
+        this.loading.set(false);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error cargando incidencias:', error);
-        this.incidents.set([]);
-        this.updateCounts();
+        this.allIncidents = [];
+        this.applyFilters();
+        this.loading.set(false);
       }
     });
   }
 
   applyFilters() {
     let filtered = [...this.allIncidents];
+    
+    if (this.categoryFilter) {
+      filtered = filtered.filter(incident => incident.category === this.categoryFilter);
+    }
+    
+    if (this.priorityFilter) {
+      filtered = filtered.filter(incident => incident.priority === this.priorityFilter);
+    }
     
     if (this.statusFilter) {
       filtered = filtered.filter(incident => incident.status === this.statusFilter);
@@ -142,7 +158,7 @@ export class MyIncidentsComponent implements OnInit {
       'in_progress': 'in_progress',
       'resolved': 'resolved',
       'cancelled': 'cancelled',
-      'rejected': 'cancelled'
+      'rejected': 'rejected'
     };
     return statusMap[status] || 'reported';
   }
@@ -222,12 +238,32 @@ export class MyIncidentsComponent implements OnInit {
 
   getCategoryName(category: string): string {
     const cat = this.categories().find(c => c.code === category);
-    return cat ? cat.name : category;
+    if (cat) return cat.name;
+    
+    // Valores por defecto mientras se cargan los catálogos
+    const defaultCategories: { [key: string]: string } = {
+      'electrical': 'Eléctrico',
+      'plumbing': 'Plomería',
+      'maintenance': 'Mantenimiento',
+      'security': 'Seguridad',
+      'cleaning': 'Limpieza',
+      'other': 'Otro'
+    };
+    return defaultCategories[category] || category;
   }
 
   getPriorityName(priority: string): string {
     const pri = this.priorities().find(p => p.code === priority);
-    return pri ? pri.name : priority;
+    if (pri) return pri.name;
+    
+    // Valores por defecto mientras se cargan los catálogos
+    const defaultPriorities: { [key: string]: string } = {
+      'low': 'Baja',
+      'medium': 'Media',
+      'high': 'Alta',
+      'urgent': 'Urgente'
+    };
+    return defaultPriorities[priority] || priority;
   }
 
   // Mantener compatibilidad con funciones existentes
