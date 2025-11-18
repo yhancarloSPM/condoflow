@@ -297,7 +297,7 @@ export class AnnouncementManagementComponent implements OnInit {
 
   getTypeColor(typeName: string): string {
     switch (typeName.toLowerCase()) {
-      case 'general': return 'bg-success';
+      case 'informativo': return 'bg-success';
       case 'evento': return 'bg-warning';
       case 'aviso': return 'bg-danger';
       default: return 'bg-secondary';
@@ -306,16 +306,16 @@ export class AnnouncementManagementComponent implements OnInit {
 
   getTypeIconColor(typeName: string): string {
     switch (typeName.toLowerCase()) {
-      case 'general': return '#10b981';
+      case 'informativo': return '#10b981';
       case 'evento': return '#ffc107';
       case 'aviso': return '#ff6b6b';
-      default: return '#6c757d';
+      default: return '#9ca3af';
     }
   }
 
   getTypeCategoryClass(typeName: string): string {
     switch (typeName.toLowerCase()) {
-      case 'general': return 'success';
+      case 'informativo': return 'success';
       case 'evento': return 'warning';
       case 'aviso': return 'danger';
       default: return 'secondary';

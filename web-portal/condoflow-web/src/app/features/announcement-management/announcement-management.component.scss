@@ -194,7 +194,7 @@
   display: inline-block;
 }
 
-.category-general {
+.category-informativo {
   background: rgba(16, 185, 129, 0.8);
   color: white;
 }
@@ -209,23 +209,13 @@
   color: white;
 }
 
-.category-urgente {
-  background: rgba(255, 107, 107, 0.8);
-  color: white;
-}
-
-.category-normal {
-  background: rgba(107, 114, 128, 0.8);
-  color: white;
-}
-
 .urgent-si {
   background: rgba(255, 107, 107, 0.8);
   color: white;
 }
 
 .urgent-no {
-  background: rgba(107, 114, 128, 0.8);
+  background:  #9ca3af;
   color: white;
 }
 
