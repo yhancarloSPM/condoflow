@@ -118,7 +118,7 @@
                           </button>
                           @if (incident.status === 'cancelled') {
                             <button class="btn-edit-progress" disabled title="Cancelada por propietario">
-                              <i class="pi pi-ban" style="color: #6b7280;"></i>
+                              <i class="pi pi-ban" style="color: #9ca3af;"></i>
                             </button>
                           } @else {
                             <button class="btn-edit-reported" (click)="openStatusModal(incident)" title="Cambiar estado">
@@ -286,7 +286,7 @@
               }
               @if (selectedIncident()?.status === 'cancelled' && selectedIncident()?.updatedAt) {
                 <div class="d-flex align-items-center text-muted mt-2">
-                  <i class="pi pi-ban me-2" style="color: #64748b;"></i>
+                  <i class="pi pi-ban me-2" style="color: #9ca3af;"></i>
                   <small>Cancelado el {{ selectedIncident()?.updatedAt | date:'dd/MM/yyyy HH:mm' }}</small>
                 </div>
               }
