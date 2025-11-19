@@ -262,7 +262,7 @@ export class IncidentManagementComponent implements OnInit {
       case 'rejected':
         return '#ef4444'; // danger - rojo
       default:
-        return '#6b7280'; // secondary - gris
+        return '#9ca3af'; // secondary - gris
     }
   }
 }
