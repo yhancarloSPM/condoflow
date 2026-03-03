@@ -23,26 +23,39 @@ public class MonthlyDebtGenerationService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("Servicio de generación anual de deudas iniciado");
+        
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 var now = DateTime.Now;
-                var nextRun = new DateTime(now.Year, now.Month, 1).AddMonths(1).AddMinutes(1);
-                var delay = nextRun - now;
-
-                _logger.LogInformation("Próxima generación de deudas programada para: {NextRun}", nextRun);
+                var nextJanuary1st = new DateTime(now.Year + 1, 1, 1, 0, 1, 0);
+                
+                // Si estamos en el 1 de enero y es temprano (primeros 5 minutos), ejecutar inmediatamente
+                if (now.Month == 1 && now.Day == 1 && now.Hour == 0 && now.Minute < 5)
+                {
+                    _logger.LogInformation("Ejecutando generación de deudas para el año {Year}", now.Year);
+                    await GenerateDebtsForYear(now.Year);
+                    
+                    // Esperar hasta el próximo año
+                    nextJanuary1st = new DateTime(now.Year + 1, 1, 1, 0, 1, 0);
+                }
+                
+                var delay = nextJanuary1st - now;
+                _logger.LogInformation("Próxima generación de deudas programada para: {Date}", nextJanuary1st);
                 
                 await Task.Delay(delay, stoppingToken);
                 
-                if (!stoppingToken.IsCancellationRequested)
-                {
-                    await GenerateMonthlyDebts();
-                }
+                // Generar deudas para el nuevo año
+                var yearToGenerate = nextJanuary1st.Year;
+                _logger.LogInformation("Generando deudas para el año {Year}", yearToGenerate);
+                await GenerateDebtsForYear(yearToGenerate);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en el servicio de generación de deudas mensuales");
+                _logger.LogError(ex, "Error en el servicio de generación de deudas anuales");
+                // Esperar 1 hora antes de reintentar en caso de error
                 await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
             }
         }
@@ -60,6 +73,8 @@ public class MonthlyDebtGenerationService : BackgroundService
             var apartments = await context.Apartments
                 .Where(a => a.IsActive && a.OwnerId != null)
                 .ToListAsync();
+
+            _logger.LogInformation("Apartamentos encontrados: {Count}", apartments.Count);
 
             var debtsCreated = 0;
             var startMonth = specificMonth ?? 1;
@@ -103,6 +118,11 @@ public class MonthlyDebtGenerationService : BackgroundService
 
                         context.Debts.Add(debt);
                         debtsCreated++;
+                        _logger.LogInformation("Creando deuda: Apartamento {Apt}, Mes {Month}, Año {Year}", apartment.Number, month, year);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Deuda ya existe: Apartamento {Apt}, Mes {Month}, Año {Year}, DebtId {DebtId}", apartment.Number, month, year, existingDebt.Id);
                     }
                 }
             }
