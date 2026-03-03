@@ -186,12 +186,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }, 200);
   }
 
-
-
-
-
-
-
   updateCharts() {
     if (this.activeTab() === 'monthly') {
       this.updateMonthlyCharts();
@@ -202,15 +196,15 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   
   updateMonthlyCharts() {
     if (this.incomeChart) {
-      const income = [85000, 92000, 78000, 95000, 88000, this.getTotalIncome()];
-      const expenses = [45000, 48000, 52000, 46000, 49000, this.getTotalExpenses()];
+      const income = [this.getTotalIncome()];
+      const expenses = [this.getTotalExpenses()];
       this.incomeChart.data.datasets[0].data = income;
       this.incomeChart.data.datasets[1].data = expenses;
       this.incomeChart.update();
     }
     
     if (this.morosityChart) {
-      const morosityRate = [15, 18, 12, 22, 16, this.getOverduePercentage()];
+      const morosityRate = [this.getOverduePercentage()];
       this.morosityChart.data.datasets[0].data = morosityRate;
       this.morosityChart.update();
     }
@@ -239,8 +233,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
     
     if (this.yearlyComparisonChart) {
-      this.yearlyComparisonChart.data.datasets[0].data = [980000, 1050000, this.getYearlyIncome()];
-      this.yearlyComparisonChart.data.datasets[1].data = [520000, 540000, this.getYearlyExpenses()];
+      this.yearlyComparisonChart.data.datasets[0].data = [this.getYearlyIncome()];
+      this.yearlyComparisonChart.data.datasets[1].data = [this.getYearlyExpenses()];
       this.yearlyComparisonChart.update();
     }
   }
@@ -425,6 +419,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     return this.debts()
       .filter(d => {
         if (d.status !== 'Paid') return false;
+        
         // Usar el período de la deuda, no la fecha de pago
         const debtDate = new Date(d.dueDate || d.createdAt);
         return debtDate.getMonth() + 1 === this.selectedMonth() &&

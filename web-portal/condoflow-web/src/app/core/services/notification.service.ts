@@ -31,7 +31,7 @@ export class NotificationService {
     if (!token) return;
 
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl('https://localhost:7009/notificationHub', {
+      .withUrl(`${environment.apiUrl.replace('/api', '')}/notificationHub`, {
         accessTokenFactory: () => token
       })
       .build();

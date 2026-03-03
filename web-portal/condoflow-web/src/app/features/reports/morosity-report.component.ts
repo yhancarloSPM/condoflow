@@ -15,7 +15,7 @@ import autoTable from 'jspdf-autotable';
   standalone: true,
   imports: [CommonModule, FormsModule, NavbarComponent],
   templateUrl: './morosity-report.component.html',
-  styleUrls: ['./morosity-report.component.scss']
+  styleUrls: ['./morosity-report.component.scss'],
 })
 export class MorosityReportComponent implements OnInit {
   currentUser = signal<any>(null);
@@ -41,17 +41,17 @@ export class MorosityReportComponent implements OnInit {
     private router: Router,
     private adminDebtService: AdminDebtService,
     private http: HttpClient
-  ) {}
+  ) { }
 
   ngOnInit() {
     const user = this.authService.currentUser();
     this.currentUser.set(user);
-    
+
     if (!user || user.role !== 'Admin') {
       this.router.navigate(['/auth']);
       return;
     }
-    
+
     this.loadDebts();
     this.loadBlocks();
   }
@@ -76,38 +76,38 @@ export class MorosityReportComponent implements OnInit {
 
   filteredDebts = computed(() => {
     // Mostrar deudas vencidas, incluyendo las que tienen pagos en revisión
-    let filtered = this.debts().filter(d => 
-      (d.isOverdue === true || d.status === 'PaymentSubmitted') && 
-      d.status !== 'Paid' && 
+    let filtered = this.debts().filter(d =>
+      (d.isOverdue === true || d.status === 'PaymentSubmitted') &&
+      d.status !== 'Paid' &&
       !d.isPaid
     );
-    
+
     if (this.selectedOwnerName()) {
       filtered = filtered.filter(d => d.ownerName.toLowerCase().includes(this.selectedOwnerName().toLowerCase()));
     }
-    
+
     if (this.selectedBlock()) {
       filtered = filtered.filter(d => {
         const block = this.getBlock(d);
         return block === this.selectedBlock();
       });
     }
-    
+
     if (this.selectedApartment()) {
       filtered = filtered.filter(d => {
         const apt = this.getApartmentNumber(d);
         return apt === this.selectedApartment();
       });
     }
-    
+
     if (this.selectedYear()) {
       filtered = filtered.filter(d => d.year.toString() === this.selectedYear());
     }
-    
+
     if (this.selectedMonth()) {
       filtered = filtered.filter(d => d.month.toString() === this.selectedMonth());
     }
-    
+
     const totalPages = Math.ceil(filtered.length / this.itemsPerPage);
     const startIndex = (this.currentPage() - 1) * this.itemsPerPage;
     return {
@@ -121,10 +121,10 @@ export class MorosityReportComponent implements OnInit {
     const ownersMap = new Map();
     const yearsSet = new Set<string>();
     const monthsSet = new Set<string>();
-    
-    this.debts().filter(d => 
-      (d.isOverdue === true || d.status === 'PaymentSubmitted') && 
-      d.status !== 'Paid' && 
+
+    this.debts().filter(d =>
+      (d.isOverdue === true || d.status === 'PaymentSubmitted') &&
+      d.status !== 'Paid' &&
       !d.isPaid
     ).forEach(debt => {
       // Owners
@@ -135,14 +135,14 @@ export class MorosityReportComponent implements OnInit {
           apartment: debt.apartment
         });
       }
-      
 
-      
+
+
       // Years and months
       if (debt.year) yearsSet.add(debt.year.toString());
       if (debt.month) monthsSet.add(debt.month.toString());
     });
-    
+
     this.owners.set(Array.from(ownersMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || '')));
 
     this.years.set(Array.from(yearsSet).sort().reverse());
@@ -186,7 +186,7 @@ export class MorosityReportComponent implements OnInit {
 
   onBlockChange(): void {
     this.selectedApartment.set('');
-    
+
     if (this.selectedBlock()) {
       this.http.get<any>(`${this.authService.getApiUrl()}/apartments/by-block/${this.selectedBlock()}`).subscribe({
         next: (response) => {
@@ -210,30 +210,30 @@ export class MorosityReportComponent implements OnInit {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Morosidad');
       const currentDate = new Date().toLocaleDateString('es-ES');
-      
+
       worksheet.mergeCells('A1:H1');
       const titleCell = worksheet.getCell('A1');
       titleCell.value = 'CONDOFLOW - REPORTE DE MOROSIDAD';
       titleCell.font = { size: 18, bold: true, color: { argb: 'FFFFFF' } };
       titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'EF4444' } };
       titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-      
+
       worksheet.mergeCells('A2:H2');
       const dateCell = worksheet.getCell('A2');
       dateCell.value = `Fecha de generación: ${currentDate}`;
       dateCell.font = { size: 12, italic: true, bold: true };
       dateCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FEE2E2' } };
       dateCell.alignment = { horizontal: 'center' };
-      
+
       const headers = ['Propietario', 'Bloque', 'Apartamento', 'Mes', 'Año', 'Monto', 'Días Vencido', 'Estado'];
       worksheet.getRow(4).values = headers;
       worksheet.getRow(4).font = { bold: true, color: { argb: 'FFFFFF' }, size: 11 };
       worksheet.getRow(4).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DC2626' } };
-      
+
       let rowIndex = 5;
-      this.debts().filter(d => 
-        (d.isOverdue === true || d.status === 'PaymentSubmitted') && 
-        d.status !== 'Paid' && 
+      this.debts().filter(d =>
+        (d.isOverdue === true || d.status === 'PaymentSubmitted') &&
+        d.status !== 'Paid' &&
         !d.isPaid
       ).forEach(debt => {
         const row = worksheet.getRow(rowIndex);
@@ -250,12 +250,12 @@ export class MorosityReportComponent implements OnInit {
         row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FEF2F2' } };
         rowIndex++;
       });
-      
+
       worksheet.columns = [
         { width: 30 }, { width: 10 }, { width: 12 }, { width: 12 },
         { width: 8 }, { width: 15 }, { width: 15 }, { width: 12 }
       ];
-      
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
@@ -264,7 +264,7 @@ export class MorosityReportComponent implements OnInit {
       a.download = `Reporte_Morosidad_${new Date().toISOString().split('T')[0]}.xlsx`;
       a.click();
       window.URL.revokeObjectURL(url);
-      
+
       this.exportLoading.set(false);
     }, 500);
   }
@@ -274,18 +274,18 @@ export class MorosityReportComponent implements OnInit {
     setTimeout(() => {
       const doc = new jsPDF();
       const currentDate = new Date().toLocaleDateString('es-ES');
-      
+
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.text('CONDOFLOW - REPORTE DE MOROSIDAD', 105, 20, { align: 'center' });
-      
+
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.text(`Fecha de generación: ${currentDate}`, 105, 30, { align: 'center' });
-      
-      const data = this.debts().filter(d => 
-        (d.isOverdue === true || d.status === 'PaymentSubmitted') && 
-        d.status !== 'Paid' && 
+
+      const data = this.debts().filter(d =>
+        (d.isOverdue === true || d.status === 'PaymentSubmitted') &&
+        d.status !== 'Paid' &&
         !d.isPaid
       ).map(debt => [
         debt.ownerName,
@@ -296,7 +296,7 @@ export class MorosityReportComponent implements OnInit {
         '',
         'Vencida'
       ]);
-      
+
       autoTable(doc, {
         head: [['Propietario', 'Bloque', 'Apt', 'Período', 'Monto', 'Días Vencido', 'Estado']],
         body: data,
@@ -304,7 +304,7 @@ export class MorosityReportComponent implements OnInit {
         styles: { fontSize: 8, cellPadding: 2 },
         headStyles: { fillColor: [239, 68, 68], textColor: 255 }
       });
-      
+
       doc.save(`Reporte_Morosidad_${new Date().toISOString().split('T')[0]}.pdf`);
       this.exportLoading.set(false);
     }, 500);

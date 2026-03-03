@@ -22,33 +22,29 @@
 
         <div class="filters-section">
           <div class="filters-grid">
-      <div class="filter-group">
-        <label>Propietario</label>
-        <input 
-          type="text" 
-          [value]="selectedOwnerName()"
-          (input)="updateOwnerName($event)"
-          placeholder="Buscar propietario..."
-          class="filter-input">
-      </div>
+            <div class="filter-group">
+              <label>Propietario</label>
+              <input type="text" [value]="selectedOwnerName()" (input)="updateOwnerName($event)"
+                placeholder="Buscar propietario..." class="filter-input">
+            </div>
 
 
 
-      <div class="filter-group">
-        <label>Bloque</label>
-        <select [(ngModel)]="selectedBlock" class="filter-select" (change)="onBlockChange()">
-          <option value="">Todos los bloques</option>
-          <option *ngFor="let block of blocks()" [value]="block">{{block}}</option>
-        </select>
-      </div>
+            <div class="filter-group">
+              <label>Bloque</label>
+              <select [(ngModel)]="selectedBlock" class="filter-select" (change)="onBlockChange()">
+                <option value="">Todos los bloques</option>
+                <option *ngFor="let block of blocks()" [value]="block">{{block}}</option>
+              </select>
+            </div>
 
-      <div class="filter-group">
-        <label>Apartamento</label>
-        <select [(ngModel)]="selectedApartment" class="filter-select">
-          <option value="">Todos los apartamentos</option>
-          <option *ngFor="let apt of apartments()" [value]="apt">{{apt}}</option>
-        </select>
-      </div>
+            <div class="filter-group">
+              <label>Apartamento</label>
+              <select [(ngModel)]="selectedApartment" class="filter-select">
+                <option value="">Todos los apartamentos</option>
+                <option *ngFor="let apt of apartments()" [value]="apt">{{apt}}</option>
+              </select>
+            </div>
 
 
           </div>
@@ -56,130 +52,119 @@
       </div>
     </div>
 
-  <!-- Tabla de datos -->
-  <div class="table-section">
-    <div class="table-header">
-      <h3>Pagos Registrados ({{filteredPayments().totalCount}})</h3>
-      <div class="export-buttons">
-        <button class="export-btn excel-btn" (click)="generateExcel()" [disabled]="exportLoading()">
-          <i class="pi pi-file-excel"></i>
-          Excel
-        </button>
-        <button class="export-btn pdf-btn" (click)="generatePDF()" [disabled]="exportLoading()">
-          <i class="pi pi-file-pdf"></i>
-          PDF
-        </button>
+    <!-- Tabla de datos -->
+    <div class="table-section">
+      <div class="table-header">
+        <h3>Pagos Registrados ({{filteredPayments().totalCount}})</h3>
+        <div class="export-buttons">
+          <button class="export-btn excel-btn" (click)="generateExcel()" [disabled]="exportLoading()">
+            <i class="pi pi-file-excel"></i>
+            Excel
+          </button>
+          <button class="export-btn pdf-btn" (click)="generatePDF()" [disabled]="exportLoading()">
+            <i class="pi pi-file-pdf"></i>
+            PDF
+          </button>
+        </div>
       </div>
-    </div>
-    
-    <div class="card-body d-flex flex-column" style="position: relative;">
-      @if (exportLoading()) {
+
+      <div class="card-body d-flex flex-column" style="position: relative;">
+        @if (exportLoading()) {
         <div class="simple-loading-overlay">
           <div class="spinner"></div>
           <p>Generando reporte...</p>
         </div>
-      }
-      @if (loading()) {
+        }
+        @if (loading()) {
         <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
           <div class="spinner"></div>
           <p class="text-muted">Cargando pagos...</p>
         </div>
-      } @else {
+        } @else {
         <div class="table-container">
           <table class="payments-table table table-striped">
-        <thead>
-          <tr>
-            <th>Fecha de Pago</th>
-            <th>Propietario</th>
-            <th class="center-text">Bloque</th>
-            <th class="center-text">Apartamento</th>
-            <th style="text-align: right;">Monto</th>
-            <th>Método</th>
-            <th>Concepto</th>
-            <th class="center-text">Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let payment of filteredPayments().data; let i = index" 
-              [class.even-row]="i % 2 === 0">
-            <td>{{payment.paymentDate | date:'dd/MM/yyyy'}}</td>
-            <td>
-              {{payment.ownerName?.includes(' | ') ? payment.ownerName.split(' | ')[0] : payment.ownerName}}
-            </td>
-            <td class="center-text">
-              {{getBlock(payment)}}
-            </td>
-            <td class="center-text">
-              {{getApartmentNumber(payment)}}
-            </td>
-            <td class="center-text" 
-                [class.amount-approved]="payment.status.toLowerCase() === 'approved'"
-                [class.amount-pending]="payment.status.toLowerCase() === 'pending'"
-                [class.amount-rejected]="payment.status.toLowerCase() === 'rejected'"
-                style="text-align: right;">${{payment.amount | number:'1.2-2'}}</td>
-            <td>{{payment.paymentMethod}}</td>
-            <td>{{payment.concept || '-'}}</td>
-            <td class="center-text">
-              <span class="status-badge" 
-                    [class.status-approved]="payment.status.toLowerCase() === 'approved'"
+            <thead>
+              <tr>
+                <th>Fecha de Pago</th>
+                <th>Propietario</th>
+                <th class="center-text">Bloque</th>
+                <th class="center-text">Apartamento</th>
+                <th style="text-align: right; background: rgba(16, 185, 129, 0.8) !important;">Monto</th>
+                <th style="text-align: center;">Método</th>
+                <th>Concepto</th>
+                <th class="center-text">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let payment of filteredPayments().data; let i = index" [class.even-row]="i % 2 === 0">
+                <td>{{payment.paymentDate | date:'dd/MM/yyyy'}}</td>
+                <td>
+                  {{payment.ownerName?.includes(' | ') ? payment.ownerName.split(' | ')[0] : payment.ownerName}}
+                </td>
+                <td class="center-text">
+                  {{getBlock(payment)}}
+                </td>
+                <td class="center-text">
+                  {{getApartmentNumber(payment)}}
+                </td>
+                <td class="center-text" [class.amount-approved]="payment.status.toLowerCase() === 'approved'"
+                  [class.amount-pending]="payment.status.toLowerCase() === 'pending'"
+                  [class.amount-rejected]="payment.status.toLowerCase() === 'rejected'" style="text-align: right;">
+                  ${{payment.amount | number:'1.2-2'}}</td>
+                <td style="text-align: center;">{{payment.paymentMethod}}</td>
+                <td>{{payment.concept || '-'}}</td>
+                <td class="center-text">
+                  <span class="status-badge" [class.status-approved]="payment.status.toLowerCase() === 'approved'"
                     [class.status-pending]="payment.status.toLowerCase() === 'pending'"
                     [class.status-rejected]="payment.status.toLowerCase() === 'rejected'">
-                {{getPaymentStatusText(payment.status)}}
-              </span>
-            </td>
-          </tr>
-        </tbody>
+                    {{getPaymentStatusText(payment.status)}}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
-        
-        @if (filteredPayments().data.length === 0) {
-          <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
-            <h6 class="text-white mt-3">No hay pagos</h6>
-            <p class="text-white small">No se encontraron pagos con los filtros aplicados</p>
-          </div>
-        }
-        
-        @if (filteredPayments().totalCount > itemsPerPage) {
-          <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;">
-            <div>
-              <small class="text-muted">
-                Mostrando {{ (currentPage() - 1) * itemsPerPage + 1 }} - 
-                {{ Math.min(currentPage() * itemsPerPage, filteredPayments().totalCount) }} 
-                de {{ filteredPayments().totalCount }} registros
-              </small>
-            </div>
-            <nav>
-              <div class="pagination">
-                <button 
-                  class="pagination-btn" 
-                  [disabled]="currentPage() === 1" 
-                  (click)="goToPage(currentPage() - 1)">
-                  <i class="pi pi-chevron-left"></i>
-                </button>
-                
-                <button 
-                  *ngFor="let page of [].constructor(Math.min(5, filteredPayments().totalPages)); let i = index" 
-                  class="pagination-btn" 
-                  [class.active]="currentPage() === i + 1" 
-                  (click)="goToPage(i + 1)">
-                  {{ i + 1 }}
-                </button>
-                
-                <span *ngIf="filteredPayments().totalPages > 5" class="pagination-dots">...</span>
-                
-                <button 
-                  class="pagination-btn" 
-                  [disabled]="currentPage() === filteredPayments().totalPages" 
-                  (click)="goToPage(currentPage() + 1)">
-                  <i class="pi pi-chevron-right"></i>
-                </button>
-              </div>
-            </nav>
-          </div>
-        }
-      }
-    </div>
 
-  </div>
+        @if (filteredPayments().data.length === 0) {
+        <div class="text-center py-5 flex-grow-1 d-flex flex-column justify-content-center">
+          <h6 class="text-white mt-3">No hay pagos</h6>
+          <p class="text-white small">No se encontraron pagos con los filtros aplicados</p>
+        </div>
+        }
+
+        @if (filteredPayments().totalCount > itemsPerPage) {
+        <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;">
+          <div>
+            <small class="text-muted">
+              Mostrando {{ (currentPage() - 1) * itemsPerPage + 1 }} -
+              {{ Math.min(currentPage() * itemsPerPage, filteredPayments().totalCount) }}
+              de {{ filteredPayments().totalCount }} registros
+            </small>
+          </div>
+          <nav>
+            <div class="pagination">
+              <button class="pagination-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
+                <i class="pi pi-chevron-left"></i>
+              </button>
+
+              <button *ngFor="let page of [].constructor(Math.min(5, filteredPayments().totalPages)); let i = index"
+                class="pagination-btn" [class.active]="currentPage() === i + 1" (click)="goToPage(i + 1)">
+                {{ i + 1 }}
+              </button>
+
+              <span *ngIf="filteredPayments().totalPages > 5" class="pagination-dots">...</span>
+
+              <button class="pagination-btn" [disabled]="currentPage() === filteredPayments().totalPages"
+                (click)="goToPage(currentPage() + 1)">
+                <i class="pi pi-chevron-right"></i>
+              </button>
+            </div>
+          </nav>
+        </div>
+        }
+        }
+      </div>
+
+    </div>
   </div>
 </div>

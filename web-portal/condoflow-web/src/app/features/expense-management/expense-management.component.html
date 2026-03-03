@@ -12,10 +12,7 @@
             <h1 class="header-title">Gestión de Gastos</h1>
             <p class="header-subtitle">Administra los gastos del condominio</p>
           </div>
-          <button 
-            type="button" 
-            class="btn btn-primary ms-auto"
-            (click)="openCreateModal()">
+          <button type="button" class="btn btn-primary ms-auto" (click)="openCreateModal()">
             <i class="pi pi-plus"></i>
             Nuevo Gasto
           </button>
@@ -26,53 +23,46 @@
           <div class="filters-grid">
             <div class="filter-group">
               <label class="filter-label">Búsqueda</label>
-              <input 
-                type="text" 
-                class="filter-input" 
-                placeholder="Buscar..."
-                [ngModel]="filters.search()"
+              <input type="text" class="filter-input" placeholder="Buscar..." [ngModel]="filters.search()"
                 (ngModelChange)="filters.search.set($event); applyFilters()">
             </div>
-            
+
             <div class="filter-group">
               <label class="filter-label">Categoría</label>
-              <select class="filter-select" [ngModel]="filters.category()" (ngModelChange)="filters.category.set($event); applyFilters()">
+              <select class="filter-select" [ngModel]="filters.category()"
+                (ngModelChange)="filters.category.set($event); applyFilters()">
                 <option value="">Todas</option>
                 <option *ngFor="let category of categories()" [value]="category.id">{{ category.name }}</option>
               </select>
             </div>
-            
+
             <div class="filter-group">
               <label class="filter-label">Estado</label>
-              <select class="filter-select" [ngModel]="filters.status()" (ngModelChange)="filters.status.set($event); applyFilters()">
+              <select class="filter-select" [ngModel]="filters.status()"
+                (ngModelChange)="filters.status.set($event); applyFilters()">
                 <option value="">Todos</option>
                 <option *ngFor="let status of statuses()" [value]="status.id">{{ status.name }}</option>
               </select>
             </div>
-            
+
             <div class="filter-group">
               <label class="filter-label">Proveedor</label>
-              <select class="filter-select" [ngModel]="filters.provider()" (ngModelChange)="filters.provider.set($event); applyFilters()">
+              <select class="filter-select" [ngModel]="filters.provider()"
+                (ngModelChange)="filters.provider.set($event); applyFilters()">
                 <option value="">Todos</option>
                 <option *ngFor="let provider of providers()" [value]="provider.id">{{ provider.name }}</option>
               </select>
             </div>
-            
+
             <div class="filter-group">
               <label class="filter-label">Desde</label>
-              <input 
-                type="date" 
-                class="filter-input" 
-                [ngModel]="filters.startDate()"
+              <input type="date" class="filter-input" [ngModel]="filters.startDate()"
                 (ngModelChange)="filters.startDate.set($event); applyFilters()">
             </div>
-            
+
             <div class="filter-group">
               <label class="filter-label">Hasta</label>
-              <input 
-                type="date" 
-                class="filter-input" 
-                [ngModel]="filters.endDate()"
+              <input type="date" class="filter-input" [ngModel]="filters.endDate()"
                 (ngModelChange)="filters.endDate.set($event); applyFilters()">
             </div>
           </div>
@@ -86,7 +76,7 @@
         <h5 class="mb-0">Lista de Gastos</h5>
         <small class="text-muted">{{ filteredExpenses().length }} gastos encontrados</small>
       </div>
-      
+
       <div class="card-body">
         <div class="table-responsive">
           <table class="table">
@@ -94,8 +84,8 @@
               <tr>
                 <th style="width: 35%;">Descripción</th>
                 <th style="width: 12%;">Categoría</th>
-                <th style="width: 10%;">Monto</th>
-                <th style="width: 10%;">Fecha</th>
+                <th style="width: 10%; text-align: right; background: rgba(16, 185, 129, 0.8) !important;">Monto</th>
+                <th style="width: 10%; text-align: center;">Fecha</th>
                 <th style="width: 10%;">Estado</th>
                 <th style="width: 13%;">Proveedor</th>
                 <th style="width: 10%;">Acciones</th>
@@ -114,10 +104,10 @@
                     {{ getCategoryName(expense.categoryId) }}
                   </span>
                 </td>
-                <td>
-                  <span class="amount">${{ expense.amount | number:'1.0-0' }}</span>
+                <td style="text-align: right;" class="amount">
+                  <span>${{ expense.amount | number:'1.0-0' }}</span>
                 </td>
-                <td>{{ expense.date | date:'dd/MM/yyyy' }}</td>
+                <td style="text-align: center;">{{ expense.date | date:'dd/MM/yyyy' }}</td>
                 <td>
                   <span class="badge status-badge" [ngClass]="getStatusBootstrapClass(expense.statusId)">
                     {{ getStatusName(expense.statusId).toUpperCase() }}
@@ -126,17 +116,10 @@
                 <td>{{ getProviderName(expense.providerId || 0) }}</td>
                 <td>
                   <div class="action-buttons">
-                    <button 
-                      type="button" 
-                      class="btn-edit-reported"
-                      (click)="editExpense(expense)"
-                      title="Editar">
+                    <button type="button" class="btn-edit-reported" (click)="editExpense(expense)" title="Editar">
                       <i class="pi pi-refresh" [style.color]="getIconColorByStatus(expense.statusId)"></i>
                     </button>
-                    <button 
-                      type="button" 
-                      class="btn-edit-progress"
-                      (click)="deleteExpense(expense.id)"
+                    <button type="button" class="btn-edit-progress" (click)="deleteExpense(expense.id)"
                       title="Eliminar">
                       <i class="pi pi-trash"></i>
                     </button>
@@ -146,32 +129,26 @@
             </tbody>
           </table>
         </div>
-        
+
         <!-- Paginación -->
-        <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;" *ngIf="filteredExpenses().length > 10">
-          <small style="color: rgba(255,255,255,0.8);">Mostrando {{ getStartIndex() + 1 }} - {{ getEndIndex() }} de {{ filteredExpenses().length }} gastos</small>
+        <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="margin-top: 2px;"
+          *ngIf="filteredExpenses().length > 10">
+          <small style="color: rgba(255,255,255,0.8);">Mostrando {{ getStartIndex() + 1 }} - {{ getEndIndex() }} de {{
+            filteredExpenses().length }} gastos</small>
           <div class="pagination">
-            <button 
-              class="pagination-btn"
-              [disabled]="currentPage() === 1"
-              (click)="goToPage(currentPage() - 1)">
+            <button class="pagination-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
               <i class="pi pi-chevron-left"></i>
             </button>
-            
+
             <ng-container *ngFor="let page of getVisiblePages()">
-              <button 
-                *ngIf="page !== -1"
-                class="pagination-btn"
-                [class.active]="page === currentPage()"
+              <button *ngIf="page !== -1" class="pagination-btn" [class.active]="page === currentPage()"
                 (click)="goToPage(page)">
                 {{ page }}
               </button>
               <span *ngIf="page === -1" class="pagination-dots">...</span>
             </ng-container>
-            
-            <button 
-              class="pagination-btn"
-              [disabled]="currentPage() === totalPages()"
+
+            <button class="pagination-btn" [disabled]="currentPage() === totalPages()"
               (click)="goToPage(currentPage() + 1)">
               <i class="pi pi-chevron-right"></i>
             </button>
@@ -200,66 +177,40 @@
           <div class="row">
             <div class="col-md-8 mb-3">
               <label class="form-label"><i class="pi pi-file-edit me-2"></i>Descripción *</label>
-              <input 
-                type="text" 
-                class="form-control"
-                [(ngModel)]="currentExpense.description"
-                name="description"
-                required
-                maxlength="120"
-                autocomplete="off"
-                placeholder="Ej: Mantenimiento ascensor"
-                #descriptionInput="ngModel"
-                [class.is-invalid]="descriptionInput.invalid && descriptionInput.touched">
+              <input type="text" class="form-control" [(ngModel)]="currentExpense.description" name="description"
+                required maxlength="120" autocomplete="off" placeholder="Ej: Mantenimiento ascensor"
+                #descriptionInput="ngModel" [class.is-invalid]="descriptionInput.invalid && descriptionInput.touched">
               <div *ngIf="descriptionInput.invalid && descriptionInput.touched" class="invalid-feedback">
                 <div *ngIf="descriptionInput.errors?.['required']">La descripción es obligatoria</div>
-                <div *ngIf="descriptionInput.errors?.['maxlength']">La descripción no puede tener más de 120 caracteres</div>
+                <div *ngIf="descriptionInput.errors?.['maxlength']">La descripción no puede tener más de 120 caracteres
+                </div>
               </div>
             </div>
-            
+
             <div class="col-md-4 mb-3">
               <label class="form-label"><i class="pi pi-dollar me-2"></i>Monto *</label>
-              <input 
-                type="number" 
-                class="form-control"
-                [(ngModel)]="currentExpense.amount"
-                name="amount"
-                required
-                min="0.01"
-                step="0.01"
-                placeholder="0.00"
-                #amountInput="ngModel"
+              <input type="number" class="form-control" [(ngModel)]="currentExpense.amount" name="amount" required
+                min="0.01" step="0.01" placeholder="0.00" #amountInput="ngModel"
                 [class.is-invalid]="amountInput.invalid && amountInput.touched">
               <div *ngIf="amountInput.invalid && amountInput.touched" class="invalid-feedback">
                 <div *ngIf="amountInput.errors?.['required']">El monto es obligatorio</div>
                 <div *ngIf="amountInput.errors?.['min']">El monto debe ser mayor a 0</div>
               </div>
             </div>
-            
+
             <div class="col-md-4 mb-3">
               <label class="form-label"><i class="pi pi-calendar me-2"></i>Fecha *</label>
-              <input 
-                type="date" 
-                class="form-control"
-                [(ngModel)]="currentExpense.date"
-                name="date"
-                required
-                #dateInput="ngModel"
-                [class.is-invalid]="dateInput.invalid && dateInput.touched">
+              <input type="date" class="form-control" [(ngModel)]="currentExpense.date" name="date" required
+                #dateInput="ngModel" [class.is-invalid]="dateInput.invalid && dateInput.touched">
               <div *ngIf="dateInput.invalid && dateInput.touched" class="invalid-feedback">
                 La fecha es obligatoria
               </div>
             </div>
-            
+
             <div class="col-md-4 mb-3">
               <label class="form-label"><i class="pi pi-tags me-2"></i>Categoría *</label>
-              <select 
-                class="form-select"
-                [(ngModel)]="currentExpense.categoryId"
-                name="categoryId"
-                required
-                #categoryInput="ngModel"
-                [class.is-invalid]="categoryInput.invalid && categoryInput.touched">
+              <select class="form-select" [(ngModel)]="currentExpense.categoryId" name="categoryId" required
+                #categoryInput="ngModel" [class.is-invalid]="categoryInput.invalid && categoryInput.touched">
                 <option [value]="0">Seleccionar categoría</option>
                 <option *ngFor="let category of categories()" [value]="category.id">{{ category.name }}</option>
               </select>
@@ -267,16 +218,11 @@
                 Debe seleccionar una categoría
               </div>
             </div>
-            
+
             <div class="col-md-4 mb-3">
               <label class="form-label"><i class="pi pi-flag me-2"></i>Estado *</label>
-              <select 
-                class="form-select"
-                [(ngModel)]="currentExpense.statusId"
-                name="statusId"
-                required
-                [disabled]="!isEditing() || isStatusReadonly()"
-                #statusInput="ngModel"
+              <select class="form-select" [(ngModel)]="currentExpense.statusId" name="statusId" required
+                [disabled]="!isEditing() || isStatusReadonly()" #statusInput="ngModel"
                 [class.is-invalid]="statusInput.invalid && statusInput.touched">
                 <option [value]="0">Seleccionar estado</option>
                 <option *ngFor="let status of getAvailableStatuses()" [value]="status.id">{{ status.name }}</option>
@@ -285,16 +231,11 @@
                 Debe seleccionar un estado
               </div>
             </div>
-            
+
             <div class="col-md-6 mb-3">
               <label class="form-label"><i class="pi pi-truck me-2"></i>Proveedor *</label>
-              <select 
-                class="form-select"
-                [(ngModel)]="currentExpense.providerId"
-                name="providerId"
-                required
-                #providerInput="ngModel"
-                [class.is-invalid]="providerInput.invalid && providerInput.touched">
+              <select class="form-select" [(ngModel)]="currentExpense.providerId" name="providerId" required
+                #providerInput="ngModel" [class.is-invalid]="providerInput.invalid && providerInput.touched">
                 <option [value]="0">Seleccionar proveedor</option>
                 <option *ngFor="let provider of providers()" [value]="provider.id">{{ provider.name }}</option>
               </select>
@@ -302,60 +243,57 @@
                 Debe seleccionar un proveedor
               </div>
             </div>
-            
+
             <div class="col-md-12 mb-3">
               <label class="form-label"><i class="pi pi-file me-2"></i>Factura del Proveedor (Opcional)</label>
               <div class="modern-file-upload" [class.has-file]="selectedInvoiceFile || currentExpense.invoiceUrl">
                 <div class="file-drop-zone" (click)="triggerInvoiceFileInput()">
                   @if (!selectedInvoiceFile && !currentExpense.invoiceUrl) {
-                    <div class="upload-placeholder">
-                      <i class="pi pi-cloud-upload"></i>
-                      <span class="upload-text">Arrastra tu archivo aquí o <strong>haz clic para seleccionar</strong></span>
-                      <span class="upload-hint">JPG, PNG, PDF - Máx. 5MB</span>
-                    </div>
+                  <div class="upload-placeholder">
+                    <i class="pi pi-cloud-upload"></i>
+                    <span class="upload-text">Arrastra tu archivo aquí o <strong>haz clic para
+                        seleccionar</strong></span>
+                    <span class="upload-hint">JPG, PNG, PDF - Máx. 5MB</span>
+                  </div>
                   } @else if (selectedInvoiceFile) {
-                    <div class="file-preview">
-                      <i class="pi pi-file"></i>
-                      <div class="file-info">
-                        <span class="file-name">{{ selectedInvoiceFile.name }}</span>
-                        <span class="file-size">{{ getFileSize(selectedInvoiceFile.size) }}</span>
-                      </div>
-                      <button type="button" class="remove-file" (click)="removeInvoiceFile($event)">
-                        <i class="pi pi-times"></i>
+                  <div class="file-preview">
+                    <i class="pi pi-file"></i>
+                    <div class="file-info">
+                      <span class="file-name">{{ selectedInvoiceFile.name }}</span>
+                      <span class="file-size">{{ getFileSize(selectedInvoiceFile.size) }}</span>
+                    </div>
+                    <button type="button" class="remove-file" (click)="removeInvoiceFile($event)">
+                      <i class="pi pi-times"></i>
+                    </button>
+                  </div>
+                  } @else if (currentExpense.invoiceUrl) {
+                  <div class="file-preview">
+                    <i class="pi pi-file"></i>
+                    <div class="file-info">
+                      <span class="file-name">Factura actual</span>
+                      <span class="file-size">Ver archivo</span>
+                    </div>
+                    <div class="file-actions">
+                      <a [href]="currentExpense.invoiceUrl" target="_blank" class="view-file" title="Ver factura">
+                        <i class="pi pi-eye"></i>
+                      </a>
+                      <button type="button" class="remove-file" (click)="removeInvoiceFile($event)"
+                        title="Cambiar archivo">
+                        <i class="pi pi-refresh"></i>
                       </button>
                     </div>
-                  } @else if (currentExpense.invoiceUrl) {
-                    <div class="file-preview">
-                      <i class="pi pi-file"></i>
-                      <div class="file-info">
-                        <span class="file-name">Factura actual</span>
-                        <span class="file-size">Ver archivo</span>
-                      </div>
-                      <div class="file-actions">
-                        <a [href]="currentExpense.invoiceUrl" target="_blank" class="view-file" title="Ver factura">
-                          <i class="pi pi-eye"></i>
-                        </a>
-                        <button type="button" class="remove-file" (click)="removeInvoiceFile($event)" title="Cambiar archivo">
-                          <i class="pi pi-refresh"></i>
-                        </button>
-                      </div>
-                    </div>
+                  </div>
                   }
                 </div>
-                <input type="file" #invoiceFileInput (change)="onInvoiceFileSelected($event)" accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+                <input type="file" #invoiceFileInput (change)="onInvoiceFileSelected($event)"
+                  accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
               </div>
             </div>
-            
+
             <div class="col-md-12 mb-3">
               <label class="form-label"><i class="pi pi-comment me-2"></i>Notas</label>
-              <textarea 
-                class="form-control"
-                [(ngModel)]="currentExpense.notes"
-                name="notes"
-                maxlength="250"
-                rows="3"
-                placeholder="Observaciones adicionales..."
-                #notesInput="ngModel"
+              <textarea class="form-control" [(ngModel)]="currentExpense.notes" name="notes" maxlength="250" rows="3"
+                placeholder="Observaciones adicionales..." #notesInput="ngModel"
                 [class.is-invalid]="notesInput.invalid && notesInput.touched"></textarea>
               <div *ngIf="notesInput.invalid && notesInput.touched" class="invalid-feedback">
                 Las notas no pueden tener más de 250 caracteres
@@ -377,37 +315,38 @@
 
 <!-- Modal de Confirmación de Eliminación -->
 @if (showDeleteModal()) {
-  <div class="modal-backdrop" (click)="closeDeleteModal()">
-    <div class="modal-dialog" (click)="$event.stopPropagation()">
-      <div class="modal-content">
-        <div class="modal-header">
-          <div class="d-flex align-items-center gap-2">
-            <i class="pi pi-trash" style="color: #dc2626;"></i>
-            <h5 class="modal-title mb-0">Confirmar Eliminación</h5>
+<div class="modal-backdrop" (click)="closeDeleteModal()">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="d-flex align-items-center gap-2">
+          <i class="pi pi-trash" style="color: #dc2626;"></i>
+          <h5 class="modal-title mb-0">Confirmar Eliminación</h5>
+        </div>
+        <button type="button" class="btn-close" (click)="closeDeleteModal()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="color: white;">¿Estás seguro de eliminar este gasto?</p>
+        @if (expenseToDelete()) {
+        <div class="user-info-card">
+          <div>
+            <div class="fw-semibold" style="color: white;">{{ expenseToDelete()?.description }}</div>
+            <span style="color: #ef4444; font-weight: 600; font-size: 0.95rem;">Monto: ${{ expenseToDelete()?.amount |
+              number:'1.0-0' }}</span>
           </div>
-          <button type="button" class="btn-close" (click)="closeDeleteModal()">
-            <i class="pi pi-times"></i>
-          </button>
         </div>
-        <div class="modal-body">
-          <p style="color: white;">¿Estás seguro de eliminar este gasto?</p>
-          @if (expenseToDelete()) {
-            <div class="user-info-card">
-              <div>
-                <div class="fw-semibold" style="color: white;">{{ expenseToDelete()?.description }}</div>
-                <span style="color: #ef4444; font-weight: 600; font-size: 0.95rem;">Monto: ${{ expenseToDelete()?.amount | number:'1.0-0' }}</span>
-              </div>
-            </div>
-          }
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary modal-btn" (click)="closeDeleteModal()">Cancelar</button>
-          <button type="button" class="btn btn-outline-danger modal-btn" (click)="confirmDelete()" [disabled]="loading()">
-            <span *ngIf="loading()" class="spinner-border spinner-border-sm me-1"></span>
-            {{ loading() ? 'Eliminando...' : 'Eliminar' }}
-          </button>
-        </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary modal-btn" (click)="closeDeleteModal()">Cancelar</button>
+        <button type="button" class="btn btn-outline-danger modal-btn" (click)="confirmDelete()" [disabled]="loading()">
+          <span *ngIf="loading()" class="spinner-border spinner-border-sm me-1"></span>
+          {{ loading() ? 'Eliminando...' : 'Eliminar' }}
+        </button>
       </div>
     </div>
   </div>
+</div>
 }

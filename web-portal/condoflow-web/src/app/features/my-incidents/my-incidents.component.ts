@@ -180,7 +180,8 @@ export class MyIncidentsComponent implements OnInit {
       'low': 'low',
       'medium': 'medium',
       'high': 'high',
-      'urgent': 'urgent'
+      'urgent': 'urgent',
+      'critical': 'critical'
     };
     return priorityMap[priority] || 'medium';
   }
@@ -261,7 +262,8 @@ export class MyIncidentsComponent implements OnInit {
       'low': 'Baja',
       'medium': 'Media',
       'high': 'Alta',
-      'urgent': 'Urgente'
+      'urgent': 'Urgente',
+      'critical': 'Crítica'
     };
     return defaultPriorities[priority] || priority;
   }
@@ -273,6 +275,7 @@ export class MyIncidentsComponent implements OnInit {
   getPrioritySeverity(priority: string): string {
     const severityMap: { [key: string]: string } = {
       'critical': 'danger',
+      'urgent': 'danger',
       'high': 'warning',
       'medium': 'info',
       'low': 'secondary'

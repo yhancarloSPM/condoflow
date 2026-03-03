@@ -492,28 +492,18 @@
   letter-spacing: 0.5px;
   min-width: 120px;
   
-  &.electrical {
-    background: rgba(245, 158, 11, 0.8);
+  &.electrical, &.plumbing {
+    background: rgba(30, 60, 114, 0.8);
     color: white;
   }
   
-  &.plumbing {
-    background: rgba(59, 130, 246, 0.8);
-    color: white;
-  }
-  
-  &.maintenance {
-    background: rgba(16, 185, 129, 0.8);
+  &.maintenance, &.cleaning {
+    background: rgba(54, 104, 190, 0.8);
     color: white;
   }
   
   &.security {
-    background: rgba(255, 107, 107, 0.8);
-    color: white;
-  }
-  
-  &.cleaning {
-    background: rgba(168, 85, 247, 0.8);
+    background: rgba(42, 82, 152, 0.8);
     color: white;
   }
   
@@ -539,16 +529,16 @@
   }
   
   &.medium {
-    background: rgba(245, 158, 11, 0.8);
+    background: rgba(250, 204, 21, 0.8);
     color: white;
   }
   
   &.high {
-    background: rgba(255, 107, 107, 0.8);
+    background: rgba(245, 158, 11, 0.8);
     color: white;
   }
   
-  &.urgent {
+  &.critical {
     background: rgba(255, 107, 107, 0.8);
     color: white;
   }

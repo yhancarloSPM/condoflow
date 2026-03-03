@@ -4,21 +4,31 @@
 /* Variables CondoFlow */
 :root {
   /* Colores principales */
-  --primary: #2563EB;           /* Azul profesional */
-  --primary-dark: #1d4ed8;      /* Azul más oscuro para hover */
-  --secondary: #10B981;         /* Verde jade */
-  --secondary-dark: #059669;    /* Verde más oscuro para hover */
-  
+  --primary: #2563EB;
+  /* Azul profesional */
+  --primary-dark: #1d4ed8;
+  /* Azul más oscuro para hover */
+  --secondary: #10B981;
+  /* Verde jade */
+  --secondary-dark: #059669;
+  /* Verde más oscuro para hover */
+
   /* Colores neutrales */
-  --neutral-light: #F3F4F6;     /* Gris claro */
-  --neutral-dark: #374151;      /* Gris profundo */
-  --text: #374151;              /* Texto principal */
-  --text-light: #6B7280;        /* Texto secundario */
-  
+  --neutral-light: #F3F4F6;
+  /* Gris claro */
+  --neutral-dark: #374151;
+  /* Gris profundo */
+  --text: #374151;
+  /* Texto principal */
+  --text-light: #6B7280;
+  /* Texto secundario */
+
   /* Feedback */
-  --danger: #EF4444;            /* Rojo suave */
-  --success: #10B981;           /* Verde jade (mismo que secondary) */
-  
+  --danger: #EF4444;
+  /* Rojo suave */
+  --success: #10B981;
+  /* Verde jade (mismo que secondary) */
+
   /* Utilidades */
   --border: #E5E7EB;
   --background: #FFFFFF;
@@ -98,7 +108,8 @@ body {
   font-size: 0.875rem;
 }
 
-.form-control, .form-select {
+.form-control,
+.form-select {
   border: 2px solid var(--border);
   border-radius: 8px;
   padding: 0.75rem 1rem;
@@ -107,7 +118,8 @@ body {
   background: white;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   outline: none;
@@ -190,15 +202,15 @@ a:hover {
   .auth-container {
     padding: 0.5rem;
   }
-  
+
   .p-card .p-card-header {
     padding: 1.5rem;
   }
-  
+
   .p-card .p-card-content {
     padding: 1.5rem;
   }
-  
+
   .p-card .p-card-title {
     font-size: 1.5rem;
   }
@@ -210,8 +222,13 @@ a:hover {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* PrimeNG Toast Styles */
@@ -297,15 +314,15 @@ a:hover {
     min-width: 280px !important;
     margin: 0.25rem !important;
   }
-  
+
   .p-toast .p-toast-message-content {
     padding: 0.875rem 1rem !important;
   }
-  
+
   .p-toast .p-toast-summary {
     font-size: 0.8rem !important;
   }
-  
+
   .p-toast .p-toast-detail {
     font-size: 0.75rem !important;
   }

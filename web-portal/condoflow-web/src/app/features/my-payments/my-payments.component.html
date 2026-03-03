@@ -1,6 +1,6 @@
 <div class="management-layout">
   <app-navbar></app-navbar>
-  
+
   <div class="main-content">
     <div class="header-card">
       <div class="header-content">
@@ -27,11 +27,13 @@
                 <label class="form-label">Tipo de Pago *</label>
                 <div class="payment-type-options">
                   <label class="radio-option">
-                    <input type="radio" name="paymentType" value="debt" [(ngModel)]="paymentType" (change)="onPaymentTypeChange()" [ngModelOptions]="{standalone: true}">
+                    <input type="radio" name="paymentType" value="debt" [(ngModel)]="paymentType"
+                      (change)="onPaymentTypeChange()" [ngModelOptions]="{standalone: true}">
                     <span class="radio-label">Pagar Deuda Pendiente</span>
                   </label>
                   <label class="radio-option">
-                    <input type="radio" name="paymentType" value="free" [(ngModel)]="paymentType" (change)="onPaymentTypeChange()" [ngModelOptions]="{standalone: true}">
+                    <input type="radio" name="paymentType" value="free" [(ngModel)]="paymentType"
+                      (change)="onPaymentTypeChange()" [ngModelOptions]="{standalone: true}">
                     <span class="radio-label">Pago Libre</span>
                   </label>
                 </div>
@@ -39,43 +41,47 @@
 
               <div class="form-row">
                 @if (paymentType === 'debt') {
-                  <div class="form-group">
-                    <label for="selectedDebt" class="form-label">Seleccionar Deuda *</label>
-                    <select id="selectedDebt" [(ngModel)]="selectedDebtId" (change)="onDebtSelected()" class="form-control" name="selectedDebt" [ngModelOptions]="{standalone: true}">
-                      <option value="">Seleccionar deuda a pagar...</option>
-                      @for (debt of availableDebts(); track debt.id) {
-                        <option [value]="debt.id">
-                          {{ debt.concept }}
-                        </option>
-                      }
-                    </select>
-                  </div>
-                }
-                
-                @if (paymentType === 'free') {
-                  <div class="form-group">
-                    <label for="concept" class="form-label">Concepto de Pago *</label>
-                    <select id="concept" formControlName="concept" class="form-control" [class.is-invalid]="paymentForm.get('concept')?.invalid && paymentForm.get('concept')?.touched">
-                      <option value="">Seleccionar concepto...</option>
-                      @for (concept of paymentConcepts(); track concept.value) {
-                        <option [value]="concept.value">{{ concept.label }}</option>
-                      }
-                    </select>
-                    @if (paymentForm.get('concept')?.invalid && paymentForm.get('concept')?.touched) {
-                      <div class="invalid-feedback">
-                        Debe seleccionar un concepto
-                      </div>
+                <div class="form-group">
+                  <label for="selectedDebt" class="form-label">Seleccionar Deuda *</label>
+                  <select id="selectedDebt" [(ngModel)]="selectedDebtId" (change)="onDebtSelected()"
+                    class="form-control" name="selectedDebt" [ngModelOptions]="{standalone: true}">
+                    <option value="">Seleccionar deuda a pagar...</option>
+                    @for (debt of availableDebts(); track debt.id) {
+                    <option [value]="debt.id">
+                      {{ debt.concept }}
+                    </option>
                     }
-                  </div>
+                  </select>
+                </div>
                 }
-                
+
+                @if (paymentType === 'free') {
+                <div class="form-group">
+                  <label for="concept" class="form-label">Concepto de Pago *</label>
+                  <select id="concept" formControlName="concept" class="form-control"
+                    [class.is-invalid]="paymentForm.get('concept')?.invalid && paymentForm.get('concept')?.touched">
+                    <option value="">Seleccionar concepto...</option>
+                    @for (concept of paymentConcepts(); track concept.value) {
+                    <option [value]="concept.value">{{ concept.label }}</option>
+                    }
+                  </select>
+                  @if (paymentForm.get('concept')?.invalid && paymentForm.get('concept')?.touched) {
+                  <div class="invalid-feedback">
+                    Debe seleccionar un concepto
+                  </div>
+                  }
+                </div>
+                }
+
                 <div class="form-group">
                   <label for="amount" class="form-label">Monto *</label>
-                  <input type="number" id="amount" formControlName="amount" class="form-control" placeholder="0.00" step="0.01" min="0" [class.is-invalid]="paymentForm.get('amount')?.invalid && paymentForm.get('amount')?.touched">
+                  <input type="number" id="amount" formControlName="amount" class="form-control" placeholder="0.00"
+                    step="0.01" min="0"
+                    [class.is-invalid]="paymentForm.get('amount')?.invalid && paymentForm.get('amount')?.touched">
                   @if (paymentForm.get('amount')?.invalid && paymentForm.get('amount')?.touched) {
-                    <div class="invalid-feedback">
-                      El monto es requerido y debe ser mayor a 0
-                    </div>
+                  <div class="invalid-feedback">
+                    El monto es requerido y debe ser mayor a 0
+                  </div>
                   }
                 </div>
               </div>
@@ -85,7 +91,7 @@
                   <label for="paymentDate" class="form-label">Fecha del Comprobante *</label>
                   <input type="date" id="paymentDate" formControlName="paymentDate" class="form-control">
                 </div>
-                
+
                 <div class="form-group">
                   <label for="paymentMethod" class="form-label">Método de Pago *</label>
                   <select id="paymentMethod" formControlName="paymentMethod" class="form-control">
@@ -97,64 +103,69 @@
                   </select>
                 </div>
               </div>
-          
+
               <div class="form-group">
                 <label class="form-label">Comprobante *</label>
                 <div class="modern-file-upload" [class.has-file]="selectedFile">
                   <div class="file-drop-zone" (click)="triggerFileInput()">
                     @if (!selectedFile) {
-                      <div class="upload-placeholder">
-                        <i class="pi pi-cloud-upload"></i>
-                        <span class="upload-text">Arrastra tu archivo aquí o <strong>haz clic para seleccionar</strong></span>
-                        <span class="upload-hint">JPG, PNG - Máx. 5MB</span>
-                      </div>
+                    <div class="upload-placeholder">
+                      <i class="pi pi-cloud-upload"></i>
+                      <span class="upload-text">Arrastra tu archivo aquí o <strong>haz clic para
+                          seleccionar</strong></span>
+                      <span class="upload-hint">JPG, PNG - Máx. 5MB</span>
+                    </div>
                     } @else {
-                      <div class="file-preview">
-                        <i class="pi pi-file"></i>
-                        <div class="file-info">
-                          <span class="file-name">{{ selectedFile.name }}</span>
-                          <span class="file-size">{{ getFileSize(selectedFile.size) }}</span>
-                        </div>
-                        <button type="button" class="remove-file" (click)="removeFile($event)">
-                          <i class="pi pi-times"></i>
-                        </button>
+                    <div class="file-preview">
+                      <i class="pi pi-file"></i>
+                      <div class="file-info">
+                        <span class="file-name">{{ selectedFile.name }}</span>
+                        <span class="file-size">{{ getFileSize(selectedFile.size) }}</span>
                       </div>
+                      <button type="button" class="remove-file" (click)="removeFile($event)">
+                        <i class="pi pi-times"></i>
+                      </button>
+                    </div>
                     }
                   </div>
-                  <input type="file" #fileInput id="receipt" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+                  <input type="file" #fileInput id="receipt" (change)="onFileSelected($event)" accept="image/*"
+                    style="display: none;">
                 </div>
               </div>
-              
+
               <div class="form-actions">
-                <button type="submit" class="btn btn-outline-success modal-btn" [disabled]="!isFormValid() || submitting()">
+                <button type="submit" class="btn btn-outline-success modal-btn"
+                  [disabled]="!isFormValid() || submitting()">
                   @if (submitting()) {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                    Enviando...
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                  Enviando...
                   } @else {
-                    Enviar Pago
+                  Enviar Pago
                   }
                 </button>
               </div>
             </form>
           </div>
-          
+
           <div class="payments-history-section">
             <h5 class="section-title">Historial de Pagos</h5>
-            
+
             <div class="filters-section">
               <div class="filter-group">
                 <label class="filter-label">Estado:</label>
-                <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()"
+                  [ngModelOptions]="{standalone: true}">
                   <option value="">Todos</option>
                   <option value="pending">En Revisión</option>
                   <option value="approved">Aprobado</option>
                   <option value="rejected">Rechazado</option>
                 </select>
               </div>
-              
+
               <div class="filter-group">
                 <label class="filter-label">Método:</label>
-                <select class="filter-select" [(ngModel)]="methodFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                <select class="filter-select" [(ngModel)]="methodFilter" (change)="applyFilters()"
+                  [ngModelOptions]="{standalone: true}">
                   <option value="">Todos</option>
                   <option value="Transferencia">Transferencia</option>
                   <option value="Efectivo">Efectivo</option>
@@ -162,79 +173,86 @@
                   <option value="Tarjeta">Tarjeta</option>
                 </select>
               </div>
-              
+
               <div class="filter-group">
                 <label class="filter-label">Desde:</label>
-                <input type="date" class="filter-select" [(ngModel)]="dateFromFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                <input type="date" class="filter-select" [(ngModel)]="dateFromFilter" (change)="applyFilters()"
+                  [ngModelOptions]="{standalone: true}">
               </div>
-              
+
               <div class="filter-group">
                 <label class="filter-label">Hasta:</label>
-                <input type="date" class="filter-select" [(ngModel)]="dateToFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                <input type="date" class="filter-select" [(ngModel)]="dateToFilter" (change)="applyFilters()"
+                  [ngModelOptions]="{standalone: true}">
               </div>
             </div>
-            
+
             @if (loading()) {
-              <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="text-white mt-2">Cargando pagos...</p>
-              </div>
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="text-white mt-2">Cargando pagos...</p>
+            </div>
             } @else if (payments().length === 0) {
-              <div class="text-center py-5">
-                <h6 class="text-white mt-3">No tienes pagos registrados</h6>
-                <p class="text-white small">Tus pagos aparecerán aquí cuando los realices</p>
-              </div>
+            <div class="text-center py-5">
+              <h6 class="text-white mt-3">No tienes pagos registrados</h6>
+              <p class="text-white small">Tus pagos aparecerán aquí cuando los realices</p>
+            </div>
             } @else {
-              <div class="table-container">
-                <table class="payments-table">
-                  <thead>
-                    <tr>
-                      <th>Concepto</th>
-                      <th>Fecha</th>
-                      <th>Método</th>
-                      <th>Monto</th>
-                      <th>Estado</th>
-                      <th>Comprobante</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (payment of payments(); track payment.id) {
-                      <tr>
-                        <td>{{ payment.description }}</td>
-                        <td>{{ payment.date | date:'dd/MM/yyyy' }}</td>
-                        <td>
-                          <span class="method-badge" [class]="getMethodClass(payment.paymentMethod)">
-                            {{ payment.paymentMethod }}
-                          </span>
-                        </td>
-                        <td class="amount-cell">RD$ {{ payment.amount?.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</td>
-                        <td>
-                          @if (payment.status === 'pending') {
-                            <span class="status-badge pending">
-                              EN REVISIÓN
-                            </span>
-                          } @else if (payment.status === 'approved') {
-                            <span class="status-badge approved">
-                              APROBADO
-                            </span>
-                          } @else if (payment.status === 'rejected') {
-                            <span class="status-badge rejected">
-                              RECHAZADO
-                            </span>
-                          }
-                        </td>
-                        <td class="text-center">
-                          @if (payment.receiptUrl) {
-                            <button type="button" class="btn-action" (click)="viewReceipt(payment)" title="Ver comprobante">
-                              <i class="pi pi-image"></i>
-                            </button>
-                          }
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
+            <div class="table-container">
+              <table class="payments-table">
+                <thead>
+                  <tr>
+                    <th>Concepto</th>
+                    <th>Fecha</th>
+                    <th>Método</th>
+                    <th style="background: rgba(16, 185, 129, 0.8) !important; text-align: right;">Monto</th>
+                    <th>Estado</th>
+                    <th>Comprobante</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (payment of payments(); track payment.id) {
+                  <tr>
+                    <td>{{ payment.description }}</td>
+                    <td>{{ payment.date | date:'dd/MM/yyyy' }}</td>
+                    <td>
+                      <span class="method-badge" [class]="getMethodClass(payment.paymentMethod)">
+                        {{ payment.paymentMethod }}
+                      </span>
+                    </td>
+                    <td class="amount-cell" [class.amount-approved]="payment.status === 'approved'"
+                      [class.amount-pending]="payment.status === 'pending'"
+                      [class.amount-rejected]="payment.status === 'rejected'">
+                      ${{ payment.amount?.toLocaleString('es-DO', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                      }}
+                    </td>
+                    <td>
+                      @if (payment.status === 'pending') {
+                      <span class="status-badge pending">
+                        EN REVISIÓN
+                      </span>
+                      } @else if (payment.status === 'approved') {
+                      <span class="status-badge approved">
+                        APROBADO
+                      </span>
+                      } @else if (payment.status === 'rejected') {
+                      <span class="status-badge rejected">
+                        RECHAZADO
+                      </span>
+                      }
+                    </td>
+                    <td class="text-center">
+                      @if (payment.receiptUrl) {
+                      <button type="button" class="btn-action" (click)="viewReceipt(payment)" title="Ver comprobante">
+                        <i class="pi pi-image" style="color: rgba(255,255,255,0.7); font-size: 1.1rem;"></i>
+                      </button>
+                      }
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
             }
           </div>
         </div>

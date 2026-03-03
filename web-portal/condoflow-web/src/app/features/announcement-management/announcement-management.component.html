@@ -329,7 +329,7 @@
             <i class="pi pi-tag me-2" style="color: #10b981;"></i>
             Cambiar Tipo de Comunicado
           </h5>
-          <button type="button" class="btn-close" (click)="closeTypeModal()">
+          <button type="button" class="btn-close me-1" (click)="closeTypeModal()">
             <i class="pi pi-times"></i>
           </button>
         </div>
@@ -345,7 +345,7 @@
             <label for="typeSelect" class="form-label">Tipo de Comunicado:</label>
             <select 
               id="typeSelect" 
-              class="form-select" 
+              class="form-select me-2" 
               [(ngModel)]="selectedTypeId"
             >
               @for (type of announcementTypes(); track type.id) {
