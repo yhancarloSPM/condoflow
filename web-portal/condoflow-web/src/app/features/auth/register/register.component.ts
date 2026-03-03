@@ -190,9 +190,28 @@ import { AuthService } from '../../../core/services/auth.service';
       color: #9ca3af;
     }
 
+    .form-select {
+      color: #374151;
+    }
+
     .form-select option {
       background: white;
       color: #374151;
+    }
+
+    .form-select option:first-child {
+      color: #9ca3af;
+    }
+
+    .form-select:invalid,
+    .form-select[value=""],
+    .form-select:disabled {
+      color: #9ca3af;
+    }
+
+    .form-select:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
     }
 
     .btn {
@@ -370,16 +389,17 @@ import { AuthService } from '../../../core/services/auth.service';
               <div class="form-group">
                 <label class="form-label">
                   <i class="pi pi-building me-2"></i>
-                  Bloque/Torre
+                  Bloque
                 </label>
                 <select 
                   formControlName="block"
                   class="form-select"
                   (change)="onBlockChange($event)"
+                  required
                 >
-                  <option value="">Seleccionar bloque</option>
-                  @for (block of blocks(); track block.name) {
-                    <option [value]="block.name">{{ block.name }}</option>
+                  <option value="" disabled selected>Seleccionar bloque</option>
+                  @for (block of blocks(); track block.id) {
+                    <option [value]="block.id">{{ block.name }}</option>
                   }
                 </select>
               </div>
@@ -391,10 +411,11 @@ import { AuthService } from '../../../core/services/auth.service';
                 <select 
                   formControlName="apartment"
                   class="form-select"
+                  required
                 >
-                  <option value="">Seleccionar apartamento</option>
-                  @for (apt of apartments(); track apt.number) {
-                    <option [value]="apt.number">{{ apt.number }}</option>
+                  <option value="" disabled selected>Seleccionar apartamento</option>
+                  @for (apt of apartments(); track apt.id) {
+                    <option [value]="apt.id">{{ apt.number }}</option>
                   }
                 </select>
               </div>
@@ -523,45 +544,55 @@ export class RegisterComponent {
   loadBlocks(): void {
     this.http.get<any>(`${this.authService.getApiUrl()}/blocks`).subscribe({
       next: (response) => {
+        console.log('Blocks response:', response);
         if (response.success) {
           const blocksData = response.data.map((block: any) => ({
+            id: block.id,
             name: block.name,
             label: block.name
           }));
           this.blocks.set(blocksData);
+          console.log('Blocks loaded:', blocksData);
         }
       },
-      error: () => {
-        this.blocks.set([
-          { name: 'Q', label: 'Q' },
-          { name: 'P', label: 'P' },
-          { name: 'N', label: 'N' },
-          { name: 'M', label: 'M' },
-          { name: 'O', label: 'O' }
-        ]);
+      error: (err) => {
+        console.error('Error loading blocks:', err);
+        this.blocks.set([]);
       }
     });
   }
 
   onBlockChange(event: any): void {
-    const blockName = event.target.value;
+    const blockId = parseInt(event.target.value);
+    console.log('Block selected:', blockId);
     
-    if (blockName) {
+    if (blockId) {
       this.registerForm.get('apartment')?.enable();
-      this.http.get<any>(`${this.authService.getApiUrl()}/apartments/by-block/${blockName}`).subscribe({
-        next: (response) => {
-          if (response.success) {
-            const apartmentsData = response.data.map((apt: any) => ({
-              number: apt.number,
-              label: apt.number
-            }));
-            this.apartments.set(apartmentsData);
+      
+      // Buscar el bloque seleccionado para obtener su nombre
+      const selectedBlock = this.blocks().find(b => b.id === blockId);
+      const blockName = selectedBlock?.name;
+      
+      if (blockName) {
+        this.http.get<any>(`${this.authService.getApiUrl()}/apartments/by-block/${blockName}`).subscribe({
+          next: (response) => {
+            console.log('Apartments response:', response);
+            if (response.success) {
+              const apartmentsData = response.data.map((apt: any) => ({
+                id: apt.id,
+                number: apt.number.trim(),
+                label: apt.number.trim()
+              }));
+              this.apartments.set(apartmentsData);
+              console.log('Apartments loaded:', apartmentsData);
+            }
+          },
+          error: (err) => {
+            console.error('Error loading apartments:', err);
+            this.apartments.set([]);
           }
-        },
-        error: () => {
-          this.apartments.set([]);
-        }
-      });
+        });
+      }
     } else {
       this.apartments.set([]);
       this.registerForm.get('apartment')?.disable();
@@ -598,10 +629,16 @@ export class RegisterComponent {
       this.loading.set(true);
       this.errorMessage.set('');
       
-      const { confirmPassword, ...registerData } = this.registerForm.value;
+      const { confirmPassword, block, apartment, ...registerData } = this.registerForm.value;
       
       // Limpiar el número de teléfono removiendo la máscara
       registerData.phoneNumber = registerData.phoneNumber.replace(/\D/g, '');
+      
+      // Enviar tanto blockId como apartmentId
+      registerData.blockId = parseInt(block);
+      registerData.apartmentId = parseInt(apartment);
+      
+      console.log('Sending registration data:', registerData);
       
       this.authService.register(registerData).subscribe({
         next: (response) => {
