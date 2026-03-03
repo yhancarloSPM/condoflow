@@ -127,9 +127,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(u => u.ApartmentId)
                   .OnDelete(DeleteBehavior.SetNull);
             
-            entity.Property(u => u.Block).HasMaxLength(10);
-            entity.Property(u => u.Apartment).HasMaxLength(10);
-            
             // Índice único para ApartmentId
             entity.HasIndex(u => u.ApartmentId)
                   .IsUnique()

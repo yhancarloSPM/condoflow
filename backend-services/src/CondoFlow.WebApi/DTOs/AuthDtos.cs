@@ -12,8 +12,8 @@ public record RegisterRequest(
     [Required, StringLength(50, MinimumLength = 2)] string FirstName, 
     [Required, StringLength(50, MinimumLength = 2)] string LastName,
     [Required, Phone, StringLength(20)] string PhoneNumber,
-    [Required, StringLength(1)] string Block,
-    [Required, StringLength(10)] string Apartment,
+    [Required] int BlockId,
+    [Required] int ApartmentId,
     [Required, RegularExpression("^(Owner|Admin)$")] string Role = "Owner");
 
 public record AuthResponse(
@@ -24,7 +24,6 @@ public record AuthResponse(
     string LastName, 
     IList<string> Roles,
     Guid? OwnerId = null,
-    string? Block = null,
-    string? Apartment = null);
+    int? ApartmentId = null);
 
 public record RefreshTokenRequest(string RefreshToken);

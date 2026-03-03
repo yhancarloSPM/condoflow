@@ -7,8 +7,7 @@ public class ApplicationUser : IdentityUser
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public int? ApartmentId { get; set; }
-    public string Block { get; set; } = string.Empty;
-    public string Apartment { get; set; } = string.Empty;
+    public int? BlockId { get; set; }  // ID del bloque
     
     // Navigation
     public CondoFlow.Domain.Entities.Apartment? ApartmentEntity { get; set; }
@@ -20,4 +19,12 @@ public class ApplicationUser : IdentityUser
     public bool IsRejected { get; set; } = false;
     public DateTime? RejectedAt { get; set; }
     public string? RejectedBy { get; set; }
+    
+    // Helper method para obtener el nombre del bloque
+    public string GetBlockName(CondoFlow.Infrastructure.Data.ApplicationDbContext context)
+    {
+        if (!BlockId.HasValue) return string.Empty;
+        var block = context.Blocks.Find(BlockId.Value);
+        return block?.Name ?? BlockId.ToString();
+    }
 }

@@ -80,6 +80,19 @@ public class AuthController : ControllerBase
             var refreshToken = _jwtService.GenerateRefreshToken();
             await _jwtService.StoreRefreshTokenAsync(user, refreshToken);
 
+            // Cargar información del apartamento si existe
+            string? apartmentInfo = null;
+            if (user.ApartmentId.HasValue)
+            {
+                var apartment = await _context.Apartments
+                    .Include(a => a.Block)
+                    .FirstOrDefaultAsync(a => a.Id == user.ApartmentId.Value);
+                if (apartment != null)
+                {
+                    apartmentInfo = $"{apartment.Block.Name}-{apartment.Number}";
+                }
+            }
+
             var userData = new {
                 token = token,
                 refreshToken = refreshToken,
@@ -89,8 +102,8 @@ public class AuthController : ControllerBase
                     lastName = user.LastName,
                     email = user.Email,
                     role = roles.FirstOrDefault() ?? "Owner",
-                    block = user.Block,
-                    apartment = user.Apartment,
+                    apartmentId = user.ApartmentId,
+                    apartment = apartmentInfo,
                     ownerId = user.OwnerId?.ToString()
                 }
             };
@@ -130,6 +143,21 @@ public class AuthController : ControllerBase
             }
 
 
+            // Verificar que el apartamento existe y está disponible
+            var apartment = await _context.Apartments
+                .Include(a => a.Block)
+                .FirstOrDefaultAsync(a => a.Id == request.ApartmentId && a.IsActive);
+            
+            if (apartment == null)
+                return BadRequest(ApiResponse.ErrorResult("Apartamento no encontrado o no disponible", 400));
+
+            // Verificar que el apartamento no esté ya asignado
+            var existingUserWithApartment = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.ApartmentId == request.ApartmentId && u.IsApproved);
+            
+            if (existingUserWithApartment != null)
+                return BadRequest(ApiResponse.ErrorResult("Este apartamento ya está asignado a otro usuario", 400));
+
             var user = new ApplicationUser
             {
                 UserName = request.Email,
@@ -137,8 +165,8 @@ public class AuthController : ControllerBase
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 PhoneNumber = CleanPhoneNumber(request.PhoneNumber),
-                Block = request.Block,
-                Apartment = request.Apartment,
+                ApartmentId = request.ApartmentId,
+                BlockId = apartment.BlockId,
                 IsApproved = request.Role == "Admin"
             };
 
@@ -148,27 +176,18 @@ public class AuthController : ControllerBase
 
             await _userManager.AddToRoleAsync(user, request.Role);
 
-
             // Enviar notificación de nuevo registro
             if (request.Role == "Owner")
             {
-
                 try
                 {
-
                     await _notificationService.SendUserRegistrationNotificationAsync(
-                        user.FirstName, user.LastName, user.Block, user.Apartment);
-
+                        user.FirstName, user.LastName, apartment.Block.Name, apartment.Number);
                 }
                 catch (Exception ex)
                 {
-
-
+                    // Log error but continue
                 }
-            }
-            else
-            {
-
             }
 
             // Si es Owner y no está aprobado, retornar mensaje especial
@@ -187,7 +206,7 @@ public class AuthController : ControllerBase
             var refreshToken = _jwtService.GenerateRefreshToken();
             await _jwtService.StoreRefreshTokenAsync(user, refreshToken);
 
-            var authResponse = new AuthResponse(token, refreshToken, user.Email, user.FirstName, user.LastName, roles, user.OwnerId, user.Block, user.Apartment);
+            var authResponse = new AuthResponse(token, refreshToken, user.Email, user.FirstName, user.LastName, roles, user.OwnerId, user.ApartmentId);
             return Ok(ApiResponse<AuthResponse>.SuccessResult(authResponse, _localization.GetMessage("RegistrationSuccessful"), 200));
         }
         catch (Exception ex)
@@ -231,7 +250,7 @@ public class AuthController : ControllerBase
             // Actualizar refresh token
             await _jwtService.StoreRefreshTokenAsync(user, newRefreshToken);
 
-            var authResponse = new AuthResponse(newToken, newRefreshToken, user.Email!, user.FirstName, user.LastName, roles, user.OwnerId, user.Block, user.Apartment);
+            var authResponse = new AuthResponse(newToken, newRefreshToken, user.Email!, user.FirstName, user.LastName, roles, user.OwnerId, user.ApartmentId);
             return Ok(ApiResponse<AuthResponse>.SuccessResult(authResponse, _localization.GetMessage("TokenRefreshed"), 200));
         }
         catch (Exception)
@@ -258,16 +277,32 @@ public class AuthController : ControllerBase
             user.RejectedAt = null;
             user.RejectedBy = null;
             
-            // Si es Owner, generar OwnerId
+            // Si es Owner, generar OwnerId y actualizar Apartment
             var roles = await _userManager.GetRolesAsync(user);
             if (roles.Contains("Owner"))
             {
-                user.OwnerId = Guid.NewGuid();
+                var ownerId = Guid.NewGuid();
+                user.OwnerId = ownerId;
+                
+                // Actualizar el OwnerId en el Apartment correspondiente
+                if (user.ApartmentId.HasValue)
+                {
+                    var apartment = await _context.Apartments
+                        .FirstOrDefaultAsync(a => a.Id == user.ApartmentId.Value);
+                    
+                    if (apartment != null)
+                    {
+                        apartment.OwnerId = ownerId;
+                    }
+                }
             }
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
                 return BadRequest(ApiResponse.ErrorResult(_localization.GetMessage("ApprovalError"), 400));
+            
+            // Guardar cambios en Apartments
+            await _context.SaveChangesAsync();
 
             // Enviar notificación al usuario
             try
@@ -358,8 +393,7 @@ public class AuthController : ControllerBase
                     u.FirstName,
                     u.LastName,
                     u.PhoneNumber,
-                    Block = u.Block,
-                    Apartment = u.Apartment,
+                    ApartmentId = u.ApartmentId,
                     u.CreatedAt,
                     u.IsRejected,
                     u.RejectedAt,
@@ -392,8 +426,7 @@ public class AuthController : ControllerBase
                     u.FirstName,
                     u.LastName,
                     u.PhoneNumber,
-                    Block = u.Block,
-                    Apartment = u.Apartment,
+                    ApartmentId = u.ApartmentId,
                     u.CreatedAt,
                     u.IsApproved,
                     u.ApprovedAt,
