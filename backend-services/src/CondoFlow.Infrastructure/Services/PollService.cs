@@ -233,8 +233,16 @@ public class PollService : IPollService
     {
         try
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-            return user != null ? $"{user.Block}-{user.Apartment}" : "N/A";
+            var user = _context.Users
+                .Include(u => u.ApartmentEntity)
+                    .ThenInclude(a => a.Block)
+                .FirstOrDefault(u => u.Id == userId);
+                
+            if (user?.ApartmentEntity != null)
+            {
+                return $"{user.ApartmentEntity.Block.Name}-{user.ApartmentEntity.Number}";
+            }
+            return "N/A";
         }
         catch
         {

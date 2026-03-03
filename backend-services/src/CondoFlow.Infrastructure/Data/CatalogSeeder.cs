@@ -7,7 +7,7 @@ public static class CatalogSeeder
 {
     public static async Task SeedAsync(ApplicationDbContext context)
     {
-        // Seed categories
+        // Seed categories (Incident Categories)
         if (!await context.Categories.AnyAsync())
         {
             var categories = new List<Category>
@@ -53,20 +53,20 @@ public static class CatalogSeeder
         var existingEventTypes = await context.EventTypes.Select(et => et.Code).ToListAsync();
         var newEventTypes = new List<EventType>();
         
-        var allEventTypes = new List<(string Code, string Name, string Description, int Order)>
+        var allEventTypes = new List<(string Code, string Name, string Description)>
         {
-            ("birthday", "Cumpleaños", "Celebración de cumpleaños", 1),
-            ("meeting", "Reunión", "Reunión familiar o de trabajo", 2),
-            ("celebration", "Celebración", "Celebración general", 3),
-            ("wedding", "Boda", "Ceremonia de boda", 4),
-            ("anniversary", "Aniversario", "Celebración de aniversario", 5),
-            ("graduation", "Graduación", "Celebración de graduación", 6),
-            ("baby_shower", "Baby Shower", "Celebración de baby shower", 7),
-            ("quinceañera", "Quinceañera", "Celebración de quinceañera", 8),
-            ("family_reunion", "Reunión Familiar", "Reunión familiar", 9),
-            ("corporate", "Evento Corporativo", "Evento de empresa", 10),
-            ("social", "Evento Social", "Evento social general", 11),
-            ("other", "Otro", "Otro tipo de evento", 12)
+            ("birthday", "Cumpleaños", "Celebración de cumpleaños"),
+            ("meeting", "Reunión", "Reunión familiar o de trabajo"),
+            ("celebration", "Celebración", "Celebración general"),
+            ("wedding", "Boda", "Ceremonia de boda"),
+            ("anniversary", "Aniversario", "Celebración de aniversario"),
+            ("graduation", "Graduación", "Celebración de graduación"),
+            ("baby_shower", "Baby Shower", "Celebración de baby shower"),
+            ("quinceañera", "Quinceañera", "Celebración de quinceañera"),
+            ("family_reunion", "Reunión Familiar", "Reunión familiar"),
+            ("corporate", "Evento Corporativo", "Evento de empresa"),
+            ("social", "Evento Social", "Evento social general"),
+            ("other", "Otro", "Otro tipo de evento")
         };
         
         foreach (var eventType in allEventTypes)
@@ -78,7 +78,6 @@ public static class CatalogSeeder
                     Code = eventType.Code,
                     Name = eventType.Name,
                     Description = eventType.Description,
-
                     IsActive = true
                 });
             }
@@ -87,6 +86,85 @@ public static class CatalogSeeder
         if (newEventTypes.Any())
         {
             context.EventTypes.AddRange(newEventTypes);
+        }
+
+        // Seed Blocks and Apartments
+        if (!await context.Blocks.AnyAsync())
+        {
+            var blocks = new List<Block>
+            {
+                new() { Name = "M", Description = "Bloque M", IsActive = true },
+                new() { Name = "N", Description = "Bloque N", IsActive = true },
+                new() { Name = "O", Description = "Bloque O", IsActive = true },
+                new() { Name = "P", Description = "Bloque P", IsActive = true },
+                new() { Name = "Q", Description = "Bloque Q", IsActive = true }
+            };
+            context.Blocks.AddRange(blocks);
+            await context.SaveChangesAsync();
+            
+            // Seed Apartments for each block (4 floors, 2 apartments per floor)
+            foreach (var block in blocks)
+            {
+                var apartments = new List<Apartment>();
+                for (int floor = 1; floor <= 4; floor++)
+                {
+                    apartments.Add(new Apartment 
+                    { 
+                        Number = $"{floor}01", 
+                        Floor = floor, 
+                        BlockId = block.Id, 
+                        IsActive = true 
+                    });
+                    apartments.Add(new Apartment 
+                    { 
+                        Number = $"{floor}02", 
+                        Floor = floor, 
+                        BlockId = block.Id, 
+                        IsActive = true 
+                    });
+                }
+                context.Apartments.AddRange(apartments);
+            }
+        }
+
+        // Seed Announcement Types
+        if (!await context.AnnouncementTypes.AnyAsync())
+        {
+            var announcementTypes = new List<AnnouncementType>
+            {
+                new() { Name = "Informativo", Description = "Anuncios informativos generales", IsActive = true },
+                new() { Name = "Urgente", Description = "Anuncios urgentes que requieren atención inmediata", IsActive = true },
+                new() { Name = "Mantenimiento", Description = "Avisos de mantenimiento programado", IsActive = true },
+                new() { Name = "Evento", Description = "Anuncios de eventos y actividades", IsActive = true }
+            };
+            context.AnnouncementTypes.AddRange(announcementTypes);
+        }
+
+        // Seed Payment Concepts
+        if (!await context.PaymentConcepts.AnyAsync())
+        {
+            var paymentConcepts = new List<PaymentConcept>
+            {
+                new() { Code = "maintenance", Name = "Pago de Mantenimiento", DefaultAmount = 2000m, RoofAmount = 1000m, IsAutoCalculated = true, IsActive = true },
+                new() { Code = "extraordinary", Name = "Cuota Extraordinaria", IsAutoCalculated = false, IsActive = true },
+                new() { Code = "other", Name = "Otro", IsAutoCalculated = false, IsActive = true }
+            };
+            context.PaymentConcepts.AddRange(paymentConcepts);
+        }
+
+        // Seed Expense Categories
+        if (!await context.ExpenseCategories.AnyAsync())
+        {
+            var expenseCategories = new List<ExpenseCategory>
+            {
+                new() { Name = "Mantenimiento", IsActive = true },
+                new() { Name = "Limpieza", IsActive = true },
+                new() { Name = "Seguridad", IsActive = true },
+                new() { Name = "Servicios", IsActive = true },
+                new() { Name = "Administración", IsActive = true },
+                new() { Name = "Reparaciones", IsActive = true }
+            };
+            context.ExpenseCategories.AddRange(expenseCategories);
         }
 
         await context.SaveChangesAsync();

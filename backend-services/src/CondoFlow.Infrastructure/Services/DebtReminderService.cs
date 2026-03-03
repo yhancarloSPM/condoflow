@@ -1,4 +1,5 @@
 using CondoFlow.Application.Common.Services;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -72,7 +73,7 @@ public class DebtReminderService : IDebtReminderService
         var overdueDate = DateTime.Now.AddDays(-1).Date;
         
         var overdueDebts = await _context.Debts
-            .Where(d => d.Status == "Pending" && d.DueDate.Date == overdueDate)
+            .Where(d => d.Status == StatusPayments.Pending && d.DueDate.Date == overdueDate)
             .ToListAsync();
 
         foreach (var debt in overdueDebts)

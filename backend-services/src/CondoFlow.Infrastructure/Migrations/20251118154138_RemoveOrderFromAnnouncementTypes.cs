@@ -10,9 +10,19 @@ namespace CondoFlow.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Order",
-                table: "AnnouncementTypes");
+            // Check if Order column exists before dropping
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT * FROM sys.columns WHERE name = 'Order' AND object_id = OBJECT_ID('AnnouncementTypes'))
+                BEGIN
+                    DECLARE @var sysname;
+                    SELECT @var = [d].[name]
+                    FROM [sys].[default_constraints] [d]
+                    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+                    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[AnnouncementTypes]') AND [c].[name] = N'Order');
+                    IF @var IS NOT NULL EXEC(N'ALTER TABLE [AnnouncementTypes] DROP CONSTRAINT [' + @var + '];');
+                    ALTER TABLE [AnnouncementTypes] DROP COLUMN [Order];
+                END
+            ");
         }
 
         /// <inheritdoc />

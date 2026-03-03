@@ -11,32 +11,45 @@ namespace CondoFlow.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_PollVote_Poll_Owner_Unique",
-                table: "PollVotes");
+            // Check if index exists before dropping
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_PollVote_Poll_Owner_Unique' AND object_id = OBJECT_ID('PollVotes'))
+                BEGIN
+                    DROP INDEX [IX_PollVote_Poll_Owner_Unique] ON [PollVotes];
+                END
+            ");
 
-            migrationBuilder.DropColumn(
-                name: "OwnerId",
-                table: "PollVotes");
+            // Check if column exists before dropping
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT * FROM sys.columns WHERE name = 'OwnerId' AND object_id = OBJECT_ID('PollVotes'))
+                BEGIN
+                    ALTER TABLE [PollVotes] DROP COLUMN [OwnerId];
+                END
+            ");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "DeletedAt",
-                table: "Polls",
-                type: "datetime2",
-                nullable: true);
+            // Check if DeletedAt column exists before adding
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE name = 'DeletedAt' AND object_id = OBJECT_ID('Polls'))
+                BEGIN
+                    ALTER TABLE [Polls] ADD [DeletedAt] datetime2 NULL;
+                END
+            ");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "IsDeleted",
-                table: "Polls",
-                type: "bit",
-                nullable: false,
-                defaultValue: false);
+            // Check if IsDeleted column exists before adding
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE name = 'IsDeleted' AND object_id = OBJECT_ID('Polls'))
+                BEGIN
+                    ALTER TABLE [Polls] ADD [IsDeleted] bit NOT NULL DEFAULT 0;
+                END
+            ");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PollVote_Poll_User_Unique",
-                table: "PollVotes",
-                columns: new[] { "PollId", "UserId" },
-                unique: true);
+            // Check if index exists before creating
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_PollVote_Poll_User_Unique' AND object_id = OBJECT_ID('PollVotes'))
+                BEGIN
+                    CREATE UNIQUE INDEX [IX_PollVote_Poll_User_Unique] ON [PollVotes] ([PollId], [UserId]);
+                END
+            ");
         }
 
         /// <inheritdoc />
