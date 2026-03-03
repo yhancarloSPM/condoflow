@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-  BASE_URL: 'http://172.16.20.105:7009/api',
-  SIGNALR_HUB_URL: 'http://172.16.20.105:7009/notificationHub',
+  BASE_URL: 'http://localhost:7009/api',
+  SIGNALR_HUB_URL: 'http://localhost:7009/notificationHub',
   TIMEOUT: 30000,
 };
 
