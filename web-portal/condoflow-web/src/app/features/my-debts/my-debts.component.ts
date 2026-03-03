@@ -1,11 +1,13 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { DebtService } from '../../core/services/debt.service';
 import { NavbarComponent } from '../../shared/components/navbar.component';
 import { PaymentService } from '../../core/services/payment.service';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-my-debts',
@@ -14,7 +16,7 @@ import { PaymentService } from '../../core/services/payment.service';
   templateUrl: './my-debts.component.html',
   styleUrls: ['./my-debts.component.scss']
 })
-export class MyDebtsComponent implements OnInit {
+export class MyDebtsComponent implements OnInit, OnDestroy {
   currentUser = signal<any>(null);
   loading = signal(false);
   currentDebts = signal<any[]>([]);
@@ -24,6 +26,7 @@ export class MyDebtsComponent implements OnInit {
   recentPayments = signal<any[]>([]);
   selectedYear = new Date().getFullYear();
   availableYears: number[] = [];
+  private routerSubscription?: Subscription;
 
   months = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
@@ -36,20 +39,43 @@ export class MyDebtsComponent implements OnInit {
 
   ngOnInit() {
     this.currentUser.set(this.authService.currentUser());
-    this.initializeYears();
+    this.initializeYears(); // Inicializar años antes de cargar datos
     this.loadDebts();
     this.loadRecentPayments();
+    
+    // Recargar datos cuando se navega a esta ruta
+    this.routerSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        if (event.url === '/my-debts') {
+          this.loadDebts();
+          this.loadRecentPayments();
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.routerSubscription?.unsubscribe();
   }
 
   initializeYears() {
     const currentYear = new Date().getFullYear();
-    this.availableYears = [currentYear - 1, currentYear];
+    // Inicializar solo con el año actual
+    // calculateAvailableYears() se encargará de agregar años históricos basados en las deudas reales
+    this.availableYears = [currentYear];
     this.selectedYear = currentYear;
   }
 
   onYearChange() {
+    console.log('📅 My Debts - onYearChange - Año seleccionado:', this.selectedYear);
     this.filterDebtsByYear();
     this.loadRecentPayments();
+  }
+
+  onYearChangeEvent(event: any) {
+    this.selectedYear = parseInt(event.target.value);
+    console.log('📅 My Debts - onYearChangeEvent - Nuevo año:', this.selectedYear);
+    this.onYearChange();
   }
 
   allDebtsData: any = null;
@@ -64,6 +90,10 @@ export class MyDebtsComponent implements OnInit {
         if (response.success) {
           // Guardar todos los datos sin filtrar
           this.allDebtsData = response.data;
+          
+          // Calcular años disponibles basados en las deudas
+          this.calculateAvailableYears();
+          
           // Aplicar filtro por año
           this.filterDebtsByYear();
         }
@@ -76,6 +106,58 @@ export class MyDebtsComponent implements OnInit {
     });
   }
 
+  calculateAvailableYears() {
+    const currentYear = new Date().getFullYear();
+    
+    if (!this.allDebtsData) {
+      // Si no hay datos, solo mostrar el año actual
+      this.availableYears = [currentYear];
+      this.selectedYear = currentYear;
+      return;
+    }
+    
+    // Combinar todas las deudas
+    const allDebts = [
+      ...(this.allDebtsData.currentDebts || []),
+      ...(this.allDebtsData.overdueDebts || []),
+      ...(this.allDebtsData.paidDebts || []),
+      ...(this.allDebtsData.paymentSubmittedDebts || [])
+    ];
+    
+    if (allDebts.length === 0) {
+      // Si no hay deudas, solo mostrar el año actual
+      this.availableYears = [currentYear];
+      this.selectedYear = currentYear;
+      return;
+    }
+    
+    // Obtener años únicos de las deudas usando dueDate, filtrando años futuros
+    const years = [...new Set(allDebts.map(d => new Date(d.dueDate).getFullYear()))]
+      .filter(y => y <= currentYear);
+    
+    if (years.length === 0) {
+      // Si no hay años válidos, solo mostrar el año actual
+      this.availableYears = [currentYear];
+      this.selectedYear = currentYear;
+      return;
+    }
+    
+    const minYear = Math.min(...years);
+    const maxYear = currentYear;
+    
+    const availableYears: number[] = [];
+    for (let year = minYear; year <= maxYear; year++) {
+      availableYears.push(year);
+    }
+    
+    this.availableYears = availableYears.sort((a, b) => b - a); // Descendente
+    
+    // Si el año seleccionado no está en los disponibles, usar el año actual
+    if (!availableYears.includes(this.selectedYear)) {
+      this.selectedYear = currentYear;
+    }
+  }
+
   filterDebtsByYear() {
     if (!this.allDebtsData) return;
     
@@ -83,7 +165,7 @@ export class MyDebtsComponent implements OnInit {
       return debts.filter((debt: any) => {
         const dueDate = new Date(debt.dueDate);
         const year = dueDate.getFullYear();
-        const selectedYearNum = Number(this.selectedYear);
+        const selectedYearNum = this.selectedYear;
         return year === selectedYearNum;
       });
     };

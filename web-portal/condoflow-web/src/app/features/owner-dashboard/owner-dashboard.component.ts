@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 import { AuthService } from '../../core/services/auth.service';
@@ -13,7 +14,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-owner-dashboard',
   standalone: true,
-  imports: [CommonModule, NavbarComponent],
+  imports: [CommonModule, NavbarComponent, FormsModule],
   templateUrl: './owner-dashboard.component.html',
   styleUrls: ['./owner-dashboard.component.scss']
 })
@@ -30,6 +31,8 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
   allPayments = signal<any[]>([]);
   apartmentInfo = signal<any>(null);
   announcements = signal<any[]>([]);
+  selectedYear = new Date().getFullYear();
+  availableYears: number[] = [];
   
   pieChart: Chart | null = null;
   lineChart: Chart | null = null;
@@ -44,6 +47,7 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.currentUser.set(this.authService.currentUser());
+    this.initializeYears(); // Inicializar años antes de cargar datos
     this.loadDashboardData();
     
     // Escuchar cambios de ruta para recargar datos
@@ -55,9 +59,7 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    setTimeout(() => {
-      this.initCharts();
-    }, 100);
+    // Las gráficas se inicializarán después de cargar los datos
   }
 
   async loadDashboardData() {
@@ -101,13 +103,58 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
     const allDebts = [...currentDebts, ...overdueDebts, ...paidDebts, ...paymentSubmittedDebts];
     this.allDebts.set(allDebts);
     
+    // Calcular años disponibles basados en las deudas
+    this.calculateAvailableYears(allDebts);
+    
     // Usar las categorías del backend que ya están correctas
     this.totalRequirePayment.set(currentDebts.length + overdueDebts.length);
     this.totalInReview.set(paymentSubmittedDebts.length);
     this.totalPaid.set(paidDebts.length);
     
-    // Actualizar gráficas después de procesar datos
-    this.updateCharts();
+    // Inicializar o actualizar gráficas después de procesar datos
+    if (!this.pieChart || !this.lineChart) {
+      // Primera vez - crear las gráficas
+      setTimeout(() => this.initCharts(), 100);
+    } else {
+      // Ya existen - solo actualizar
+      this.updateCharts();
+    }
+  }
+
+  calculateAvailableYears(debts: any[]) {
+    const currentYear = new Date().getFullYear();
+    
+    if (debts.length === 0) {
+      // Si no hay deudas, solo mostrar el año actual
+      this.availableYears = [currentYear];
+      this.selectedYear = currentYear;
+      return;
+    }
+    
+    // Obtener años únicos de las deudas (solo hasta el año actual)
+    const years = [...new Set(debts.map(d => d.year))].filter(y => y != null && y <= currentYear);
+    
+    if (years.length === 0) {
+      // Si no hay años válidos, solo mostrar el año actual
+      this.availableYears = [currentYear];
+      this.selectedYear = currentYear;
+      return;
+    }
+    
+    const minYear = Math.min(...years);
+    const maxYear = currentYear;
+    
+    const availableYears: number[] = [];
+    for (let year = minYear; year <= maxYear; year++) {
+      availableYears.push(year);
+    }
+    
+    this.availableYears = availableYears.sort((a, b) => b - a); // Descendente
+    
+    // Si el año seleccionado no está en los disponibles, usar el año actual
+    if (!availableYears.includes(this.selectedYear)) {
+      this.selectedYear = currentYear;
+    }
   }
 
   getPaymentStatusClass(status: string): string {
@@ -157,6 +204,25 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
     return (first + last).toUpperCase();
   }
 
+  initializeYears() {
+    const currentYear = new Date().getFullYear();
+    // Inicializar solo con el año actual
+    // calculateAvailableYears() se encargará de agregar años históricos basados en las deudas reales
+    this.availableYears = [currentYear];
+    this.selectedYear = currentYear;
+  }
+
+  onYearChange() {
+    console.log('📅 onYearChange - Año seleccionado:', this.selectedYear);
+    this.updateCharts();
+  }
+
+  onYearChangeEvent(event: any) {
+    this.selectedYear = parseInt(event.target.value);
+    console.log('📅 onYearChangeEvent - Nuevo año:', this.selectedYear);
+    this.onYearChange();
+  }
+
   initCharts() {
     this.createPieChart();
     this.createLineChart();
@@ -166,9 +232,14 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
     const ctx = this.pieChartRef?.nativeElement?.getContext('2d');
     if (!ctx) return;
 
-    const requirePayment = this.totalRequirePayment();
-    const inReview = this.totalInReview();
-    const paid = this.totalPaid();
+    // Filtrar deudas por el año seleccionado
+    const selectedYearNum = this.selectedYear;
+    const debtsForYear = this.allDebts().filter(debt => debt.year === selectedYearNum);
+    
+    // Contar por estado solo las deudas del año seleccionado
+    const requirePayment = debtsForYear.filter(d => d.status === 'Pending' || d.status === 'Overdue').length;
+    const inReview = debtsForYear.filter(d => d.status === 'PaymentSubmitted').length;
+    const paid = debtsForYear.filter(d => d.status === 'Paid').length;
     
     const hasData = requirePayment > 0 || inReview > 0 || paid > 0;
     const data = hasData ? [requirePayment, inReview, paid] : [1];
@@ -263,7 +334,11 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     const status = new Array(12).fill(0);
     
-    this.allDebts().forEach(debt => {
+    // Filtrar deudas por el año seleccionado
+    const selectedYearNum = this.selectedYear;
+    const debtsForYear = this.allDebts().filter(debt => debt.year === selectedYearNum);
+    
+    debtsForYear.forEach(debt => {
       if (debt.month >= 1 && debt.month <= 12) {
         const monthIndex = debt.month - 1;
         
@@ -285,9 +360,14 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
 
   updateCharts() {
     if (this.pieChart) {
-      const requirePayment = this.totalRequirePayment();
-      const inReview = this.totalInReview();
-      const paid = this.totalPaid();
+      // Filtrar deudas por el año seleccionado
+      const selectedYearNum = this.selectedYear;
+      const debtsForYear = this.allDebts().filter(debt => debt.year === selectedYearNum);
+      
+      // Contar por estado solo las deudas del año seleccionado
+      const requirePayment = debtsForYear.filter(d => d.status === 'Pending' || d.status === 'Overdue').length;
+      const inReview = debtsForYear.filter(d => d.status === 'PaymentSubmitted').length;
+      const paid = debtsForYear.filter(d => d.status === 'Paid').length;
       
       const hasData = requirePayment > 0 || inReview > 0 || paid > 0;
       this.pieChart.data.datasets[0].data = hasData ? [requirePayment, inReview, paid] : [1];

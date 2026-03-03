@@ -11,10 +11,10 @@
       <!-- Calendario de Mantenimiento -->
       <div class="calendar-section">
         <div class="calendar-header">
-          <h3>Calendario de Incidencias</h3>
+          <h3>Estado de Deudas Mensual</h3>
           <div class="year-selector">
             <label for="yearSelect">Año:</label>
-            <select id="yearSelect" [(ngModel)]="selectedYear" (change)="onYearChange()">
+            <select id="yearSelect" [value]="selectedYear" (change)="onYearChangeEvent($event)">
               @for (year of availableYears; track year) {
                 <option [value]="year">{{ year }}</option>
               }

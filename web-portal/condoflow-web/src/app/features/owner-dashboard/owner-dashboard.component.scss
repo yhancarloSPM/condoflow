@@ -40,6 +40,13 @@
 .charts-section { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
 .chart-card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; }
 .chart-card h3 { margin: 0 0 1.5rem 0; font-size: 1.25rem; font-weight: 600; color: #1f2937; }
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.chart-header h3 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #1f2937; }
+.year-selector { display: flex; align-items: center; gap: 0.5rem; }
+.year-selector label { font-size: 0.875rem; color: #6b7280; font-weight: 500; }
+.year-selector select { padding: 0.5rem 1rem; border: 1px solid #d1d5db; border-radius: 6px; background: white; color: #374151; font-size: 0.875rem; cursor: pointer; transition: all 0.2s ease; }
+.year-selector select:hover { border-color: #2563EB; }
+.year-selector select:focus { outline: none; border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 .chart-container { position: relative; height: 300px; }
 .empty-chart { text-align: center; color: #9ca3af; }
 .empty-chart i { font-size: 3rem; margin-bottom: 1rem; }
