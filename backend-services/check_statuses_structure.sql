@@ -1,9 +1,0 @@
--- Verificar estructura de la tabla Statuses
-SELECT 
-    COLUMN_NAME,
-    DATA_TYPE,
-    IS_NULLABLE,
-    COLUMN_DEFAULT
-FROM INFORMATION_SCHEMA.COLUMNS 
-WHERE TABLE_NAME = 'Statuses'
-ORDER BY ORDINAL_POSITION;
