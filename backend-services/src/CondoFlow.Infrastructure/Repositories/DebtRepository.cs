@@ -1,4 +1,5 @@
 using CondoFlow.Domain.Entities;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,8 +53,8 @@ public class DebtRepository : IDebtRepository
     {
         return await _context.Debts
             .Where(d => d.OwnerId == ownerId && 
-                   (d.Status == "Pending" || d.Status == "Overdue" || d.Status == "PaymentSubmitted") &&
-                   d.Status != "Paid")
+                   (d.Status == StatusPayments.Pending || d.Status == StatusPayments.Overdue || d.Status == StatusPayments.PaymentSubmitted) &&
+                   d.Status != StatusPayments.Paid)
             .OrderBy(d => d.DueDate)
             .ToListAsync();
     }

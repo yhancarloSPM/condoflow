@@ -1,4 +1,5 @@
 using CondoFlow.Domain.Entities;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Domain.ValueObjects;
 using Xunit;
 
@@ -65,7 +66,7 @@ public class DebtTests
         debt.MarkAsPaid();
 
         // Assert
-        Assert.Equal("Paid", debt.Status);
+        Assert.Equal(StatusPayments.Paid, debt.Status);
     }
 
     [Fact]
@@ -78,7 +79,7 @@ public class DebtTests
         debt.MarkAsOverdue();
 
         // Assert
-        Assert.Equal("Overdue", debt.Status);
+        Assert.Equal(StatusPayments.Overdue, debt.Status);
     }
 
     private static Debt CreateValidDebt()

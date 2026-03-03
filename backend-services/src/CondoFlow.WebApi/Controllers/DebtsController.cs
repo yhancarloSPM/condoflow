@@ -1,6 +1,7 @@
 using CondoFlow.Application.Common.DTOs.Debt;
 using CondoFlow.Application.Common.Models;
 using CondoFlow.Domain.Entities;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Domain.ValueObjects;
 using CondoFlow.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -55,10 +56,10 @@ public class DebtsController : ControllerBase
             })
             .ToListAsync();
 
-        var currentDebts = debts.Where(d => d.Status == "Pending" && !d.IsOverdue).ToList();
-        var overdueDebts = debts.Where(d => d.Status != "PaymentSubmitted" && d.Status != "Paid" && d.IsOverdue).ToList();
-        var paidDebts = debts.Where(d => d.Status == "Paid").ToList();
-        var paymentSubmittedDebts = debts.Where(d => d.Status == "PaymentSubmitted").ToList();
+        var currentDebts = debts.Where(d => d.Status == StatusPayments.Pending && !d.IsOverdue).ToList();
+        var overdueDebts = debts.Where(d => (d.Status == StatusPayments.Pending || d.Status == StatusPayments.Overdue) && d.IsOverdue).ToList();
+        var paidDebts = debts.Where(d => d.Status == StatusPayments.Paid).ToList();
+        var paymentSubmittedDebts = debts.Where(d => d.Status == StatusPayments.PaymentSubmitted).ToList();
         
 
 
