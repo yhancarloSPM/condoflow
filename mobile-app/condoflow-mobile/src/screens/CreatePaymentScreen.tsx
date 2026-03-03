@@ -37,7 +37,7 @@ export default function CreatePaymentScreen({ route, navigation }: any) {
     }
 
     const result = await ImagePicker.launchImagePickerAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       quality: 0.8,
       base64: true,
