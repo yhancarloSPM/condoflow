@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -29,6 +29,8 @@ function AuthStack() {
 }
 
 function MainTabs() {
+  const { signOut } = useAuth();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -46,6 +48,14 @@ function MainTabs() {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={signOut}
+            style={{ marginRight: 15, padding: 5 }}
+          >
+            <Text style={{ color: '#fff', fontSize: 16 }}>Salir</Text>
+          </TouchableOpacity>
+        ),
       }}
     >
       <Tab.Screen
