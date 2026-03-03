@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authorization;
-using CondoFlow.Infrastructure.Identity;
 using CondoFlow.Application.Common.Models;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Infrastructure.Data;
+using CondoFlow.Infrastructure.Identity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CondoFlow.WebApi.Controllers;
@@ -54,8 +55,7 @@ public class OwnersController : ControllerBase
                 firstName = user.FirstName,
                 lastName = user.LastName,
                 email = user.Email,
-                apartment = user.Apartment,
-                block = user.Block
+                apartmentId = user.ApartmentId
             };
 
             return Ok(ApiResponse<object>.SuccessResult(ownerData, "Información del propietario obtenida exitosamente", 200));
@@ -74,8 +74,8 @@ public class OwnersController : ControllerBase
         {
             // Primero verificar si hay deudas
             var totalDebts = await _context.Debts.CountAsync();
-            var pendingDebts = await _context.Debts.Where(d => d.Status == "Pending").CountAsync();
-            var overdueDebts = await _context.Debts.Where(d => d.Status == "Overdue").CountAsync();
+            var pendingDebts = await _context.Debts.Where(d => d.Status == StatusPayments.Pending).CountAsync();
+            var overdueDebts = await _context.Debts.Where(d => d.Status == StatusPayments.Overdue).CountAsync();
             
             // Debug info
             var debugInfo = new
@@ -94,15 +94,15 @@ public class OwnersController : ControllerBase
 
             // Obtener deudas activas (incluyendo las que tienen pagos en revisión)
             var activeDebts = await _context.Debts
-                .Where(d => d.Status == "Pending" || d.Status == "Overdue" || d.Status == "PaymentSubmitted")
+                .Where(d => d.Status == StatusPayments.Pending || d.Status == StatusPayments.Overdue || d.Status == StatusPayments.PaymentSubmitted)
                 .ToListAsync();
 
             // Actualizar status basado en IsOverdue
             foreach (var debt in activeDebts)
             {
-                if (debt.IsOverdue && debt.Status == "Pending")
+                if (debt.IsOverdue && debt.Status == StatusPayments.Pending)
                 {
-                    debt.Status = "Overdue";
+                    debt.Status = StatusPayments.Overdue;
                 }
             }
 
@@ -125,22 +125,33 @@ public class OwnersController : ControllerBase
                     x.d.OwnerId, 
                     FirstName = x.u?.FirstName ?? "Usuario", 
                     LastName = x.u?.LastName ?? "no encontrado", 
-                    Block = x.u?.Block ?? "",
-                    Apartment = x.u?.Apartment ?? "" 
+                    ApartmentId = x.u?.ApartmentId
                 })
-                .Select(g => new
-                {
-                    ownerId = g.Key.OwnerId,
-                    name = g.Key.FirstName + " " + g.Key.LastName,
-                    apartment = !string.IsNullOrEmpty(g.Key.Block) && !string.IsNullOrEmpty(g.Key.Apartment) 
-                        ? g.Key.Block + "-" + g.Key.Apartment 
-                        : "",
-                    pendingAmount = g.Where(x => x.d.Status == "Pending").Sum(x => x.d.Amount.Amount),
-                    overdueAmount = g.Where(x => x.d.Status == "Overdue" || x.d.Status == "PaymentSubmitted").Sum(x => x.d.Amount.Amount),
-                    totalAmount = g.Sum(x => x.d.Amount.Amount),
-                    pendingCount = g.Count(x => x.d.Status == "Pending"),
-                    overdueCount = g.Count(x => x.d.Status == "Overdue" || x.d.Status == "PaymentSubmitted"),
-                    lastUpdate = g.Max(x => x.d.CreatedAt)
+                .Select(g => {
+                    var apartmentInfo = "";
+                    if (g.Key.ApartmentId.HasValue)
+                    {
+                        var apartment = _context.Apartments
+                            .Include(a => a.Block)
+                            .FirstOrDefault(a => a.Id == g.Key.ApartmentId.Value);
+                        if (apartment != null)
+                        {
+                            apartmentInfo = $"{apartment.Block.Name}-{apartment.Number}";
+                        }
+                    }
+                    
+                    return new
+                    {
+                        ownerId = g.Key.OwnerId,
+                        name = g.Key.FirstName + " " + g.Key.LastName,
+                        apartment = apartmentInfo,
+                        pendingAmount = g.Where(x => x.d.Status == StatusPayments.Pending).Sum(x => x.d.Amount.Amount),
+                        overdueAmount = g.Where(x => x.d.Status == StatusPayments.Overdue || x.d.Status == StatusPayments.PaymentSubmitted).Sum(x => x.d.Amount.Amount),
+                        totalAmount = g.Sum(x => x.d.Amount.Amount),
+                        pendingCount = g.Count(x => x.d.Status == StatusPayments.Pending),
+                        overdueCount = g.Count(x => x.d.Status == StatusPayments.Overdue || x.d.Status == StatusPayments.PaymentSubmitted),
+                        lastUpdate = g.Max(x => x.d.CreatedAt)
+                    };
                 })
                 .OrderByDescending(o => o.totalAmount)
                 .ToList();
@@ -162,7 +173,7 @@ public class OwnersController : ControllerBase
             var ownerGuid = Guid.Parse(ownerId);
             
             var debts = await _context.Debts
-                .Where(d => d.OwnerId == ownerGuid && (d.Status == "Pending" || d.Status == "Overdue" || d.Status == "PaymentSubmitted"))
+                .Where(d => d.OwnerId == ownerGuid && (d.Status == StatusPayments.Pending || d.Status == StatusPayments.Overdue || d.Status == StatusPayments.PaymentSubmitted))
                 .OrderByDescending(d => d.Year)
                 .ThenByDescending(d => d.Month)
                 .ToListAsync();
@@ -176,7 +187,7 @@ public class OwnersController : ControllerBase
                 month = debt.Month,
                 year = debt.Year,
                 dueDate = debt.DueDate,
-                status = debt.IsOverdue ? "Overdue" : debt.Status,
+                status = debt.IsOverdue ? StatusPayments.Overdue : debt.Status,
                 createdAt = debt.CreatedAt
             }).ToList();
 

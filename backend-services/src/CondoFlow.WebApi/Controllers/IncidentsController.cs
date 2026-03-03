@@ -164,18 +164,20 @@ public class IncidentsController : ControllerBase
         try
         {
             var incidents = await _context.Incidents
-                .Join(_context.Users, i => i.OwnerId.ToString(), u => u.Id, (i, u) => new {
-                    id = i.Id,
-                    title = i.Title,
-                    description = i.Description,
-                    category = i.Category,
-                    priority = i.Priority,
-                    status = i.Status,
-                    adminComment = i.AdminComment,
-                    ownerName = $"{u.FirstName} {u.LastName}",
-                    apartment = $"{u.Block}-{u.Apartment}",
-                    createdAt = i.CreatedAt,
-                    updatedAt = i.UpdatedAt
+                .Join(_context.Users, i => i.OwnerId.ToString(), u => u.Id, (i, u) => new { i, u })
+                .GroupJoin(_context.Apartments.Include(a => a.Block), x => x.u.ApartmentId, a => (int?)a.Id, (x, apartments) => new { x.i, x.u, apartment = apartments.FirstOrDefault() })
+                .Select(x => new {
+                    id = x.i.Id,
+                    title = x.i.Title,
+                    description = x.i.Description,
+                    category = x.i.Category,
+                    priority = x.i.Priority,
+                    status = x.i.Status,
+                    adminComment = x.i.AdminComment,
+                    ownerName = $"{x.u.FirstName} {x.u.LastName}",
+                    apartment = x.apartment != null ? $"{x.apartment.Block.Name}-{x.apartment.Number}" : "",
+                    createdAt = x.i.CreatedAt,
+                    updatedAt = x.i.UpdatedAt
                 })
                 .OrderByDescending(i => i.createdAt)
                 .ToListAsync();

@@ -1,4 +1,5 @@
 using CondoFlow.Application.Common.Models;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,11 +34,17 @@ public class AdminDebtsController : ControllerBase
 
             foreach (var debt in debts)
             {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.OwnerId == debt.OwnerId);
+                var user = await _context.Users
+                    .Include(u => u.ApartmentEntity)
+                        .ThenInclude(a => a.Block)
+                    .FirstOrDefaultAsync(u => u.OwnerId == debt.OwnerId);
+                    
                 var ownerName = user != null ? $"{user.FirstName} {user.LastName}" : "Usuario no encontrado";
-                var apartment = user != null && !string.IsNullOrEmpty(user.Block) && !string.IsNullOrEmpty(user.Apartment) 
-                    ? $"{user.Block}-{user.Apartment}" 
-                    : "";
+                var apartment = "";
+                if (user?.ApartmentEntity != null)
+                {
+                    apartment = $"{user.ApartmentEntity.Block.Name}-{user.ApartmentEntity.Number}";
+                }
 
                 debtResponses.Add(new
                 {
@@ -51,7 +58,7 @@ public class AdminDebtsController : ControllerBase
                     Month = debt.Month,
                     Year = debt.Year,
                     DueDate = debt.DueDate,
-                    Status = debt.IsOverdue ? "Overdue" : debt.Status,
+                    Status = debt.IsOverdue ? StatusPayments.Overdue : debt.Status,
                     IsOverdue = debt.IsOverdue,
                     IsPaid = debt.IsPaid,
                     CreatedAt = debt.CreatedAt
@@ -72,7 +79,8 @@ public class AdminDebtsController : ControllerBase
         try
         {
             var users = await _context.Users
-                .Where(u => u.OwnerId != null && u.IsApproved)
+                .Include(u => u.ApartmentEntity)
+                .Where(u => u.OwnerId != null && u.IsApproved && u.ApartmentId != null)
                 .ToListAsync();
 
             var debtsCreated = 0;
@@ -88,8 +96,8 @@ public class AdminDebtsController : ControllerBase
 
                     if (existingDebt == null)
                     {
-                        var isRoofApartment = user.Apartment == "501" || user.Apartment == "502";
-                        var amount = isRoofApartment ? 900 : 1800;
+                        var isRoofApartment = user.ApartmentEntity!.Number == "501" || user.ApartmentEntity.Number == "502";
+                        var amount = isRoofApartment ? 1000 : 2000;
                         
                         var debt = new CondoFlow.Domain.Entities.Debt(
                             user.OwnerId.Value,

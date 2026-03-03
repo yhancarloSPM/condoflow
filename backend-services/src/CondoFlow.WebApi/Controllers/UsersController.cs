@@ -44,8 +44,7 @@ public class UsersController : ControllerBase
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                Block = user.Block,
-                Apartment = user.Apartment,
+                ApartmentId = user.ApartmentId,
                 OwnerId = user.OwnerId,
                 IsApproved = user.IsApproved,
                 CreatedAt = user.CreatedAt

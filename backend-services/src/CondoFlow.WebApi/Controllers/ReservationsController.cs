@@ -2,11 +2,13 @@ using CondoFlow.Application.Common.DTOs.Reservation;
 using CondoFlow.Application.Common.Models;
 using CondoFlow.Application.Common.Services;
 using CondoFlow.Domain.Entities;
+using CondoFlow.Infrastructure.Data;
 using CondoFlow.Infrastructure.Repositories;
 using CondoFlow.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace CondoFlow.WebApi.Controllers;
@@ -19,12 +21,18 @@ public class ReservationsController : ControllerBase
     private readonly IReservationRepository _reservationRepository;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly INotificationService _notificationService;
+    private readonly ApplicationDbContext _context;
 
-    public ReservationsController(IReservationRepository reservationRepository, UserManager<ApplicationUser> userManager, INotificationService notificationService)
+    public ReservationsController(
+        IReservationRepository reservationRepository, 
+        UserManager<ApplicationUser> userManager, 
+        INotificationService notificationService,
+        ApplicationDbContext context)
     {
         _reservationRepository = reservationRepository;
         _userManager = userManager;
         _notificationService = notificationService;
+        _context = context;
     }
 
     [HttpGet]
@@ -276,15 +284,21 @@ public class ReservationsController : ControllerBase
 
     private async Task<ReservationDto> MapToDtoAsync(Reservation reservation)
     {
-        var user = await _userManager.FindByIdAsync(reservation.UserId);
+        var user = await _userManager.Users
+            .Include(u => u.ApartmentEntity)
+                .ThenInclude(a => a.Block)
+            .FirstOrDefaultAsync(u => u.Id == reservation.UserId);
+            
         var userName = "Usuario desconocido";
         
         if (user != null)
         {
             var fullName = $"{user.FirstName} {user.LastName}".Trim();
-            var apartment = !string.IsNullOrEmpty(user.Block) && !string.IsNullOrEmpty(user.Apartment) 
-                ? $"{user.Block}-{user.Apartment}" 
-                : "Sin apartamento";
+            var apartment = "Sin apartamento";
+            if (user.ApartmentEntity != null)
+            {
+                apartment = $"{user.ApartmentEntity.Block.Name}-{user.ApartmentEntity.Number}";
+            }
             userName = $"{fullName}\n{apartment}";
         }
         
@@ -347,11 +361,17 @@ public class ReservationsController : ControllerBase
     
     private async Task SendCancellationNotificationToAdmin(Reservation reservation, string? cancellationReason)
     {
-        var user = await _userManager.FindByIdAsync(reservation.UserId);
+        var user = await _userManager.Users
+            .Include(u => u.ApartmentEntity)
+                .ThenInclude(a => a.Block)
+            .FirstOrDefaultAsync(u => u.Id == reservation.UserId);
+            
         var userName = user != null ? $"{user.FirstName} {user.LastName}" : "Usuario desconocido";
-        var apartment = user != null && !string.IsNullOrEmpty(user.Block) && !string.IsNullOrEmpty(user.Apartment) 
-            ? $"{user.Block}-{user.Apartment}" 
-            : "Sin apartamento";
+        var apartment = "Sin apartamento";
+        if (user?.ApartmentEntity != null)
+        {
+            apartment = $"{user.ApartmentEntity.Block.Name}-{user.ApartmentEntity.Number}";
+        }
         
         var title = "Reserva Cancelada por Propietario";
         var message = $"{userName} ({apartment}) ha cancelado su reserva del gazebo para el {reservation.ReservationDate:dd/MM/yyyy} de {reservation.StartTime.Hours:00}:{reservation.StartTime.Minutes:00} a {reservation.EndTime.Hours:00}:{reservation.EndTime.Minutes:00}.";
@@ -372,11 +392,17 @@ public class ReservationsController : ControllerBase
     
     private async Task SendNewReservationNotificationToAdmin(Reservation reservation)
     {
-        var user = await _userManager.FindByIdAsync(reservation.UserId);
+        var user = await _userManager.Users
+            .Include(u => u.ApartmentEntity)
+                .ThenInclude(a => a.Block)
+            .FirstOrDefaultAsync(u => u.Id == reservation.UserId);
+            
         var userName = user != null ? $"{user.FirstName} {user.LastName}" : "Usuario desconocido";
-        var apartment = user != null && !string.IsNullOrEmpty(user.Block) && !string.IsNullOrEmpty(user.Apartment) 
-            ? $"{user.Block}-{user.Apartment}" 
-            : "Sin apartamento";
+        var apartment = "Sin apartamento";
+        if (user?.ApartmentEntity != null)
+        {
+            apartment = $"{user.ApartmentEntity.Block.Name}-{user.ApartmentEntity.Number}";
+        }
         
         var title = "Nueva Reserva de Gazebo";
         var message = $"{userName} ({apartment}) ha solicitado una reserva del gazebo para el {reservation.ReservationDate:dd/MM/yyyy} de {reservation.StartTime.Hours:00}:{reservation.StartTime.Minutes:00} a {reservation.EndTime.Hours:00}:{reservation.EndTime.Minutes:00}. Requiere aprobación.";

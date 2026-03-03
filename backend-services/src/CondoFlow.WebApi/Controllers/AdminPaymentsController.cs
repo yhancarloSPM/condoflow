@@ -1,5 +1,6 @@
 using CondoFlow.Application.Common.Models;
 using CondoFlow.Application.Common.Services;
+using CondoFlow.Infrastructure.Data;
 using CondoFlow.Infrastructure.Identity;
 using CondoFlow.Infrastructure.Repositories;
 using CondoFlow.WebApi.DTOs;
@@ -19,17 +20,20 @@ public class AdminPaymentsController : ControllerBase
     private readonly IPaymentRepository _paymentRepository;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly INotificationService _notificationService;
+    private readonly ApplicationDbContext _context;
 
     public AdminPaymentsController(
         ILocalizationService localization,
         IPaymentRepository paymentRepository,
         UserManager<ApplicationUser> userManager,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        ApplicationDbContext context)
     {
         _localization = localization;
         _paymentRepository = paymentRepository;
         _userManager = userManager;
         _notificationService = notificationService;
+        _context = context;
     }
 
     [HttpGet]
@@ -42,8 +46,17 @@ public class AdminPaymentsController : ControllerBase
 
             foreach (var payment in payments)
             {
-                var user = await _userManager.Users.FirstOrDefaultAsync(u => u.OwnerId == payment.OwnerId);
-                var ownerName = user != null ? $"{user.FirstName} {user.LastName} | {user.Block}-{user.Apartment}" : "Usuario no encontrado";
+                var user = await _userManager.Users
+                    .Include(u => u.ApartmentEntity)
+                        .ThenInclude(a => a.Block)
+                    .FirstOrDefaultAsync(u => u.OwnerId == payment.OwnerId);
+                    
+                var ownerInfo = "Usuario no encontrado";
+                if (user?.ApartmentEntity != null)
+                {
+                    ownerInfo = $"{user.FirstName} {user.LastName} | {user.ApartmentEntity.Block.Name}-{user.ApartmentEntity.Number}";
+                }
+                var ownerName = ownerInfo;
 
                 // Obtener concepto de la deuda si es un pago de deuda
                 string concept = payment.Concept;
@@ -141,9 +154,9 @@ public class AdminPaymentsController : ControllerBase
 
             return Ok(ApiResponse<object>.SuccessResult(new { paymentId }, "Pago aprobado exitosamente", 200));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return StatusCode(500, ApiResponse.ErrorResult("Error al aprobar el pago", 500));
+            return StatusCode(500, ApiResponse.ErrorResult($"Error al aprobar el pago | {ex.Message}", 500));
         }
     }
 
