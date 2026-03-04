@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { VictoryPie, VictoryBar, VictoryChart, VictoryAxis, VictoryStack } from 'victory';
@@ -33,7 +34,7 @@ interface YearlyStats {
   paidCount: number;
 }
 
-export default function OwnerDashboardScreen() {
+export default function OwnerDashboardScreen({ navigation }: any) {
   const { user } = useAuth();
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [stats, setStats] = useState<DashboardStats>({
@@ -225,63 +226,90 @@ export default function OwnerDashboardScreen() {
       {/* Filtro de Año */}
       {availableYears.length > 0 && (
         <View style={styles.yearFilterContainer}>
-          <Text style={styles.yearFilterLabel}>Filtrar por año:</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedYear}
-              onValueChange={(itemValue) => setSelectedYear(Number(itemValue))}
-              style={styles.picker}
-              dropdownIconColor="#6b7280"
-            >
-              {availableYears.map((year) => (
-                <Picker.Item key={year} label={year.toString()} value={year} />
-              ))}
-            </Picker>
+          <View style={styles.yearFilterHeader}>
+            <Text style={styles.yearFilterIcon}>📅</Text>
+            <Text style={styles.yearFilterLabel}>Año</Text>
           </View>
+          <Picker
+            selectedValue={selectedYear}
+            onValueChange={(itemValue) => setSelectedYear(Number(itemValue))}
+            style={styles.picker}
+            dropdownIconColor="#1e40af"
+            itemStyle={styles.pickerItem}
+          >
+            {availableYears.map((year) => (
+              <Picker.Item key={year} label={year.toString()} value={year} />
+            ))}
+          </Picker>
         </View>
       )}
 
       <View style={styles.statsContainer}>
-        {/* Tarjeta de Pago Mensual */}
-        <View style={[styles.statCard, { borderLeftColor: '#6366f1' }]}>
-          <Text style={styles.statLabel}>Pago Mensual</Text>
-          <Text style={[styles.statValue, { color: '#6366f1' }]}>
-            {formatCurrency(stats.maintenanceAmount)}
-          </Text>
-          <Text style={styles.statSubtext}>Mantenimiento</Text>
+        <View style={styles.statsRow}>
+          {/* Tarjeta de Requieren Pago */}
+          <TouchableOpacity 
+            style={[styles.statCard, styles.statCardHalf, { borderLeftColor: '#EF4444' }]}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Queries', { 
+              screen: 'DebtsMenu',
+              params: { filterStatus: 'requirePayment' }
+            })}
+          >
+            <Text style={styles.statLabel}>Requieren Pago</Text>
+            <Text style={[styles.statValue, { color: '#EF4444' }]}>
+              {stats.requirePaymentCount}
+            </Text>
+            <Text style={styles.statSubtext}>
+              {formatCurrency(stats.requirePaymentAmount)}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Tarjeta de En Revisión */}
+          <TouchableOpacity 
+            style={[styles.statCard, styles.statCardHalf, { borderLeftColor: '#f97316' }]}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Queries', { 
+              screen: 'DebtsMenu',
+              params: { filterStatus: 'inReview' }
+            })}
+          >
+            <Text style={styles.statLabel}>En Revisión</Text>
+            <Text style={[styles.statValue, { color: '#f97316' }]}>
+              {stats.inReviewCount}
+            </Text>
+            <Text style={styles.statSubtext}>
+              {formatCurrency(stats.inReviewAmount)}
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Tarjeta de Requieren Pago */}
-        <View style={[styles.statCard, { borderLeftColor: '#EF4444' }]}>
-          <Text style={styles.statLabel}>Requieren Pago</Text>
-          <Text style={[styles.statValue, { color: '#EF4444' }]}>
-            {stats.requirePaymentCount}
-          </Text>
-          <Text style={styles.statSubtext}>
-            {formatCurrency(stats.requirePaymentAmount)}
-          </Text>
-        </View>
+        <View style={styles.statsRow}>
+          {/* Tarjeta de Pagados */}
+          <TouchableOpacity 
+            style={[styles.statCard, styles.statCardHalf, { borderLeftColor: '#10B981' }]}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Queries', { 
+              screen: 'DebtsMenu',
+              params: { filterStatus: 'paid' }
+            })}
+          >
+            <Text style={styles.statLabel}>Pagados</Text>
+            <Text style={[styles.statValue, { color: '#10B981' }]}>
+              {stats.paidCount}
+            </Text>
+            <Text style={styles.statSubtext}>
+              {formatCurrency(stats.paidAmount)}
+            </Text>
+          </TouchableOpacity>
 
-        {/* Tarjeta de En Revisión */}
-        <View style={[styles.statCard, { borderLeftColor: '#f97316' }]}>
-          <Text style={styles.statLabel}>En Revisión</Text>
-          <Text style={[styles.statValue, { color: '#f97316' }]}>
-            {stats.inReviewCount}
-          </Text>
-          <Text style={styles.statSubtext}>
-            {formatCurrency(stats.inReviewAmount)}
-          </Text>
-        </View>
-
-        {/* Tarjeta de Pagados */}
-        <View style={[styles.statCard, { borderLeftColor: '#10B981' }]}>
-          <Text style={styles.statLabel}>Pagados</Text>
-          <Text style={[styles.statValue, { color: '#10B981' }]}>
-            {stats.paidCount}
-          </Text>
-          <Text style={styles.statSubtext}>
-            {formatCurrency(stats.paidAmount)}
-          </Text>
+          {/* Tarjeta de Pago Mensual */}
+          <View style={[styles.statCard, styles.statCardHalf, { borderLeftColor: '#6366f1' }]}>
+            <Text style={styles.statLabel}>Pago Mensual</Text>
+            <Text style={[styles.statValueSmall, { color: '#6366f1' }]}>
+              {formatCurrency(stats.maintenanceAmount)}
+            </Text>
+            <Text style={styles.statSubtext}>Mantenimiento</Text>
+          </View>
         </View>
       </View>
 
@@ -432,17 +460,24 @@ const styles = StyleSheet.create({
   statsContainer: {
     padding: 16,
   },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
   statCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
     borderLeftWidth: 4,
+  },
+  statCardHalf: {
+    flex: 1,
   },
   statLabel: {
     fontSize: 13,
@@ -452,6 +487,11 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 28,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  statValueSmall: {
+    fontSize: 20,
     fontWeight: '700',
     marginBottom: 2,
   },
@@ -484,33 +524,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     backgroundColor: '#ffffff',
     marginHorizontal: 16,
-    marginTop: 8,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    marginTop: 16,
+    marginBottom: 8,
+    borderRadius: 12,
+    shadowColor: '#1e40af',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  yearFilterHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  yearFilterIcon: {
+    fontSize: 20,
   },
   yearFilterLabel: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     color: '#1f2937',
   },
-  pickerContainer: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    minWidth: 120,
-  },
   picker: {
+    width: 120,
     height: 40,
-    width: '100%',
+    color: '#1f2937',
+    fontWeight: '600',
+  },
+  pickerItem: {
+    fontSize: 15,
+    fontWeight: '600',
   },
   legend: {
     flexDirection: 'row',

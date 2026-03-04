@@ -12,15 +12,23 @@ import { useAuth } from '../context/AuthContext';
 import { DebtService } from '../services/debt.service';
 import { Debt } from '../types';
 
-export default function DebtsScreen({ navigation }: any) {
+export default function DebtsScreen({ navigation, route }: any) {
   const { user } = useAuth();
   const [debts, setDebts] = useState<Debt[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const filterStatus = route?.params?.filterStatus || null;
 
   useEffect(() => {
     loadDebts();
   }, []);
+
+  useEffect(() => {
+    // Recargar cuando cambie el filtro
+    if (!loading) {
+      loadDebts();
+    }
+  }, [filterStatus]);
 
   const loadDebts = async () => {
     try {
@@ -30,7 +38,22 @@ export default function DebtsScreen({ navigation }: any) {
       if (user?.ownerId) {
         const data = await DebtService.getDebtsByOwner(user.ownerId);
         console.log('Debts loaded:', data);
-        setDebts(data);
+        
+        // Aplicar filtro si existe
+        let filteredData = data;
+        if (filterStatus) {
+          if (filterStatus === 'requirePayment') {
+            filteredData = data.filter(d => 
+              d.status.toUpperCase() === 'PENDING' || d.status.toUpperCase() === 'OVERDUE'
+            );
+          } else if (filterStatus === 'inReview') {
+            filteredData = data.filter(d => d.status.toUpperCase() === 'PAYMENTSUBMITTED');
+          } else if (filterStatus === 'paid') {
+            filteredData = data.filter(d => d.status.toUpperCase() === 'PAID');
+          }
+        }
+        
+        setDebts(filteredData);
       } else {
         console.log('No ownerId found');
       }
@@ -94,7 +117,9 @@ export default function DebtsScreen({ navigation }: any) {
 
   const renderDebtItem = ({ item }: { item: Debt }) => {
     const isPaid = item.status.toUpperCase() === 'PAID';
+    const isInReview = item.status.toUpperCase() === 'PAYMENTSUBMITTED';
     const hasPartialPayment = item.amountPaid > 0 && item.remainingAmount > 0;
+    const canPay = !isPaid && !isInReview;
     
     return (
       <TouchableOpacity
@@ -152,7 +177,7 @@ export default function DebtsScreen({ navigation }: any) {
           </View>
         </View>
 
-        {!isPaid && (
+        {canPay && (
           <TouchableOpacity
             style={styles.payButton}
             onPress={() =>
@@ -166,6 +191,13 @@ export default function DebtsScreen({ navigation }: any) {
     );
   };
 
+  const getFilterTitle = () => {
+    if (filterStatus === 'requirePayment') return 'Deudas que Requieren Pago';
+    if (filterStatus === 'inReview') return 'Deudas en Revisión';
+    if (filterStatus === 'paid') return 'Deudas Pagadas';
+    return 'Mis Deudas';
+  };
+
   if (loading) {
     return (
       <View style={styles.centerContainer}>
@@ -176,6 +208,11 @@ export default function DebtsScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
+      {filterStatus && (
+        <View style={styles.filterHeader}>
+          <Text style={styles.filterTitle}>{getFilterTitle()}</Text>
+        </View>
+      )}
       <FlatList
         data={debts}
         renderItem={renderDebtItem}
@@ -186,7 +223,11 @@ export default function DebtsScreen({ navigation }: any) {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No tienes deudas registradas</Text>
+            <Text style={styles.emptyText}>
+              {filterStatus 
+                ? 'No hay deudas con este estado' 
+                : 'No tienes deudas registradas'}
+            </Text>
           </View>
         }
       />
@@ -198,6 +239,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
+  },
+  filterHeader: {
+    backgroundColor: '#ffffff',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  filterTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1f2937',
   },
   centerContainer: {
     flex: 1,
