@@ -32,12 +32,8 @@ export default function DebtsScreen({ navigation, route }: any) {
 
   const loadDebts = async () => {
     try {
-      console.log('User data:', user);
-      console.log('Owner ID:', user?.ownerId);
-      
       if (user?.ownerId) {
         const data = await DebtService.getDebtsByOwner(user.ownerId);
-        console.log('Debts loaded:', data);
         
         // Aplicar filtro si existe
         let filteredData = data;
@@ -54,8 +50,6 @@ export default function DebtsScreen({ navigation, route }: any) {
         }
         
         setDebts(filteredData);
-      } else {
-        console.log('No ownerId found');
       }
     } catch (error) {
       console.error('Error loading debts:', error);
