@@ -5,45 +5,71 @@ import { StorageService } from './storage.service';
 
 export const AuthService = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await ApiService.post<AuthResponse>(
+    const response = await ApiService.post<any>(
       ENDPOINTS.AUTH.LOGIN,
       credentials
     );
 
+    // El backend devuelve los datos dentro de response.data
+    const userData = response.data;
+    const authData = {
+      token: userData.token,
+      refreshToken: userData.refreshToken,
+      userId: userData.user.id,
+      ownerId: userData.user.ownerId,
+      email: userData.user.email,
+      firstName: userData.user.firstName,
+      lastName: userData.user.lastName,
+      role: userData.user.role,
+    };
+
     // Save tokens and user data
-    await StorageService.saveToken(response.token);
-    await StorageService.saveRefreshToken(response.refreshToken);
+    await StorageService.saveToken(authData.token);
+    await StorageService.saveRefreshToken(authData.refreshToken);
     await StorageService.saveUser({
-      userId: response.userId,
-      ownerId: response.ownerId,
-      email: response.email,
-      firstName: response.firstName,
-      lastName: response.lastName,
-      role: response.role,
+      userId: authData.userId,
+      ownerId: authData.ownerId,
+      email: authData.email,
+      firstName: authData.firstName,
+      lastName: authData.lastName,
+      role: authData.role,
     });
 
-    return response;
+    return authData;
   },
 
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await ApiService.post<AuthResponse>(
+    const response = await ApiService.post<any>(
       ENDPOINTS.AUTH.REGISTER,
       data
     );
 
+    // El backend devuelve los datos dentro de response.data
+    const userData = response.data;
+    const authData = {
+      token: userData.token,
+      refreshToken: userData.refreshToken,
+      userId: userData.user.id,
+      ownerId: userData.user.ownerId,
+      email: userData.user.email,
+      firstName: userData.user.firstName,
+      lastName: userData.user.lastName,
+      role: userData.user.role,
+    };
+
     // Save tokens and user data
-    await StorageService.saveToken(response.token);
-    await StorageService.saveRefreshToken(response.refreshToken);
+    await StorageService.saveToken(authData.token);
+    await StorageService.saveRefreshToken(authData.refreshToken);
     await StorageService.saveUser({
-      userId: response.userId,
-      ownerId: response.ownerId,
-      email: response.email,
-      firstName: response.firstName,
-      lastName: response.lastName,
-      role: response.role,
+      userId: authData.userId,
+      ownerId: authData.ownerId,
+      email: authData.email,
+      firstName: authData.firstName,
+      lastName: authData.lastName,
+      role: authData.role,
     });
 
-    return response;
+    return authData;
   },
 
   async logout(): Promise<void> {

@@ -37,6 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   async function signIn(credentials: LoginRequest) {
     try {
       const response = await AuthService.login(credentials);
+      console.log('Login response:', response);
       setUser({
         userId: response.userId,
         ownerId: response.ownerId,
