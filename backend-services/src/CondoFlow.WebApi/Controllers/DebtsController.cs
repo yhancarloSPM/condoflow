@@ -33,8 +33,11 @@ public class DebtsController : ControllerBase
         if (!string.Equals(userOwnerId, ownerId, StringComparison.OrdinalIgnoreCase))
             return Forbid();
 
+        if (!Guid.TryParse(ownerId, out var ownerGuid))
+            return BadRequest(ApiResponse.ErrorResult("OwnerId inválido", 400));
+
         var debts = await _context.Debts
-            .Where(d => d.OwnerId.ToString() == ownerId)
+            .Where(d => d.OwnerId == ownerGuid)
             .OrderByDescending(d => d.Year)
             .ThenByDescending(d => d.Month)
             .Select(d => new
