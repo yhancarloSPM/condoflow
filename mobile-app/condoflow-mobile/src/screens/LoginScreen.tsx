@@ -20,7 +20,11 @@ export default function LoginScreen({ navigation }: any) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Por favor ingrese email y contraseña');
+      if (Platform.OS === 'web') {
+        alert('Por favor ingrese email y contraseña');
+      } else {
+        Alert.alert('Error', 'Por favor ingrese email y contraseña');
+      }
       return;
     }
 
@@ -28,10 +32,24 @@ export default function LoginScreen({ navigation }: any) {
     try {
       await signIn({ email, password });
     } catch (error: any) {
-      Alert.alert(
-        'Error',
-        error.response?.data?.message || 'Error al iniciar sesión'
-      );
+      console.log('Login error caught:', error);
+      console.log('Error message:', error.message);
+      
+      let errorMessage = 'Error al iniciar sesión';
+      
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      console.log('Showing alert with message:', errorMessage);
+      
+      if (Platform.OS === 'web') {
+        alert(errorMessage);
+      } else {
+        Alert.alert('Error', errorMessage);
+      }
     } finally {
       setLoading(false);
     }

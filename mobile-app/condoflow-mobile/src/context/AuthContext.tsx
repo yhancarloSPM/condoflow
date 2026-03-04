@@ -35,22 +35,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   async function signIn(credentials: LoginRequest) {
-    try {
-      const response = await AuthService.login(credentials);
-      console.log('Login response:', response);
-      setUser({
-        userId: response.userId,
-        ownerId: response.ownerId,
-        email: response.email,
-        firstName: response.firstName,
-        lastName: response.lastName,
-        role: response.role,
-        apartment: response.apartment,
-        apartmentId: response.apartmentId,
-      });
-    } catch (error) {
+    const response = await AuthService.login(credentials);
+    console.log('Login response:', response);
+    
+    // Validar que no sea un administrador
+    if (response.role === 'Admin') {
+      const error: any = new Error('La app móvil es solo para propietarios. Por favor usa la versión web para funciones administrativas.');
+      error.isAdminError = true;
       throw error;
     }
+    
+    setUser({
+      userId: response.userId,
+      ownerId: response.ownerId,
+      email: response.email,
+      firstName: response.firstName,
+      lastName: response.lastName,
+      role: response.role,
+      apartment: response.apartment,
+      apartmentId: response.apartmentId,
+    });
   }
 
   async function signUp(data: RegisterRequest) {
