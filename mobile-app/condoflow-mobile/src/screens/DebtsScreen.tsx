@@ -48,17 +48,34 @@ export default function DebtsScreen({ navigation }: any) {
   }, []);
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pendiente':
-        return '#f39c12';
-      case 'pagada':
-        return '#27ae60';
-      case 'vencida':
-        return '#e74c3c';
-      case 'parcial':
-        return '#3498db';
+    const statusUpper = status.toUpperCase();
+    switch (statusUpper) {
+      case 'PENDING':
+        return '#F59E0B'; // Naranja - igual que la web
+      case 'PAID':
+        return '#10B981'; // Verde - igual que la web
+      case 'OVERDUE':
+        return '#EF4444'; // Rojo - igual que la web
+      case 'PAYMENTSUBMITTED':
+        return '#f97316'; // Naranja oscuro - igual que la web
       default:
         return '#95a5a6';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    const statusUpper = status.toUpperCase();
+    switch (statusUpper) {
+      case 'PENDING':
+        return 'Pendiente';
+      case 'PAID':
+        return 'Pagada';
+      case 'OVERDUE':
+        return 'Vencida';
+      case 'PAYMENTSUBMITTED':
+        return 'En Revisión';
+      default:
+        return status;
     }
   };
 
@@ -75,70 +92,79 @@ export default function DebtsScreen({ navigation }: any) {
     });
   };
 
-  const renderDebtItem = ({ item }: { item: Debt }) => (
-    <TouchableOpacity
-      style={styles.debtCard}
-      onPress={() => navigation.navigate('DebtDetail', { debt: item })}
-    >
-      <View style={styles.debtHeader}>
-        <Text style={styles.debtMonth}>
-          {new Date(2024, item.month - 1).toLocaleDateString('es-DO', {
-            month: 'long',
-          })}{' '}
-          {item.year}
-        </Text>
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: getStatusColor(item.status) },
-          ]}
-        >
-          <Text style={styles.statusText}>{item.status}</Text>
-        </View>
-      </View>
-
-      <View style={styles.debtBody}>
-        <View style={styles.debtRow}>
-          <Text style={styles.debtLabel}>Monto:</Text>
-          <Text style={styles.debtAmount}>{formatCurrency(item.amount)}</Text>
+  const renderDebtItem = ({ item }: { item: Debt }) => {
+    const isPaid = item.status.toUpperCase() === 'PAID';
+    const hasPartialPayment = item.amountPaid > 0 && item.remainingAmount > 0;
+    
+    return (
+      <TouchableOpacity
+        style={styles.debtCard}
+        onPress={() => navigation.navigate('DebtDetail', { debt: item })}
+      >
+        <View style={styles.debtHeader}>
+          <Text style={styles.debtMonth}>
+            {new Date(2024, item.month - 1).toLocaleDateString('es-DO', {
+              month: 'long',
+            })}{' '}
+            {item.year}
+          </Text>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: getStatusColor(item.status) },
+            ]}
+          >
+            <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
+          </View>
         </View>
 
-        {item.amountPaid > 0 && (
+        <View style={styles.debtBody}>
           <View style={styles.debtRow}>
-            <Text style={styles.debtLabel}>Pagado:</Text>
-            <Text style={styles.debtPaid}>
-              {formatCurrency(item.amountPaid)}
+            <Text style={styles.debtLabel}>Monto:</Text>
+            <Text style={[
+              styles.debtAmount,
+              !isPaid && styles.debtAmountUnpaid
+            ]}>
+              {formatCurrency(item.amount)}
             </Text>
           </View>
-        )}
 
-        {item.remainingAmount > 0 && (
+          {hasPartialPayment && (
+            <>
+              <View style={styles.debtRow}>
+                <Text style={styles.debtLabel}>Pagado:</Text>
+                <Text style={styles.debtPaid}>
+                  {formatCurrency(item.amountPaid)}
+                </Text>
+              </View>
+              <View style={styles.debtRow}>
+                <Text style={styles.debtLabel}>Por Pagar:</Text>
+                <Text style={styles.debtRemaining}>
+                  {formatCurrency(item.remainingAmount)}
+                </Text>
+              </View>
+            </>
+          )}
+
           <View style={styles.debtRow}>
-            <Text style={styles.debtLabel}>Restante:</Text>
-            <Text style={styles.debtRemaining}>
-              {formatCurrency(item.remainingAmount)}
-            </Text>
+            <Text style={styles.debtLabel}>Vencimiento:</Text>
+            <Text style={styles.debtDate}>{formatDate(item.dueDate)}</Text>
           </View>
-        )}
-
-        <View style={styles.debtRow}>
-          <Text style={styles.debtLabel}>Vencimiento:</Text>
-          <Text style={styles.debtDate}>{formatDate(item.dueDate)}</Text>
         </View>
-      </View>
 
-      {item.status.toLowerCase() !== 'pagada' && (
-        <TouchableOpacity
-          style={styles.payButton}
-          onPress={() =>
-            navigation.navigate('CreatePayment', { debtId: item.id })
-          }
-        >
-          <Text style={styles.payButtonText}>Pagar</Text>
-        </TouchableOpacity>
-      )}
-    </TouchableOpacity>
-  );
+        {!isPaid && (
+          <TouchableOpacity
+            style={styles.payButton}
+            onPress={() =>
+              navigation.navigate('CreatePayment', { debtId: item.id })
+            }
+          >
+            <Text style={styles.payButtonText}>Pagar</Text>
+          </TouchableOpacity>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   if (loading) {
     return (
@@ -171,7 +197,7 @@ export default function DebtsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8fafc', // Mismo color que la web
   },
   centerContainer: {
     flex: 1,
@@ -234,6 +260,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#2c3e50',
+  },
+  debtAmountUnpaid: {
+    color: '#EF4444', // Rojo para deudas no pagadas
   },
   debtPaid: {
     fontSize: 14,

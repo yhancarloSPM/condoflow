@@ -207,7 +207,7 @@ export default function CreatePaymentScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8fafc', // Mismo color que la web
   },
   content: {
     padding: 20,

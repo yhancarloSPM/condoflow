@@ -42,15 +42,30 @@ export default function PaymentsScreen() {
   }, []);
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pendiente':
-        return '#f39c12';
-      case 'aprobado':
-        return '#27ae60';
-      case 'rechazado':
-        return '#e74c3c';
+    const statusUpper = status.toUpperCase();
+    switch (statusUpper) {
+      case 'PENDING':
+        return '#F59E0B'; // Naranja
+      case 'APPROVED':
+        return '#10B981'; // Verde
+      case 'REJECTED':
+        return '#EF4444'; // Rojo
       default:
         return '#95a5a6';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    const statusUpper = status.toUpperCase();
+    switch (statusUpper) {
+      case 'PENDING':
+        return 'Pendiente';
+      case 'APPROVED':
+        return 'Aprobado';
+      case 'REJECTED':
+        return 'Rechazado';
+      default:
+        return status;
     }
   };
 
@@ -77,7 +92,7 @@ export default function PaymentsScreen() {
             { backgroundColor: getStatusColor(item.status) },
           ]}
         >
-          <Text style={styles.statusText}>{item.status}</Text>
+          <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
         </View>
       </View>
 
@@ -159,7 +174,7 @@ export default function PaymentsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8fafc', // Mismo color que la web
   },
   centerContainer: {
     flex: 1,
