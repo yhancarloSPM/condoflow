@@ -33,7 +33,7 @@ export default function QueriesScreen() {
       color: '#3B82F6',
       badge: null,
       onPress: () => {
-        navigation.navigate('Reservations' as never);
+        navigation.navigate('MyReservations' as never);
       },
     },
     {
@@ -43,7 +43,7 @@ export default function QueriesScreen() {
       color: '#F59E0B',
       badge: null,
       onPress: () => {
-        navigation.navigate('Incidents' as never);
+        navigation.navigate('MyIncidents' as never);
       },
     },
     {

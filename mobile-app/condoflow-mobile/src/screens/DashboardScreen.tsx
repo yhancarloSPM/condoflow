@@ -12,14 +12,54 @@ export default function DashboardScreen({ navigation }: any) {
   const { user } = useAuth();
 
   const cards = [
-    { title: 'Dashboard', description: 'Ver estadísticas generales', color: '#3b82f6', screen: 'OwnerDashboard' },
-    { title: 'Mis Deudas', description: 'Ver estado de mis deudas', color: '#F59E0B', screen: 'DebtsMenu' },
-    { title: 'Mis Pagos', description: 'Historial de pagos', color: '#10B981', screen: 'PaymentsMenu' },
-    { title: 'Mi Perfil', description: 'Gestionar mi información', color: '#6366f1', screen: 'Profile' },
-    { title: 'Anuncios', description: 'Ver anuncios del condominio', color: '#8b5cf6', screen: 'Announcements' },
-    { title: 'Reservaciones', description: 'Gestionar reservaciones', color: '#06b6d4', screen: 'Reservations' },
-    { title: 'Mis Incidencias', description: 'Estado de reportes', color: '#f97316', screen: 'Incidents' },
-    { title: 'Encuestas', description: 'Participar en encuestas', color: '#10b981', screen: 'Polls' },
+    { 
+      title: 'Dashboard', 
+      description: 'Ver estadísticas generales', 
+      color: '#3b82f6', 
+      onPress: () => navigation.navigate('HomeDashboard')
+    },
+    { 
+      title: 'Mis Deudas', 
+      description: 'Ver estado de mis deudas', 
+      color: '#F59E0B', 
+      onPress: () => navigation.navigate('HomeDebts')
+    },
+    { 
+      title: 'Mis Pagos', 
+      description: 'Historial de pagos', 
+      color: '#10B981', 
+      onPress: () => navigation.navigate('HomePayments')
+    },
+    { 
+      title: 'Mi Perfil', 
+      description: 'Gestionar mi información', 
+      color: '#6366f1', 
+      onPress: () => navigation.navigate('HomeProfile')
+    },
+    { 
+      title: 'Anuncios', 
+      description: 'Ver anuncios del condominio', 
+      color: '#8b5cf6', 
+      onPress: () => navigation.navigate('HomeAnnouncements')
+    },
+    { 
+      title: 'Reservaciones', 
+      description: 'Gestionar reservaciones', 
+      color: '#06b6d4', 
+      onPress: () => navigation.navigate('HomeReservations')
+    },
+    { 
+      title: 'Mis Incidencias', 
+      description: 'Estado de reportes', 
+      color: '#f97316', 
+      onPress: () => navigation.navigate('HomeIncidents')
+    },
+    { 
+      title: 'Encuestas', 
+      description: 'Participar en encuestas', 
+      color: '#10b981', 
+      onPress: () => navigation.navigate('HomePolls')
+    },
   ];
 
   return (
@@ -34,7 +74,7 @@ export default function DashboardScreen({ navigation }: any) {
           <TouchableOpacity
             key={index}
             style={[styles.card, { borderLeftColor: card.color }]}
-            onPress={() => navigation.navigate(card.screen)}
+            onPress={card.onPress}
           >
             <View style={styles.cardContent}>
               <View style={styles.cardText}>

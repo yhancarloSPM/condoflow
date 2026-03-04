@@ -40,6 +40,15 @@ function PlaceholderScreen({ route }: any) {
 function CustomDrawerContent(props: any) {
   const { signOut, user } = useAuth();
 
+  const handleHomePress = () => {
+    // Navegar al tab de Inicio y resetear el stack a HomeMain
+    props.navigation.navigate('MainTabs', {
+      screen: 'Options',
+      params: { screen: 'HomeMain' }
+    });
+    props.navigation.closeDrawer();
+  };
+
   return (
     <DrawerContentScrollView {...props} style={styles.drawerContainer}>
       <View style={styles.drawerHeader}>
@@ -58,7 +67,31 @@ function CustomDrawerContent(props: any) {
       </View>
 
       <View style={styles.drawerItems}>
-        <DrawerItemList {...props} />
+        <DrawerItem
+          label="Inicio"
+          onPress={handleHomePress}
+          labelStyle={styles.drawerLabel}
+          style={styles.drawerItemStyle}
+          activeBackgroundColor="#eff6ff"
+          activeTintColor="#1e40af"
+          inactiveTintColor="#4b5563"
+        />
+        
+        <DrawerItem
+          label="Mi Perfil"
+          onPress={() => {
+            props.navigation.navigate('MainTabs', {
+              screen: 'Options',
+              params: { screen: 'HomeProfile' }
+            });
+            props.navigation.closeDrawer();
+          }}
+          labelStyle={styles.drawerLabel}
+          style={styles.drawerItemStyle}
+          activeBackgroundColor="#eff6ff"
+          activeTintColor="#1e40af"
+          inactiveTintColor="#4b5563"
+        />
         
         <View style={styles.divider} />
         
@@ -89,9 +122,69 @@ function AuthStack() {
 // Stack para el tab de Inicio
 function HomeStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="HomeMain" component={DashboardScreen} />
-      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+    <Stack.Navigator 
+      screenOptions={{
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: '#1e40af',
+        },
+        headerTintColor: '#ffffff',
+        headerTitleStyle: {
+          fontWeight: '700',
+          fontSize: 18,
+        },
+      }}
+    >
+      <Stack.Screen 
+        name="HomeMain" 
+        component={DashboardScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Notifications" 
+        component={NotificationsScreen}
+        options={{ title: 'Notificaciones' }}
+      />
+      <Stack.Screen 
+        name="HomeDashboard" 
+        component={OwnerDashboardScreen}
+        options={{ title: 'Dashboard' }}
+      />
+      <Stack.Screen 
+        name="HomeDebts" 
+        component={DebtsScreen}
+        options={{ title: 'Mis Deudas' }}
+      />
+      <Stack.Screen 
+        name="HomePayments" 
+        component={PaymentsScreen}
+        options={{ title: 'Mis Pagos' }}
+      />
+      <Stack.Screen 
+        name="HomeAnnouncements" 
+        component={PlaceholderScreen}
+        options={{ title: 'Anuncios' }}
+      />
+      <Stack.Screen 
+        name="HomeReservations" 
+        component={PlaceholderScreen}
+        options={{ title: 'Reservaciones' }}
+      />
+      <Stack.Screen 
+        name="HomeIncidents" 
+        component={PlaceholderScreen}
+        options={{ title: 'Mis Incidencias' }}
+      />
+      <Stack.Screen 
+        name="HomePolls" 
+        component={PlaceholderScreen}
+        options={{ title: 'Encuestas' }}
+      />
+      <Stack.Screen 
+        name="HomeProfile" 
+        component={PlaceholderScreen}
+        options={{ title: 'Mi Perfil' }}
+      />
     </Stack.Navigator>
   );
 }
@@ -99,11 +192,39 @@ function HomeStack() {
 // Stack para el tab de Solicitudes
 function RequestsStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="RequestsMain" component={RequestsScreen} />
-      <Stack.Screen name="CreatePayment" component={CreatePaymentScreen} />
-      <Stack.Screen name="Reservations" component={PlaceholderScreen} />
-      <Stack.Screen name="Incidents" component={PlaceholderScreen} />
+    <Stack.Navigator 
+      screenOptions={{
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: '#1e40af',
+        },
+        headerTintColor: '#ffffff',
+        headerTitleStyle: {
+          fontWeight: '700',
+          fontSize: 18,
+        },
+      }}
+    >
+      <Stack.Screen 
+        name="RequestsMain" 
+        component={RequestsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="CreatePayment" 
+        component={CreatePaymentScreen}
+        options={{ title: 'Registrar Pago' }}
+      />
+      <Stack.Screen 
+        name="Reservations" 
+        component={PlaceholderScreen}
+        options={{ title: 'Crear Reservación' }}
+      />
+      <Stack.Screen 
+        name="Incidents" 
+        component={PlaceholderScreen}
+        options={{ title: 'Reportar Incidencia' }}
+      />
     </Stack.Navigator>
   );
 }
@@ -111,12 +232,54 @@ function RequestsStack() {
 // Stack para el tab de Consultas
 function QueriesStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="QueriesMain" component={QueriesScreen} />
-      <Stack.Screen name="DebtsMenu" component={DebtsScreen} />
-      <Stack.Screen name="PaymentsMenu" component={PaymentsScreen} />
-      <Stack.Screen name="Announcements" component={PlaceholderScreen} />
-      <Stack.Screen name="Polls" component={PlaceholderScreen} />
+    <Stack.Navigator 
+      screenOptions={{
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: '#1e40af',
+        },
+        headerTintColor: '#ffffff',
+        headerTitleStyle: {
+          fontWeight: '700',
+          fontSize: 18,
+        },
+      }}
+    >
+      <Stack.Screen 
+        name="QueriesMain" 
+        component={QueriesScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="DebtsMenu" 
+        component={DebtsScreen}
+        options={{ title: 'Mis Deudas' }}
+      />
+      <Stack.Screen 
+        name="PaymentsMenu" 
+        component={PaymentsScreen}
+        options={{ title: 'Mis Pagos' }}
+      />
+      <Stack.Screen 
+        name="MyReservations" 
+        component={PlaceholderScreen}
+        options={{ title: 'Mis Reservaciones' }}
+      />
+      <Stack.Screen 
+        name="MyIncidents" 
+        component={PlaceholderScreen}
+        options={{ title: 'Mis Incidencias' }}
+      />
+      <Stack.Screen 
+        name="Announcements" 
+        component={PlaceholderScreen}
+        options={{ title: 'Anuncios' }}
+      />
+      <Stack.Screen 
+        name="Polls" 
+        component={PlaceholderScreen}
+        options={{ title: 'Encuestas' }}
+      />
     </Stack.Navigator>
   );
 }
@@ -391,13 +554,40 @@ function MainStack() {
         headerRight: () => {
           const { user } = useAuth();
           const { unreadCount } = useNotifications();
+          
+          const getUserInitials = () => {
+            if (!user) return 'U';
+            const first = user.firstName?.charAt(0) || '';
+            const last = user.lastName?.charAt(0) || '';
+            return (first + last).toUpperCase();
+          };
+          
           return (
             <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15, gap: 12 }}>
-              {user?.apartment && (
-                <Text style={{ color: '#ffffff', fontSize: 14, fontWeight: '700', textTransform: 'uppercase' }}>
-                  {user.apartment}
-                </Text>
-              )}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: '#10B981',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                  <Text style={{ color: '#ffffff', fontSize: 12, fontWeight: '700' }}>
+                    {getUserInitials()}
+                  </Text>
+                </View>
+                <View style={{ alignItems: 'flex-start' }}>
+                  <Text style={{ color: '#ffffff', fontSize: 13, fontWeight: '600' }}>
+                    {user?.firstName} {user?.lastName}
+                  </Text>
+                  {user?.apartment && (
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 12, fontWeight: '600', textTransform: 'uppercase' }}>
+                      {user.apartment}
+                    </Text>
+                  )}
+                </View>
+              </View>
               <TouchableOpacity
                 onPress={() => navigation.navigate('MainTabs', { 
                   screen: 'Options',
@@ -551,6 +741,18 @@ const styles = StyleSheet.create({
   drawerItems: {
     flex: 1,
     paddingTop: 4,
+  },
+  drawerLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 0,
+  },
+  drawerItemStyle: {
+    borderRadius: 10,
+    marginHorizontal: 12,
+    marginVertical: 0,
+    paddingVertical: 0,
+    height: 44,
   },
   divider: {
     height: 1,
