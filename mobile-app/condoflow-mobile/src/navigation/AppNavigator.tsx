@@ -86,6 +86,16 @@ function AuthStack() {
   );
 }
 
+// Stack para el tab de Inicio
+function HomeStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="HomeMain" component={DashboardScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+    </Stack.Navigator>
+  );
+}
+
 // Stack para el tab de Solicitudes
 function RequestsStack() {
   return (
@@ -147,7 +157,7 @@ function MainTabs() {
     >
       <Tab.Screen
         name="Options"
-        component={DashboardScreen}
+        component={HomeStack}
         options={{
           title: 'Inicio',
           tabBarLabel: 'Inicio',
@@ -389,7 +399,10 @@ function MainStack() {
                 </Text>
               )}
               <TouchableOpacity
-                onPress={() => navigation.navigate('Notifications')}
+                onPress={() => navigation.navigate('MainTabs', { 
+                  screen: 'Options',
+                  params: { screen: 'Notifications' }
+                })}
                 style={{
                   padding: 4,
                   position: 'relative',
@@ -462,14 +475,6 @@ function MainStack() {
         options={{
           drawerLabel: 'Mi Perfil',
           title: 'Mi Perfil',
-        }}
-      />
-      <Drawer.Screen
-        name="Notifications"
-        component={NotificationsScreen}
-        options={{
-          drawerItemStyle: { display: 'none' },
-          title: 'Notificaciones',
         }}
       />
     </Drawer.Navigator>

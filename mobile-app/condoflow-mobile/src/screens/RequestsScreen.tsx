@@ -13,8 +13,7 @@ export default function RequestsScreen() {
       description: 'Enviar comprobante de pago',
       color: '#10B981',
       onPress: () => {
-        // Navegar a Mis Deudas para seleccionar la deuda
-        navigation.navigate('DebtsMenu' as never);
+        navigation.navigate('CreatePayment' as never);
       },
     },
     {

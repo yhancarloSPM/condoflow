@@ -73,9 +73,6 @@ export default function OwnerDashboardScreen() {
     // Filtrar deudas por año seleccionado usando la propiedad 'year' del backend
     const debts = allDebts.filter(debt => debt.year === selectedYear);
     
-    console.log('calculateYearlyStats - selectedYear:', selectedYear);
-    console.log('calculateYearlyStats - debts found:', debts.length);
-    
     // Calcular estadísticas por estado para el año seleccionado
     const requirePaymentDebts = debts.filter(d => d.status === 'Pending' || d.status === 'Overdue');
     const inReviewDebts = debts.filter(d => d.status === 'PaymentSubmitted');
@@ -86,8 +83,6 @@ export default function OwnerDashboardScreen() {
       inReviewCount: inReviewDebts.length,
       paidCount: paidDebts.length,
     };
-    
-    console.log('calculateYearlyStats - setting yearlyStats to:', newStats);
 
     setYearlyStats(newStats);
     
@@ -258,9 +253,9 @@ export default function OwnerDashboardScreen() {
         </View>
 
         {/* Tarjeta de Requieren Pago */}
-        <View style={[styles.statCard, { borderLeftColor: '#F59E0B' }]}>
+        <View style={[styles.statCard, { borderLeftColor: '#EF4444' }]}>
           <Text style={styles.statLabel}>Requieren Pago</Text>
-          <Text style={[styles.statValue, { color: '#F59E0B' }]}>
+          <Text style={[styles.statValue, { color: '#EF4444' }]}>
             {stats.requirePaymentCount}
           </Text>
           <Text style={styles.statSubtext}>
@@ -440,29 +435,29 @@ const styles = StyleSheet.create({
   },
   statCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 12,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
     borderLeftWidth: 4,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#6b7280',
-    marginBottom: 8,
-    fontWeight: '600',
+    marginBottom: 6,
+    fontWeight: '700',
   },
   statValue: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   statSubtext: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#9ca3af',
   },
   chartSection: {
