@@ -62,4 +62,37 @@ public class ApartmentsController : ControllerBase
             return StatusCode(500, ApiResponse.ErrorResult("Error al obtener los apartamentos", 500));
         }
     }
+
+    [HttpGet("{apartmentId}")]
+    public async Task<IActionResult> GetApartmentById(int apartmentId)
+    {
+        try
+        {
+            var apartment = await _context.Apartments
+                .Include(a => a.Block)
+                .FirstOrDefaultAsync(a => a.Id == apartmentId && a.IsActive);
+
+            if (apartment == null)
+            {
+                return NotFound(ApiResponse.ErrorResult("Apartamento no encontrado", 404));
+            }
+
+            var apartmentInfo = new
+            {
+                apartment.Id,
+                apartment.Number,
+                apartment.Floor,
+                BlockName = apartment.Block.Name,
+                apartment.BlockId,
+                apartment.MonthlyMaintenanceAmount,
+                FullName = $"{apartment.Block.Name}-{apartment.Number}"
+            };
+
+            return Ok(ApiResponse<object>.SuccessResult(apartmentInfo, "Apartamento obtenido exitosamente", 200));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse.ErrorResult($"Error al obtener el apartamento: {ex.Message}", 500));
+        }
+    }
 }

@@ -21,6 +21,8 @@ export const AuthService = {
       firstName: userData.user.firstName,
       lastName: userData.user.lastName,
       role: userData.user.role,
+      apartment: userData.user.apartment,
+      apartmentId: userData.user.apartmentId,
     };
 
     // Save tokens and user data
@@ -33,6 +35,8 @@ export const AuthService = {
       firstName: authData.firstName,
       lastName: authData.lastName,
       role: authData.role,
+      apartment: authData.apartment,
+      apartmentId: authData.apartmentId,
     });
 
     return authData;

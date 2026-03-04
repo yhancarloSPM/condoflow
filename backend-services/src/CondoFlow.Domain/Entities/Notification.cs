@@ -10,6 +10,7 @@ public class Notification : BaseEntity
     public string? UserId { get; private set; } // Para notificaciones específicas de usuario
     public string TargetRole { get; private set; } // Admin o User
     public bool IsRead { get; private set; }
+    public bool IsDeleted { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public string? RelatedEntityId { get; private set; } // ID del pago, usuario, etc.
 
@@ -24,11 +25,17 @@ public class Notification : BaseEntity
         UserId = userId;
         RelatedEntityId = relatedEntityId;
         IsRead = false;
+        IsDeleted = false;
         CreatedAt = DateTime.UtcNow;
     }
 
     public void MarkAsRead()
     {
         IsRead = true;
+    }
+
+    public void MarkAsDeleted()
+    {
+        IsDeleted = true;
     }
 }

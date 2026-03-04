@@ -45,6 +45,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         firstName: response.firstName,
         lastName: response.lastName,
         role: response.role,
+        apartment: response.apartment,
+        apartmentId: response.apartmentId,
       });
     } catch (error) {
       throw error;

@@ -17,4 +17,5 @@ export const ENDPOINTS = {
     GET_BY_OWNER: (ownerId: string) => `/owners/${ownerId}/payments`,
     CREATE: (ownerId: string) => `/owners/${ownerId}/payments`,
   },
+  APARTMENTS: '/apartments',
 };

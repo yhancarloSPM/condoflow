@@ -34,6 +34,9 @@ public class NotificationsController : ControllerBase
 
         var query = _context.Notifications.AsQueryable();
         
+        // Filtrar notificaciones no eliminadas
+        query = query.Where(n => !n.IsDeleted);
+        
         if (userRoles.Contains("Admin"))
         {
             query = query.Where(n => n.TargetRole == "Admin");
@@ -73,5 +76,37 @@ public class NotificationsController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok(ApiResponse<object>.SuccessResult(null, "Notificación marcada como leída", 200));
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteNotification(Guid id)
+    {
+        var notification = await _context.Notifications.FindAsync(id);
+        if (notification == null)
+        {
+            return NotFound(ApiResponse<object>.ErrorResult("Notificación no encontrada", 404));
+        }
+
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? 
+                     User.FindFirst("sub")?.Value ?? 
+                     User.FindFirst("id")?.Value;
+        
+        var userRoles = User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(c => c.Value).ToList();
+        if (!userRoles.Any())
+        {
+            userRoles = User.FindAll("role").Select(c => c.Value).ToList();
+        }
+
+        // Verificar que el usuario tenga permiso para eliminar esta notificación
+        if (!userRoles.Contains("Admin") && notification.UserId != userId)
+        {
+            return Forbid();
+        }
+
+        // Borrado lógico
+        notification.MarkAsDeleted();
+        await _context.SaveChangesAsync();
+
+        return Ok(ApiResponse<object>.SuccessResult(null, "Notificación eliminada exitosamente", 200));
     }
 }

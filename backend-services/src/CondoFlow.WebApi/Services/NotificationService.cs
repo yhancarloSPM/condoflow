@@ -74,7 +74,7 @@ public class NotificationService : INotificationService
             
         if (status == "Rejected" && !string.IsNullOrEmpty(rejectionReason))
         {
-            message += $". Razón: {rejectionReason}";
+            message += $"\nRazón: {rejectionReason}";
         }
 
         var notification = new Notification(
