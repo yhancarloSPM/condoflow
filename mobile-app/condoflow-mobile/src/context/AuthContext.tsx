@@ -36,7 +36,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   async function signIn(credentials: LoginRequest) {
     const response = await AuthService.login(credentials);
-    console.log('Login response:', response);
     
     // Validar que no sea un administrador
     if (response.role === 'Admin') {

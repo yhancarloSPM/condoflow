@@ -32,9 +32,6 @@ export default function LoginScreen({ navigation }: any) {
     try {
       await signIn({ email, password });
     } catch (error: any) {
-      console.log('Login error caught:', error);
-      console.log('Error message:', error.message);
-      
       let errorMessage = 'Error al iniciar sesión';
       
       if (error.message) {
@@ -42,8 +39,6 @@ export default function LoginScreen({ navigation }: any) {
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
-      
-      console.log('Showing alert with message:', errorMessage);
       
       if (Platform.OS === 'web') {
         alert(errorMessage);

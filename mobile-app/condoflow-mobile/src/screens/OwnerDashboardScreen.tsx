@@ -117,7 +117,6 @@ export default function OwnerDashboardScreen() {
   const loadDashboardData = async () => {
     try {
       if (!user?.ownerId) {
-        console.log('No ownerId found');
         return;
       }
 
