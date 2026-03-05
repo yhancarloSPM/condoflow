@@ -95,11 +95,13 @@ import { NotificationService } from '../../core/services/notification.service';
               </div>
               <div class="user-details">
                 <span class="user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span>
-                @if (currentUser()?.apartment) {
-                  <span class="user-apartment">{{ currentUser()?.apartment }}</span>
-                } @else {
+                <span class="user-info-line">
                   <span class="user-role">{{ isAdmin() ? 'Administrador' : 'Propietario' }}</span>
-                }
+                  @if (currentUser()?.apartment) {
+                    <span class="separator"> | </span>
+                    <span class="user-apartment">{{ currentUser()?.apartment }}</span>
+                  }
+                </span>
               </div>
             </div>
             <button 
@@ -126,8 +128,10 @@ import { NotificationService } from '../../core/services/notification.service';
     .user-avatar { background: linear-gradient(135deg, #10B981, #059669); color: white; font-weight: 600; width: 2.25rem; height: 2.25rem; font-size: 0.875rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
     .user-details { display: flex; flex-direction: column; }
     .user-name { font-weight: 600; color: white; font-size: 0.875rem; }
-    .user-role { font-size: 0.75rem; color: rgba(255, 255, 255, 0.8); }
+    .user-info-line { display: flex; align-items: center; gap: 0; }
     .user-apartment { font-size: 0.75rem; color: rgba(255, 255, 255, 0.9); font-weight: 600; text-transform: uppercase; }
+    .separator { font-size: 0.75rem; color: rgba(255, 255, 255, 0.6); margin: 0 0.25rem; }
+    .user-role { font-size: 0.75rem; color: rgba(255, 255, 255, 0.8); }
     .logout-button { background: transparent; border: none; color: white; width: 2.5rem; height: 2.5rem; padding: 0; cursor: pointer; transition: all 0.2s ease; }
     .logout-button:hover { color: rgba(255, 255, 255, 0.8); }
     

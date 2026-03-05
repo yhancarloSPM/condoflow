@@ -581,9 +581,21 @@ function MainStack() {
                   <Text style={{ color: '#ffffff', fontSize: 13, fontWeight: '600' }}>
                     {user?.firstName} {user?.lastName}
                   </Text>
-                  <Text style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 12, fontWeight: '600', textTransform: 'uppercase' }}>
-                    {user?.apartment || (user?.role === 'Admin' ? 'Administrador' : 'Propietario')}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 11, fontWeight: '500' }}>
+                      {user?.role === 'Admin' ? 'Administrador' : 'Propietario'}
+                    </Text>
+                    {user?.apartment && (
+                      <>
+                        <Text style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 12, marginHorizontal: 4 }}>
+                          |
+                        </Text>
+                        <Text style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 12, fontWeight: '600', textTransform: 'uppercase' }}>
+                          {user.apartment}
+                        </Text>
+                      </>
+                    )}
+                  </View>
                 </View>
               </View>
               <TouchableOpacity
