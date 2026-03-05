@@ -68,6 +68,19 @@ export class MyPaymentsComponent implements OnInit {
     if (user?.ownerId) {
       this.loadPaymentConcepts();
       this.loadAvailableDebts().then(() => {
+        // Leer query params para pre-llenar el formulario DESPUÉS de cargar las deudas
+        this.route.queryParams.subscribe(params => {
+          if (params['debtId']) {
+            this.preloadDebtId = params['debtId'];
+            this.preloadAmount = params['amount'];
+            this.paymentType = 'debt';
+            this.selectedDebtId = params['debtId'];
+            
+            // Llamar a onDebtSelected para actualizar el monto y hacer readonly
+            this.onDebtSelected();
+          }
+        });
+        
         this.loadPayments();
       });
     } else {
@@ -225,7 +238,9 @@ export class MyPaymentsComponent implements OnInit {
     if (this.selectedDebtId) {
       const selectedDebt = this.availableDebts().find(d => d.id === this.selectedDebtId);
       if (selectedDebt) {
-        this.paymentForm.get('amount')?.setValue(selectedDebt.remainingAmount);
+        // Formatear el monto con 2 decimales
+        const formattedAmount = selectedDebt.remainingAmount.toFixed(2);
+        this.paymentForm.get('amount')?.setValue(formattedAmount);
         this.paymentForm.get('amount')?.disable();
       }
     } else {
