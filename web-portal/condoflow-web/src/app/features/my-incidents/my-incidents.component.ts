@@ -175,6 +175,18 @@ export class MyIncidentsComponent implements OnInit {
     return categoryMap[category] || 'other';
   }
 
+  getCategoryIcon(category: string): string {
+    const iconMap: { [key: string]: string } = {
+      'electrical': 'pi-bolt',
+      'plumbing': 'pi-wrench',
+      'maintenance': 'pi-cog',
+      'security': 'pi-shield',
+      'cleaning': 'pi-sparkles',
+      'other': 'pi-ellipsis-h'
+    };
+    return iconMap[category] || 'pi-ellipsis-h';
+  }
+
   getPriorityClass(priority: string): string {
     const priorityMap: { [key: string]: string } = {
       'low': 'low',
@@ -184,6 +196,28 @@ export class MyIncidentsComponent implements OnInit {
       'critical': 'critical'
     };
     return priorityMap[priority] || 'medium';
+  }
+
+  getPriorityIcon(priority: string): string {
+    const iconMap: { [key: string]: string } = {
+      'low': 'pi-arrow-down',
+      'medium': 'pi-minus',
+      'high': 'pi-arrow-up',
+      'urgent': 'pi-exclamation-triangle',
+      'critical': 'pi-exclamation-circle'
+    };
+    return iconMap[priority] || 'pi-minus';
+  }
+
+  getStatusIcon(status: string): string {
+    const iconMap: { [key: string]: string } = {
+      'reported': 'pi-clock',
+      'in_progress': 'pi-cog',
+      'resolved': 'pi-check-circle',
+      'cancelled': 'pi-ban',
+      'rejected': 'pi-times-circle'
+    };
+    return iconMap[status] || 'pi-clock';
   }
 
   createIncident() {

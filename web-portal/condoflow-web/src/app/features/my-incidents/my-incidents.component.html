@@ -2,21 +2,6 @@
   <app-navbar></app-navbar>
   
   <div class="main-content">
-    <div class="header-card">
-      <div class="header-content">
-        <div class="header-info">
-          <div class="header-icon">
-            <i class="pi pi-wrench"></i>
-          </div>
-          <div class="header-text">
-            <h2 class="header-title">Mis Incidencias</h2>
-            <hr class="title-divider">
-            <p class="header-subtitle">Reporta y da seguimiento a problemas del condominio</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="main-card card">
       <div class="card-body">
         <div class="incidents-layout">
@@ -184,16 +169,19 @@
                         <td>{{ incident.title }}</td>
                         <td class="text-center">
                           <span class="category-badge" [class]="getCategoryClass(incident.category)">
+                            <i class="pi" [ngClass]="getCategoryIcon(incident.category)"></i>
                             {{ getCategoryName(incident.category) }}
                           </span>
                         </td>
                         <td class="text-center">
                           <span class="priority-badge" [class]="getPriorityClass(incident.priority)">
+                            <i class="pi" [ngClass]="getPriorityIcon(incident.priority)"></i>
                             {{ getPriorityName(incident.priority) }}
                           </span>
                         </td>
                         <td class="text-center">
                           <span class="status-badge" [class]="getStatusClass(incident.status)">
+                            <i class="pi" [ngClass]="getStatusIcon(incident.status)"></i>
                             {{ getOwnerStatusLabel(incident).toUpperCase() }}
                           </span>
                         </td>
@@ -201,43 +189,45 @@
                           @if (!loading()) {
                             <div class="action-buttons">
                               <button 
-                                class="btn-action"
+                                class="btn-action btn-view"
                                 (click)="viewIncidentDetail(incident)"
-                                title="Ver detalle">
-                                <i class="pi pi-eye"></i>
+                                title="Ver detalle completo">
+                                <i class="pi pi-info-circle"></i>
                               </button>
                               @if (incident.imageUrl) {
                                 <button 
-                                  class="btn-action"
+                                  class="btn-action btn-image"
                                   (click)="viewImage(incident)"
-                                  title="Ver imagen">
-                                  <i class="pi pi-image"></i>
+                                  title="Ver imagen adjunta">
+                                  <i class="pi pi-camera"></i>
                                 </button>
                               } @else {
-                                <span class="btn-action-placeholder text-white">-</span>
+                                <span class="btn-action btn-no-image" title="Sin imagen">
+                                  <i class="pi pi-camera"></i>
+                                </span>
                               }
                               @if (incident.status === 'reported') {
                                 <button 
-                                  class="btn-action cancel"
+                                  class="btn-action btn-cancel"
                                   (click)="openCancelModal(incident.id)"
                                   title="Cancelar incidencia">
                                   <i class="pi pi-trash"></i>
                                 </button>
                               } @else if (incident.status === 'cancelled') {
-                                <span class="btn-action-icon">
-                                  <i class="pi pi-ban" style="color: rgba(255,255,255,0.7); font-size: 1.1rem;" title="Cancelada por propietario"></i>
+                                <span class="btn-action-icon" title="Cancelada por propietario">
+                                  <i class="pi pi-ban"></i>
                                 </span>
                               } @else if (incident.status === 'resolved') {
-                                <span class="btn-action-icon">
-                                  <i class="pi pi-check-circle" style="color: #10b981; font-size: 1.1rem;" title="Resuelta"></i>
+                                <span class="btn-action-icon status-resolved" title="Resuelta exitosamente">
+                                  <i class="pi pi-check-circle"></i>
                                 </span>
                               } @else if (incident.status === 'in_progress') {
-                                <span class="btn-action-icon">
-                                  <i class="pi pi-clock" style="color: #60a5fa; font-size: 1.1rem;" title="En proceso"></i>
+                                <span class="btn-action-icon status-progress" title="En proceso de resolución">
+                                  <i class="pi pi-cog"></i>
                                 </span>
                               } @else if (incident.status === 'rejected') {
-                                <span class="btn-action-icon">
-                                  <i class="pi pi-times-circle" style="color: #ff6b6b; font-size: 1.1rem;" title="Rechazada por administrador"></i>
+                                <span class="btn-action-icon status-rejected" title="Rechazada por administrador">
+                                  <i class="pi pi-times-circle"></i>
                                 </span>
                               } @else {
                                 <span class="btn-action-placeholder"></span>
