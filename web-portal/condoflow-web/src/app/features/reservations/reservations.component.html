@@ -2,21 +2,6 @@
   <app-navbar></app-navbar>
   
   <div class="main-content">
-    <div class="header-card">
-      <div class="header-content">
-        <div class="header-info">
-          <div class="header-icon">
-            <i class="pi pi-calendar"></i>
-          </div>
-          <div class="header-text">
-            <h2 class="header-title">Reservas del Gazebo</h2>
-            <hr class="title-divider">
-            <p class="header-subtitle">Reserva el área común para tus eventos especiales</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="main-card card">
       <div class="card-body">
         <div class="reservations-layout">
@@ -106,35 +91,62 @@
             <h5 class="section-title">Mis Reservas</h5>
             
             <div class="filters-section">
-              <div class="filter-group">
-                <label class="filter-label">Tipo de Evento:</label>
-                <select class="filter-select" [(ngModel)]="eventTypeFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
-                  <option value="">Todos</option>
-                  @for (eventType of eventTypes(); track eventType.code) {
-                    <option [value]="eventType.code">{{ eventType.name }}</option>
-                  }
-                </select>
+              <div class="filters-header">
+                <h6 class="filters-title">
+                  <i class="pi pi-filter"></i>
+                  Filtros
+                </h6>
+                @if (hasActiveFilters()) {
+                  <button class="btn-clear-filters" (click)="clearFilters()" title="Limpiar todos los filtros">
+                    <i class="pi pi-filter-slash"></i>
+                    Limpiar filtros
+                  </button>
+                }
               </div>
               
-              <div class="filter-group">
-                <label class="filter-label">Estado:</label>
-                <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
-                  <option value="">Todos</option>
-                  <option value="Pending">Pendiente</option>
-                  <option value="Confirmed">Confirmada</option>
-                  <option value="Cancelled">Cancelada</option>
-                  <option value="Rejected">Rechazada</option>
-                </select>
-              </div>
-              
-              <div class="filter-group">
-                <label class="filter-label">Desde:</label>
-                <input type="date" class="filter-select" [(ngModel)]="dateFromFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
-              </div>
-              
-              <div class="filter-group">
-                <label class="filter-label">Hasta:</label>
-                <input type="date" class="filter-select" [(ngModel)]="dateToFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+              <div class="filters-grid">
+                <div class="filter-group">
+                  <label class="filter-label">
+                    <i class="pi pi-calendar-plus"></i>
+                    Tipo de Evento
+                  </label>
+                  <select class="filter-select" [(ngModel)]="eventTypeFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                    <option value="">Todos</option>
+                    @for (eventType of eventTypes(); track eventType.code) {
+                      <option [value]="eventType.code">{{ eventType.name }}</option>
+                    }
+                  </select>
+                </div>
+                
+                <div class="filter-group">
+                  <label class="filter-label">
+                    <i class="pi pi-info-circle"></i>
+                    Estado
+                  </label>
+                  <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                    <option value="">Todos</option>
+                    <option value="Pending">Pendiente</option>
+                    <option value="Confirmed">Confirmada</option>
+                    <option value="Cancelled">Cancelada</option>
+                    <option value="Rejected">Rechazada</option>
+                  </select>
+                </div>
+                
+                <div class="filter-group">
+                  <label class="filter-label">
+                    <i class="pi pi-calendar"></i>
+                    Desde
+                  </label>
+                  <input type="date" class="filter-select" [(ngModel)]="dateFromFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                </div>
+                
+                <div class="filter-group">
+                  <label class="filter-label">
+                    <i class="pi pi-calendar"></i>
+                    Hasta
+                  </label>
+                  <input type="date" class="filter-select" [(ngModel)]="dateToFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                </div>
               </div>
             </div>
             
@@ -163,37 +175,39 @@
                         <td>{{ formatTime(reservation.startTime) }} - {{ formatTime(reservation.endTime) }}</td>
                         <td class="text-center">
                           <span class="event-badge" [class]="getEventClass(reservation.eventTypeCode)">
+                            <i class="pi" [ngClass]="getEventIcon(reservation.eventTypeCode)"></i>
                             {{ getEventTypeName(reservation.eventTypeCode) }}
                           </span>
                         </td>
                         <td>{{ reservation.notes || 'Sin descripción' }}</td>
                         <td class="text-center">
                           <span class="status-badge" [class]="getStatusClass(reservation.status)">
+                            <i class="pi" [ngClass]="getStatusIcon(reservation.status)"></i>
                             {{ getStatusText(reservation.status) }}
                           </span>
                         </td>
                         <td class="text-center">
                           <div class="action-buttons">
                             <button 
-                              class="btn-action"
+                              class="btn-action btn-view"
                               (click)="viewReservationDetail(reservation)"
                               title="Ver detalle">
-                              <i class="pi pi-eye"></i>
+                              <i class="pi pi-info-circle"></i>
                             </button>
                             @if (reservation.status === 'Pending' || reservation.status === 'Confirmed') {
                               <button 
-                                class="btn-action cancel"
+                                class="btn-action btn-cancel"
                                 (click)="openCancelModal(reservation.id)"
                                 title="Cancelar reserva">
                                 <i class="pi pi-trash"></i>
                               </button>
                             } @else if (reservation.status === 'Cancelled') {
                               <span class="btn-action-icon">
-                                <i class="pi pi-ban" style="color: rgba(255,255,255,0.7); font-size: 1.1rem;" title="Cancelada por propietario"></i>
+                                <i class="pi pi-ban" title="Cancelada por propietario"></i>
                               </span>
                             } @else if (reservation.status === 'Rejected') {
-                              <span class="btn-action-icon">
-                                <i class="pi pi-times-circle" style="color: rgba(255,255,255,0.7); font-size: 1.1rem;" title="Rechazada por administrador"></i>
+                              <span class="btn-action-icon status-rejected">
+                                <i class="pi pi-times-circle" title="Rechazada por administrador"></i>
                               </span>
                             }
                           </div>

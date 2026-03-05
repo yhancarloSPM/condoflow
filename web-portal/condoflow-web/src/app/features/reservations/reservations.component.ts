@@ -169,6 +169,18 @@ export class ReservationsComponent implements OnInit {
     this.currentPage.set(1);
   }
 
+  hasActiveFilters(): boolean {
+    return !!(this.eventTypeFilter || this.statusFilter || this.dateFromFilter || this.dateToFilter);
+  }
+
+  clearFilters() {
+    this.eventTypeFilter = '';
+    this.statusFilter = '';
+    this.dateFromFilter = '';
+    this.dateToFilter = '';
+    this.applyFilters();
+  }
+
   getStatusClass(status: string): string {
     const statusMap: { [key: string]: string } = {
       'Pending': 'pending',
@@ -195,6 +207,34 @@ export class ReservationsComponent implements OnInit {
       'other': 'other'
     };
     return eventMap[eventCode] || 'other';
+  }
+
+  getEventIcon(eventCode: string): string {
+    const iconMap: { [key: string]: string } = {
+      'birthday': 'pi-gift',
+      'meeting': 'pi-users',
+      'celebration': 'pi-star',
+      'wedding': 'pi-heart',
+      'anniversary': 'pi-heart-fill',
+      'graduation': 'pi-graduation-cap',
+      'baby_shower': 'pi-sun',
+      'quinceañera': 'pi-sparkles',
+      'family_reunion': 'pi-home',
+      'corporate': 'pi-briefcase',
+      'social': 'pi-comments',
+      'other': 'pi-ellipsis-h'
+    };
+    return iconMap[eventCode] || 'pi-ellipsis-h';
+  }
+
+  getStatusIcon(status: string): string {
+    const iconMap: { [key: string]: string } = {
+      'Pending': 'pi-clock',
+      'Confirmed': 'pi-check-circle',
+      'Cancelled': 'pi-ban',
+      'Rejected': 'pi-times-circle'
+    };
+    return iconMap[status] || 'pi-clock';
   }
 
   isValidTimeRange(): boolean {
