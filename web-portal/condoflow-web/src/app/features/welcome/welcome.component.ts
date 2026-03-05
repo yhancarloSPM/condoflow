@@ -18,10 +18,12 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     public notificationService: NotificationService
-  ) {}
+  ) {
+    this.currentUser.set(this.authService.user());
+    console.log('Welcome - Current user:', this.currentUser());
+  }
 
   async ngOnInit() {
-    this.currentUser.set(this.authService.user());
     await this.notificationService.startConnection();
   }
 

@@ -86,7 +86,13 @@
           </div>
           <div class="user-details">
             <span class="user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span>
-            <span class="user-role">{{ isAdmin() ? 'Administrador' : 'Propietario' }}</span>
+            <div class="user-info-line">
+              <span class="user-role">{{ isAdmin() ? 'Administrador' : 'Propietario' }}</span>
+              @if (currentUser()?.apartment) {
+                <span class="separator"> | </span>
+                <span class="user-apartment">{{ currentUser()?.apartment }}</span>
+              }
+            </div>
           </div>
         </div>
         <button 

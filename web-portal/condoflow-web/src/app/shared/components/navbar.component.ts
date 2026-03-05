@@ -97,10 +97,8 @@ import { NotificationService } from '../../core/services/notification.service';
                 <span class="user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span>
                 <span class="user-info-line">
                   <span class="user-role">{{ isAdmin() ? 'Administrador' : 'Propietario' }}</span>
-                  @if (currentUser()?.apartment) {
-                    <span class="separator"> | </span>
-                    <span class="user-apartment">{{ currentUser()?.apartment }}</span>
-                  }
+                  <span class="separator"> | </span>
+                  <span class="user-apartment">{{ currentUser()?.apartment || 'Sin apartamento' }}</span>
                 </span>
               </div>
             </div>
@@ -157,7 +155,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private router: Router,
     public notificationService: NotificationService
   ) {
-    this.currentUser.set(this.authService.currentUser());
+    this.currentUser.set(this.authService.user());
+    console.log('Navbar - Current user:', this.currentUser());
   }
 
   async ngOnInit() {
