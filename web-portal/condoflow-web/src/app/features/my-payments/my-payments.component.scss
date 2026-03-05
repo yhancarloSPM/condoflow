@@ -476,6 +476,14 @@
   }
 }
 
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  min-height: 2rem;
+}
+
 .btn-action-placeholder {
   width: 2.25rem;
   height: 2.25rem;

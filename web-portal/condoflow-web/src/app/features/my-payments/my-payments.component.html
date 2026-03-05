@@ -258,13 +258,15 @@
                       }
                     </td>
                     <td class="text-center">
-                      @if (payment.receiptUrl) {
-                      <button type="button" class="btn-action btn-view" (click)="viewReceipt(payment)" title="Ver comprobante">
-                        <i class="pi pi-image"></i>
-                      </button>
-                      } @else {
-                        <span class="btn-action-placeholder"></span>
-                      }
+                      <div class="action-buttons">
+                        @if (payment.receiptUrl) {
+                        <button type="button" class="btn-action btn-view" (click)="viewReceipt(payment)" title="Ver comprobante">
+                          <i class="pi pi-image"></i>
+                        </button>
+                        } @else {
+                          <span class="btn-action-placeholder"></span>
+                        }
+                      </div>
                     </td>
                   </tr>
                   }
