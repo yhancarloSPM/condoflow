@@ -101,8 +101,8 @@ public class MonthlyDebtGenerationService : BackgroundService
                             continue;
                         }
                         
-                        var isRoofApartment = apartment.Number == "501" || apartment.Number == "502";
-                        var amount = isRoofApartment ? maintenanceConcept.RoofAmount!.Value : maintenanceConcept.DefaultAmount!.Value;
+                        // Usar el monto del apartamento en lugar del concepto
+                        var amount = apartment.MonthlyMaintenanceAmount;
                         
                         var debt = new Debt();
                         debt.Id = Guid.NewGuid();
@@ -118,7 +118,7 @@ public class MonthlyDebtGenerationService : BackgroundService
 
                         context.Debts.Add(debt);
                         debtsCreated++;
-                        _logger.LogInformation("Creando deuda: Apartamento {Apt}, Mes {Month}, Año {Year}", apartment.Number, month, year);
+                        _logger.LogInformation("Creando deuda: Apartamento {Apt}, Mes {Month}, Año {Year}, Monto {Amount}", apartment.Number, month, year, amount);
                     }
                     else
                     {
@@ -181,8 +181,8 @@ public class MonthlyDebtGenerationService : BackgroundService
                         continue;
                     }
                     
-                    var isRoofApartment = apartment.Number == "501" || apartment.Number == "502";
-                    var amount = isRoofApartment ? maintenanceConcept.RoofAmount!.Value : maintenanceConcept.DefaultAmount!.Value;
+                    // Usar el monto del apartamento en lugar del concepto
+                    var amount = apartment.MonthlyMaintenanceAmount;
                     
                     var debt = new Debt();
                     debt.Id = Guid.NewGuid();
