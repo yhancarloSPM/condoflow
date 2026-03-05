@@ -23,7 +23,8 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('lineChart') lineChartRef!: ElementRef<HTMLCanvasElement>;
   currentUser = signal<any>(null);
   loading = signal(false);
-  totalRequirePayment = signal(0);
+  totalPending = signal(0);
+  totalOverdue = signal(0);
   totalInReview = signal(0);
   totalPaid = signal(0);
   recentPayments = signal<any[]>([]);
@@ -106,8 +107,9 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
     // Calcular años disponibles basados en las deudas
     this.calculateAvailableYears(allDebts);
     
-    // Usar las categorías del backend que ya están correctas
-    this.totalRequirePayment.set(currentDebts.length + overdueDebts.length);
+    // Separar pendientes y vencidos
+    this.totalPending.set(currentDebts.length);
+    this.totalOverdue.set(overdueDebts.length);
     this.totalInReview.set(paymentSubmittedDebts.length);
     this.totalPaid.set(paidDebts.length);
     

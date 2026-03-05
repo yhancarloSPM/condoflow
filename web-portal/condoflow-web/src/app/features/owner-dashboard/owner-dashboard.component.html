@@ -15,17 +15,27 @@
     } @else {
       <!-- Cards de resumen -->
       <div class="summary-cards">
-        <div class="summary-card overdue clickable" (click)="navigateToDebts()">
+        <div class="summary-card pending clickable" (click)="navigateToDebts()">
           <div class="card-icon">
-            <i class="pi pi-times"></i>
+            <i class="pi pi-exclamation-circle"></i>
           </div>
           <div class="card-content">
-            <h3>{{ totalRequirePayment() }}</h3>
-            <p>Requieren Pago</p>
+            <h3>{{ totalPending() }}</h3>
+            <p>Pendientes</p>
           </div>
         </div>
         
-        <div class="summary-card pending clickable" (click)="navigateToDebts()">
+        <div class="summary-card overdue clickable" (click)="navigateToDebts()">
+          <div class="card-icon">
+            <i class="pi pi-times-circle"></i>
+          </div>
+          <div class="card-content">
+            <h3>{{ totalOverdue() }}</h3>
+            <p>Vencidos</p>
+          </div>
+        </div>
+        
+        <div class="summary-card review clickable" (click)="navigateToDebts()">
           <div class="card-icon">
             <i class="pi pi-clock"></i>
           </div>
@@ -37,21 +47,11 @@
         
         <div class="summary-card paid clickable" (click)="navigateToDebts()">
           <div class="card-icon">
-            <i class="pi pi-check"></i>
+            <i class="pi pi-check-circle"></i>
           </div>
           <div class="card-content">
             <h3>{{ totalPaid() }}</h3>
-            <p>Pagadas</p>
-          </div>
-        </div>
-        
-        <div class="summary-card expected">
-          <div class="card-icon">
-            <i class="pi pi-dollar"></i>
-          </div>
-          <div class="card-content">
-            <h3>${{ getMonthlyAmount() }}</h3>
-            <p>Pago Mensual</p>
+            <p>Pagados</p>
           </div>
         </div>
       </div>
