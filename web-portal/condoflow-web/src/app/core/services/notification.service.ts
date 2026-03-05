@@ -11,7 +11,6 @@ export interface Notification {
   type: string;
   createdAt: string;
   isRead: boolean;
-  isDeleted?: boolean; // Para el estado temporal de eliminación
 }
 
 @Injectable({
@@ -21,7 +20,6 @@ export class NotificationService {
   private hubConnection?: HubConnection;
   notifications = signal<Notification[]>([]);
   unreadCount = signal(0);
-  private deleteTimeout?: any;
 
   private authService = inject(AuthService);
   private http = inject(HttpClient);
@@ -88,52 +86,17 @@ export class NotificationService {
 
   async deleteNotification(notificationId: string): Promise<void> {
     try {
-      // Marcar como eliminada temporalmente (mostrar mensaje de deshacer)
+      // Eliminar en el backend (borrado lógico)
+      await this.http.delete(`${environment.apiUrl}/notifications/${notificationId}`).toPromise();
+      
+      // Eliminar de la lista local inmediatamente
       const current = this.notifications();
-      const updated = current.map(n => 
-        n.id === notificationId ? { ...n, isDeleted: true } : n
-      );
-      this.notifications.set(updated);
+      const filtered = current.filter(n => n.id !== notificationId);
+      this.notifications.set(filtered);
       this.updateUnreadCount();
-      
-      // Esperar 5 segundos antes de eliminar permanentemente
-      if (this.deleteTimeout) {
-        clearTimeout(this.deleteTimeout);
-      }
-      
-      this.deleteTimeout = setTimeout(async () => {
-        try {
-          // Eliminar en el backend (borrado lógico)
-          await this.http.delete(`${environment.apiUrl}/notifications/${notificationId}`).toPromise();
-          
-          // Eliminar de la lista local
-          const current = this.notifications();
-          const filtered = current.filter(n => n.id !== notificationId);
-          this.notifications.set(filtered);
-          this.updateUnreadCount();
-        } catch (error) {
-          console.error('Error eliminando notificación del backend:', error);
-        }
-      }, 5000);
-      
     } catch (error) {
       console.error('Error eliminando notificación:', error);
     }
-  }
-
-  undoDelete(notificationId: string): void {
-    // Cancelar el timeout de eliminación
-    if (this.deleteTimeout) {
-      clearTimeout(this.deleteTimeout);
-    }
-    
-    // Restaurar la notificación
-    const current = this.notifications();
-    const updated = current.map(n => 
-      n.id === notificationId ? { ...n, isDeleted: false } : n
-    );
-    this.notifications.set(updated);
-    this.updateUnreadCount();
   }
 
   clearAll(): void {

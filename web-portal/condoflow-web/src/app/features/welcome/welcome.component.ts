@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { NavbarComponent } from '../../shared/components/navbar.component';
 
 @Component({
   selector: 'app-welcome',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NavbarComponent],
   templateUrl: './welcome.component.html',
   styleUrls: ['./welcome.component.scss']
 })
@@ -46,6 +47,11 @@ export class WelcomeComponent implements OnInit, OnDestroy {
 
   async markAsRead(notificationId: string): Promise<void> {
     await this.notificationService.markAsRead(notificationId);
+  }
+
+  async deleteNotification(event: Event, notificationId: string): Promise<void> {
+    event.stopPropagation();
+    await this.notificationService.deleteNotification(notificationId);
   }
 
   getUserInitials(): string {
