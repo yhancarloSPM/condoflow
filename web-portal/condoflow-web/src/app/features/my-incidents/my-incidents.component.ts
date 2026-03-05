@@ -152,6 +152,19 @@ export class MyIncidentsComponent implements OnInit {
     this.currentPage.set(1);
   }
 
+  hasActiveFilters(): boolean {
+    return !!(this.categoryFilter || this.priorityFilter || this.statusFilter || this.dateFromFilter || this.dateToFilter);
+  }
+
+  clearFilters() {
+    this.categoryFilter = '';
+    this.priorityFilter = '';
+    this.statusFilter = '';
+    this.dateFromFilter = '';
+    this.dateToFilter = '';
+    this.applyFilters();
+  }
+
   getStatusClass(status: string): string {
     const statusMap: { [key: string]: string } = {
       'reported': 'reported',

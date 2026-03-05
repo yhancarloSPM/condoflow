@@ -102,45 +102,75 @@
             <h5 class="section-title">Mis Incidencias</h5>
             
             <div class="filters-section">
-              <div class="filter-group">
-                <label class="filter-label">Categoría:</label>
-                <select class="filter-select" [(ngModel)]="categoryFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
-                  <option value="">Todas</option>
-                  @for (category of categories(); track category.code) {
-                    <option [value]="category.code">{{ category.name }}</option>
-                  }
-                </select>
+              <div class="filters-header">
+                <h6 class="filters-title">
+                  <i class="pi pi-filter"></i>
+                  Filtros
+                </h6>
+                @if (hasActiveFilters()) {
+                  <button class="btn-clear-filters" (click)="clearFilters()" title="Limpiar filtros">
+                    <i class="pi pi-times"></i>
+                    Limpiar
+                  </button>
+                }
               </div>
               
-              <div class="filter-group">
-                <label class="filter-label">Prioridad:</label>
-                <select class="filter-select" [(ngModel)]="priorityFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
-                  <option value="">Todas</option>
-                  @for (priority of priorities(); track priority.code) {
-                    <option [value]="priority.code">{{ priority.name }}</option>
-                  }
-                </select>
-              </div>
-              
-              <div class="filter-group">
-                <label class="filter-label">Estado:</label>
-                <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
-                  <option value="">Todos</option>
-                  <option value="reported">Reportada</option>
-                  <option value="in_progress">En Proceso</option>
-                  <option value="resolved">Resuelta</option>
-                  <option value="cancelled">Cancelada</option>
-                </select>
-              </div>
-              
-              <div class="filter-group">
-                <label class="filter-label">Desde:</label>
-                <input type="date" class="filter-select" [(ngModel)]="dateFromFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
-              </div>
-              
-              <div class="filter-group">
-                <label class="filter-label">Hasta:</label>
-                <input type="date" class="filter-select" [(ngModel)]="dateToFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+              <div class="filters-grid">
+                <div class="filter-group">
+                  <label class="filter-label">
+                    <i class="pi pi-tag"></i>
+                    Categoría
+                  </label>
+                  <select class="filter-select" [(ngModel)]="categoryFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                    <option value="">Todas</option>
+                    @for (category of categories(); track category.code) {
+                      <option [value]="category.code">{{ category.name }}</option>
+                    }
+                  </select>
+                </div>
+                
+                <div class="filter-group">
+                  <label class="filter-label">
+                    <i class="pi pi-flag"></i>
+                    Prioridad
+                  </label>
+                  <select class="filter-select" [(ngModel)]="priorityFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                    <option value="">Todas</option>
+                    @for (priority of priorities(); track priority.code) {
+                      <option [value]="priority.code">{{ priority.name }}</option>
+                    }
+                  </select>
+                </div>
+                
+                <div class="filter-group">
+                  <label class="filter-label">
+                    <i class="pi pi-info-circle"></i>
+                    Estado
+                  </label>
+                  <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                    <option value="">Todos</option>
+                    <option value="reported">Reportada</option>
+                    <option value="in_progress">En Proceso</option>
+                    <option value="resolved">Resuelta</option>
+                    <option value="cancelled">Cancelada</option>
+                  </select>
+                </div>
+                
+                <div class="filter-group">
+                  <label class="filter-label">
+                    <i class="pi pi-calendar"></i>
+                    Desde
+                  </label>
+                  <input type="date" class="filter-select" [(ngModel)]="dateFromFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                </div>
+                
+                <div class="filter-group">
+                  <label class="filter-label">
+                    <i class="pi pi-calendar"></i>
+                    Hasta
+                  </label>
+                  <input type="date" class="filter-select" [(ngModel)]="dateToFilter" (change)="applyFilters()" [ngModelOptions]="{standalone: true}">
+                </div>
               </div>
             </div>
             
