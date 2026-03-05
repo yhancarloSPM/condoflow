@@ -216,11 +216,6 @@ export class NotificationService {
     return true;
   }
 
-  clearAll(): void {
-    this.notifications.set([]);
-    this.unreadCount.set(0);
-  }
-
   private async loadExistingNotifications(): Promise<void> {
     try {
       const response = await this.http.get<any>(
