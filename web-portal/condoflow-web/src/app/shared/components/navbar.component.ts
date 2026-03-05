@@ -156,7 +156,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     public notificationService: NotificationService
   ) {
     this.currentUser.set(this.authService.user());
-    console.log('Navbar - Current user:', this.currentUser());
   }
 
   async ngOnInit() {

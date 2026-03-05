@@ -20,7 +20,6 @@ export class WelcomeComponent implements OnInit, OnDestroy {
     public notificationService: NotificationService
   ) {
     this.currentUser.set(this.authService.user());
-    console.log('Welcome - Current user:', this.currentUser());
   }
 
   async ngOnInit() {
@@ -37,7 +36,6 @@ export class WelcomeComponent implements OnInit, OnDestroy {
   }
 
   navigateTo(route: string): void {
-    console.log('Navegando a:', route);
     this.router.navigate([route]);
   }
 

@@ -26,7 +26,6 @@ export const NotificationService = {
 
   async markAllAsRead(): Promise<void> {
     // Este endpoint no existe en el backend, por ahora no lo usamos
-    console.log('Mark all as read not implemented');
   },
 
   async deleteNotification(notificationId: string): Promise<void> {

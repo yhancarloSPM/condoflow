@@ -67,14 +67,12 @@ export class MyDebtsComponent implements OnInit, OnDestroy {
   }
 
   onYearChange() {
-    console.log('📅 My Debts - onYearChange - Año seleccionado:', this.selectedYear);
     this.filterDebtsByYear();
     this.loadRecentPayments();
   }
 
   onYearChangeEvent(event: any) {
     this.selectedYear = parseInt(event.target.value);
-    console.log('📅 My Debts - onYearChangeEvent - Nuevo año:', this.selectedYear);
     this.onYearChange();
   }
 

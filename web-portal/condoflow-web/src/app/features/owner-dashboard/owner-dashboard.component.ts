@@ -215,13 +215,11 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
   }
 
   onYearChange() {
-    console.log('📅 onYearChange - Año seleccionado:', this.selectedYear);
     this.updateCharts();
   }
 
   onYearChangeEvent(event: any) {
     this.selectedYear = parseInt(event.target.value);
-    console.log('📅 onYearChangeEvent - Nuevo año:', this.selectedYear);
     this.onYearChange();
   }
 
@@ -484,8 +482,6 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
   }
 
   viewAnnouncement(announcement: any) {
-    console.log('Abriendo anuncio:', announcement.title);
-    
     // Crear overlay
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 2rem;';
