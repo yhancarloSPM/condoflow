@@ -55,31 +55,51 @@ import { NotificationService } from '../../core/services/notification.service';
                   } @else {
                     <div class="notification-list">
                       @for (notification of notificationService.notifications(); track notification.id) {
-                        <div 
-                          class="notification-item border-bottom"
-                          [class.notification-unread]="!notification.isRead"
-                          [class.notification-read]="notification.isRead"
-                          (click)="markAsRead(notification.id)"
-                        >
-                          <div class="d-flex align-items-start p-3">
-                            <div class="flex-grow-1">
-                              <h6 class="mb-1" [class.fw-bold]="!notification.isRead" [class.fw-normal]="notification.isRead" [class.text-muted]="notification.isRead">{{ notification.title }}</h6>
-                              <p class="mb-1 small" [class.text-dark]="!notification.isRead" [class.text-muted]="notification.isRead">{{ notification.message }}</p>
-                              <small class="text-muted">{{ notification.createdAt | date:'short' }}</small>
+                        @if (notification.isDeleted) {
+                          <div class="notification-deleted border-bottom">
+                            <div class="d-flex align-items-center justify-content-between p-3">
+                              <span class="text-muted">Notificación eliminada.</span>
+                              <button 
+                                class="btn-undo"
+                                (click)="undoDelete(notification.id)"
+                                title="Deshacer">
+                                <i class="pi pi-undo me-1"></i>
+                                Deshacer
+                              </button>
                             </div>
-                            @if (!notification.isRead) {
-                              <div class="d-flex flex-column align-items-center">
-                                <span class="badge bg-primary rounded-pill mb-1"></span>
-                                <small class="text-primary fw-bold" style="font-size: 0.65rem;">NUEVO</small>
-                              </div>
-                            } @else {
-                              <div class="d-flex flex-column align-items-center">
-                                <span class="badge bg-secondary rounded-pill mb-1"></span>
-                                <small class="text-muted fw-normal" style="font-size: 0.65rem;">LEÍDO</small>
-                              </div>
-                            }
                           </div>
-                        </div>
+                        } @else {
+                          <div 
+                            class="notification-item border-bottom"
+                            [class.notification-unread]="!notification.isRead"
+                            [class.notification-read]="notification.isRead"
+                          >
+                            <div class="d-flex align-items-start p-3">
+                              <div class="flex-grow-1" (click)="markAsRead(notification.id)" style="cursor: pointer;">
+                                <h6 class="mb-1" [class.fw-bold]="!notification.isRead" [class.fw-normal]="notification.isRead" [class.text-muted]="notification.isRead">{{ notification.title }}</h6>
+                                <p class="mb-1 small" [class.text-dark]="!notification.isRead" [class.text-muted]="notification.isRead">{{ notification.message }}</p>
+                                <small class="text-muted">{{ notification.createdAt | date:'short' }}</small>
+                              </div>
+                              @if (!notification.isRead) {
+                                <div class="d-flex flex-column align-items-center">
+                                  <span class="badge bg-primary rounded-pill mb-1"></span>
+                                  <small class="text-primary fw-bold" style="font-size: 0.65rem;">NUEVO</small>
+                                </div>
+                              } @else {
+                                <div class="d-flex flex-column align-items-center gap-1">
+                                  <span class="badge bg-secondary rounded-pill mb-1"></span>
+                                  <small class="text-muted fw-normal" style="font-size: 0.65rem;">LEÍDO</small>
+                                  <button 
+                                    class="btn-delete-notification"
+                                    (click)="deleteNotification($event, notification.id)"
+                                    title="Eliminar notificación">
+                                    <i class="pi pi-trash"></i>
+                                  </button>
+                                </div>
+                              }
+                            </div>
+                          </div>
+                        }
                       }
                     </div>
                   }
@@ -139,10 +159,17 @@ import { NotificationService } from '../../core/services/notification.service';
     .notification-badge { position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
     .notification-panel { width: 350px; max-height: 450px; border-radius: 12px !important; z-index: 9999 !important; }
     .notification-list { max-height: 350px; overflow-y: auto; }
-    .notification-item { cursor: pointer; transition: all 0.2s ease; }
+    .notification-item { transition: all 0.2s ease; }
     .notification-item:hover { background: #f8f9fa !important; }
     .notification-item:last-child { border-bottom: none !important; }
     .notification-unread { background: linear-gradient(90deg, #eff6ff 0%, #f0f9ff 100%) !important; border-left: 3px solid #2563EB !important; }
+    .notification-read { background: #fafafa !important; opacity: 0.8; }
+    .notification-read:hover { opacity: 1 !important; }
+    .notification-deleted { background: #f3f4f6 !important; border-left: 3px solid #9ca3af !important; }
+    .btn-delete-notification { background: transparent; border: none; color: #dc3545; padding: 0.25rem 0.5rem; cursor: pointer; transition: all 0.2s ease; border-radius: 4px; font-size: 0.875rem; }
+    .btn-delete-notification:hover { background: #fee; color: #b91c1c; }
+    .btn-undo { background: #2563EB; color: white; border: none; padding: 0.375rem 0.75rem; border-radius: 6px; font-size: 0.875rem; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; }
+    .btn-undo:hover { background: #1d4ed8; }
     .notification-read { background: #fafafa !important; opacity: 0.8; }
     .notification-read:hover { opacity: 1 !important; }
   `]
@@ -168,6 +195,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   async markAsRead(notificationId: string): Promise<void> {
     await this.notificationService.markAsRead(notificationId);
+  }
+
+  async deleteNotification(event: Event, notificationId: string): Promise<void> {
+    event.stopPropagation(); // Evitar que se marque como leída al hacer clic en eliminar
+    await this.notificationService.deleteNotification(notificationId);
+  }
+
+  undoDelete(notificationId: string): void {
+    this.notificationService.undoDelete(notificationId);
   }
 
   isAdmin(): boolean {
