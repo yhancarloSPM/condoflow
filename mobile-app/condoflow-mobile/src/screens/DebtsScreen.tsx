@@ -38,10 +38,10 @@ export default function DebtsScreen({ navigation, route }: any) {
         // Aplicar filtro si existe
         let filteredData = data;
         if (filterStatus) {
-          if (filterStatus === 'requirePayment') {
-            filteredData = data.filter(d => 
-              d.status.toUpperCase() === 'PENDING' || d.status.toUpperCase() === 'OVERDUE'
-            );
+          if (filterStatus === 'pending') {
+            filteredData = data.filter(d => d.status.toUpperCase() === 'PENDING');
+          } else if (filterStatus === 'overdue') {
+            filteredData = data.filter(d => d.status.toUpperCase() === 'OVERDUE');
           } else if (filterStatus === 'inReview') {
             filteredData = data.filter(d => d.status.toUpperCase() === 'PAYMENTSUBMITTED');
           } else if (filterStatus === 'paid') {
@@ -186,7 +186,8 @@ export default function DebtsScreen({ navigation, route }: any) {
   };
 
   const getFilterTitle = () => {
-    if (filterStatus === 'requirePayment') return 'Deudas que Requieren Pago';
+    if (filterStatus === 'pending') return 'Deudas Pendientes';
+    if (filterStatus === 'overdue') return 'Deudas Vencidas';
     if (filterStatus === 'inReview') return 'Deudas en Revisión';
     if (filterStatus === 'paid') return 'Deudas Pagadas';
     return 'Mis Deudas';

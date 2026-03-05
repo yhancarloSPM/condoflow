@@ -49,7 +49,10 @@ public class DebtsController : ControllerBase
                 RemainingAmount = d.RemainingAmount.Amount,
                 d.DueDate,
                 d.Concept,
-                d.Status,
+                // Devolver el status correcto basado en IsOverdue
+                Status = d.Status == StatusPayments.PaymentSubmitted ? StatusPayments.PaymentSubmitted :
+                         d.Status == StatusPayments.Paid ? StatusPayments.Paid :
+                         d.IsOverdue ? StatusPayments.Overdue : StatusPayments.Pending,
                 d.Month,
                 d.Year,
                 d.CreatedAt,
@@ -60,17 +63,9 @@ public class DebtsController : ControllerBase
             .ToListAsync();
 
         var currentDebts = debts.Where(d => d.Status == StatusPayments.Pending && !d.IsOverdue).ToList();
-        var overdueDebts = debts.Where(d => (d.Status == StatusPayments.Pending || d.Status == StatusPayments.Overdue) && d.IsOverdue).ToList();
+        var overdueDebts = debts.Where(d => d.Status == StatusPayments.Overdue && d.IsOverdue).ToList();
         var paidDebts = debts.Where(d => d.Status == StatusPayments.Paid).ToList();
         var paymentSubmittedDebts = debts.Where(d => d.Status == StatusPayments.PaymentSubmitted).ToList();
-        
-
-
-        foreach(var debt in debts) {
-
-        }
-
-
 
         var totalPending = currentDebts.Sum(d => d.RemainingAmount) + overdueDebts.Sum(d => d.RemainingAmount);
 

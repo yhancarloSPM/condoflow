@@ -26,6 +26,7 @@ interface DashboardStats {
   paidCount: number;
   paidAmount: number;
   overdueCount: number;
+  overdueAmount: number;
 }
 
 interface YearlyStats {
@@ -46,6 +47,7 @@ export default function OwnerDashboardScreen({ navigation }: any) {
     paidCount: 0,
     paidAmount: 0,
     overdueCount: 0,
+    overdueAmount: 0,
   });
   const [yearlyStats, setYearlyStats] = useState<YearlyStats>({
     requirePaymentCount: 0,
@@ -165,16 +167,17 @@ export default function OwnerDashboardScreen({ navigation }: any) {
       setIsInitialLoad(false);
       
       // Calcular estadísticas generales (todos los años)
-      const requirePaymentDebts = debts.filter(d => d.status === 'Pending' || d.status === 'Overdue');
+      const requirePaymentDebts = debts.filter(d => d.status === 'Pending');
       const requirePaymentAmount = requirePaymentDebts.reduce((sum, d) => sum + d.amount, 0);
+      
+      const overdueDebts = debts.filter(d => d.status === 'Overdue');
+      const overdueAmount = overdueDebts.reduce((sum, d) => sum + d.amount, 0);
       
       const inReviewDebts = debts.filter(d => d.status === 'PaymentSubmitted');
       const inReviewAmount = inReviewDebts.reduce((sum, d) => sum + d.amount, 0);
       
       const paidDebts = debts.filter(d => d.status === 'Paid');
       const paidAmount = paidDebts.reduce((sum, d) => sum + d.amount, 0);
-      
-      const overdueDebts = debts.filter(d => d.status === 'Overdue');
 
       setStats({
         maintenanceAmount,
@@ -185,6 +188,7 @@ export default function OwnerDashboardScreen({ navigation }: any) {
         paidCount: paidDebts.length,
         paidAmount,
         overdueCount: overdueDebts.length,
+        overdueAmount,
       });
     } catch (error: any) {
       console.error('Error loading dashboard data:', error);
@@ -246,17 +250,17 @@ export default function OwnerDashboardScreen({ navigation }: any) {
 
       <View style={styles.statsContainer}>
         <View style={styles.statsRow}>
-          {/* Tarjeta de Requieren Pago */}
+          {/* Tarjeta de Pendientes */}
           <TouchableOpacity 
-            style={[styles.statCard, styles.statCardHalf, { borderLeftColor: '#EF4444' }]}
+            style={[styles.statCard, styles.statCardHalf, { borderLeftColor: '#F59E0B' }]}
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Queries', { 
               screen: 'DebtsMenu',
-              params: { filterStatus: 'requirePayment' }
+              params: { filterStatus: 'pending' }
             })}
           >
-            <Text style={styles.statLabel}>Requieren Pago</Text>
-            <Text style={[styles.statValue, { color: '#EF4444' }]}>
+            <Text style={styles.statLabel}>Pendientes</Text>
+            <Text style={[styles.statValue, { color: '#F59E0B' }]}>
               {stats.requirePaymentCount}
             </Text>
             <Text style={styles.statSubtext}>
@@ -264,6 +268,26 @@ export default function OwnerDashboardScreen({ navigation }: any) {
             </Text>
           </TouchableOpacity>
 
+          {/* Tarjeta de Vencidos */}
+          <TouchableOpacity 
+            style={[styles.statCard, styles.statCardHalf, { borderLeftColor: '#EF4444' }]}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Queries', { 
+              screen: 'DebtsMenu',
+              params: { filterStatus: 'overdue' }
+            })}
+          >
+            <Text style={styles.statLabel}>Vencidos</Text>
+            <Text style={[styles.statValue, { color: '#EF4444' }]}>
+              {stats.overdueCount}
+            </Text>
+            <Text style={styles.statSubtext}>
+              {formatCurrency(stats.overdueAmount)}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.statsRow}>
           {/* Tarjeta de En Revisión */}
           <TouchableOpacity 
             style={[styles.statCard, styles.statCardHalf, { borderLeftColor: '#f97316' }]}
@@ -281,9 +305,7 @@ export default function OwnerDashboardScreen({ navigation }: any) {
               {formatCurrency(stats.inReviewAmount)}
             </Text>
           </TouchableOpacity>
-        </View>
 
-        <View style={styles.statsRow}>
           {/* Tarjeta de Pagados */}
           <TouchableOpacity 
             style={[styles.statCard, styles.statCardHalf, { borderLeftColor: '#10B981' }]}
@@ -301,15 +323,6 @@ export default function OwnerDashboardScreen({ navigation }: any) {
               {formatCurrency(stats.paidAmount)}
             </Text>
           </TouchableOpacity>
-
-          {/* Tarjeta de Pago Mensual */}
-          <View style={[styles.statCard, styles.statCardHalf, { borderLeftColor: '#6366f1' }]}>
-            <Text style={styles.statLabel}>Pago Mensual</Text>
-            <Text style={[styles.statValueSmall, { color: '#6366f1' }]}>
-              {formatCurrency(stats.maintenanceAmount)}
-            </Text>
-            <Text style={styles.statSubtext}>Mantenimiento</Text>
-          </View>
         </View>
       </View>
 
