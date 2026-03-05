@@ -270,7 +270,8 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
               padding: 15,
               font: {
                 size: 13
-              }
+              },
+              color: '#ffffff'
             }
           },
           tooltip: {
@@ -353,6 +354,7 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
             max: 3,
             ticks: {
               stepSize: 0.5,
+              color: '#ffffff',
               callback: function(value) {
                 if (value === 3) return 'Pagado';
                 if (value === 2) return 'En Revisión';
@@ -361,9 +363,15 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
                 if (value === 0) return '';
                 return '';
               }
+            },
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
             }
           },
           x: {
+            ticks: {
+              color: '#ffffff'
+            },
             grid: {
               display: false
             }
