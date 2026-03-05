@@ -360,6 +360,17 @@ export class MyDebtsComponent implements OnInit, OnDestroy {
     }
   }
 
+  getFilterClass(): string {
+    const status = this.filterStatus();
+    switch (status) {
+      case 'Pending': return 'filter-pending';
+      case 'Overdue': return 'filter-overdue';
+      case 'PaymentSubmitted': return 'filter-review';
+      case 'Paid': return 'filter-paid';
+      default: return '';
+    }
+  }
+
   clearFilter(): void {
     this.router.navigate(['/my-debts']);
   }

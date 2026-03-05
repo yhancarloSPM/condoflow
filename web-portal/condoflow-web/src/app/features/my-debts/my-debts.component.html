@@ -8,32 +8,34 @@
         <p>Cargando deudas...</p>
       </div>
     } @else {
+      <!-- Header con selector de año -->
+      <div class="page-header">
+        <h1>Estado de Deudas Mensual</h1>
+        <div class="year-selector">
+          <label for="yearSelect">Año:</label>
+          <select id="yearSelect" [value]="selectedYear" (change)="onYearChangeEvent($event)">
+            @for (year of availableYears; track year) {
+              <option [value]="year">{{ year }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Indicador de filtro -->
+      @if (filterStatus()) {
+        <div class="filter-indicator" [ngClass]="getFilterClass()">
+          <span class="filter-text">
+            <i class="pi pi-filter"></i>
+            Filtrando por: <strong>{{ getFilterStatusText() }}</strong>
+          </span>
+          <button class="clear-filter-btn" (click)="clearFilter()" title="Limpiar filtro">
+            <i class="pi pi-times"></i> Mostrar todos
+          </button>
+        </div>
+      }
+
       <!-- Calendario de Mantenimiento -->
       <div class="calendar-section">
-        <div class="calendar-header">
-          <h3>Estado de Deudas Mensual</h3>
-          <div class="year-selector">
-            <label for="yearSelect">Año:</label>
-            <select id="yearSelect" [value]="selectedYear" (change)="onYearChangeEvent($event)">
-              @for (year of availableYears; track year) {
-                <option [value]="year">{{ year }}</option>
-              }
-            </select>
-          </div>
-        </div>
-        
-        @if (filterStatus()) {
-          <div class="filter-indicator">
-            <span class="filter-text">
-              <i class="pi pi-filter"></i>
-              Filtrando por: <strong>{{ getFilterStatusText() }}</strong>
-            </span>
-            <button class="clear-filter-btn" (click)="clearFilter()" title="Limpiar filtro">
-              <i class="pi pi-times"></i> Mostrar todos
-            </button>
-          </div>
-        }
-        
         <div class="calendar-grid">
           @for (month of months; track $index) {
             @if ($index > 0) {

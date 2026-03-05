@@ -172,10 +172,20 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     await this.notificationService.startConnection();
+    this.checkUserSession();
   }
 
   async ngOnDestroy() {
     await this.notificationService.stopConnection();
+  }
+
+  checkUserSession(): void {
+    const user = this.currentUser();
+    if (!user) {
+      // Si no hay usuario, redirigir al login
+      this.authService.logout();
+      this.router.navigate(['/auth']);
+    }
   }
 
   async markAsRead(notificationId: string): Promise<void> {
