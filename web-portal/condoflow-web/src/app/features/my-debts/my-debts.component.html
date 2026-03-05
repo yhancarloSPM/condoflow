@@ -10,14 +10,27 @@
     } @else {
       <!-- Header con selector de año -->
       <div class="page-header">
-        <h1>Estado de Deudas Mensual</h1>
-        <div class="year-selector">
-          <label for="yearSelect">Año:</label>
-          <select id="yearSelect" [value]="selectedYear" (change)="onYearChangeEvent($event)">
-            @for (year of availableYears; track year) {
-              <option [value]="year">{{ year }}</option>
-            }
-          </select>
+        <div class="header-content">
+          <div class="header-info">
+            <div class="header-icon">
+              <i class="pi pi-calendar-times"></i>
+            </div>
+            <div class="header-text">
+              <h1 class="header-title">Estado de Deudas Mensual</h1>
+              <p class="header-subtitle">Visualiza y gestiona tus pagos de mantenimiento</p>
+            </div>
+          </div>
+          <div class="year-selector">
+            <label for="yearSelect">
+              <i class="pi pi-calendar"></i>
+              Año:
+            </label>
+            <select id="yearSelect" [value]="selectedYear" (change)="onYearChangeEvent($event)">
+              @for (year of availableYears; track year) {
+                <option [value]="year">{{ year }}</option>
+              }
+            </select>
+          </div>
         </div>
       </div>
 
