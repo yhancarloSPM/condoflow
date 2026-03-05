@@ -239,14 +239,15 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
     const debtsForYear = this.allDebts().filter(debt => debt.year === selectedYearNum);
     
     // Contar por estado solo las deudas del año seleccionado
-    const requirePayment = debtsForYear.filter(d => d.status === 'Pending' || d.status === 'Overdue').length;
+    const pending = debtsForYear.filter(d => d.status === 'Pending').length;
+    const overdue = debtsForYear.filter(d => d.status === 'Overdue').length;
     const inReview = debtsForYear.filter(d => d.status === 'PaymentSubmitted').length;
     const paid = debtsForYear.filter(d => d.status === 'Paid').length;
     
-    const hasData = requirePayment > 0 || inReview > 0 || paid > 0;
-    const data = hasData ? [requirePayment, inReview, paid] : [1];
-    const labels = hasData ? ['Requieren Pago', 'En Revisión', 'Pagadas'] : ['Sin deudas registradas'];
-    const colors = hasData ? ['#ef4444', '#f59e0b', '#10b981'] : ['#e5e7eb'];
+    const hasData = pending > 0 || overdue > 0 || inReview > 0 || paid > 0;
+    const data = hasData ? [pending, overdue, inReview, paid] : [1];
+    const labels = hasData ? ['Pendientes', 'Vencidos', 'En Revisión', 'Pagados'] : ['Sin deudas registradas'];
+    const colors = hasData ? ['#f59e0b', '#ef4444', '#f97316', '#10b981'] : ['#e5e7eb'];
 
     this.pieChart = new Chart(ctx, {
       type: 'pie',
@@ -263,9 +264,32 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom' },
+          legend: { 
+            position: 'bottom',
+            labels: {
+              padding: 15,
+              font: {
+                size: 13
+              }
+            }
+          },
           tooltip: {
-            enabled: hasData
+            enabled: hasData,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            padding: 12,
+            cornerRadius: 8,
+            displayColors: true,
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+                return `${label}: ${value} (${percentage}%)`;
+              }
+            }
           }
         }
       }
@@ -286,9 +310,10 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
           label: 'Estado del Mes',
           data: complianceData.status,
           backgroundColor: complianceData.status.map(status => {
-            if (status === 1) return '#10b981';
-            if (status === 0.5) return '#f59e0b';
-            if (status === 0.1) return '#ef4444';
+            if (status === 3) return '#10b981'; // Pagado
+            if (status === 2) return '#f97316'; // En Revisión
+            if (status === 1) return '#ef4444'; // Vencido
+            if (status === 0.5) return '#f59e0b'; // Pendiente
             return '#e5e7eb';
           }),
           borderWidth: 1,
@@ -301,12 +326,22 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
         plugins: {
           legend: { display: false },
           tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            padding: 12,
+            cornerRadius: 8,
+            displayColors: false,
             callbacks: {
+              title: function(context) {
+                return context[0].label;
+              },
               label: function(context) {
                 const value = context.parsed.y;
-                if (value === 1) return 'Pagado ✓';
-                if (value === 0.5) return 'En Revisión ⏳';
-                if (value === 0.1) return 'Requiere Pago ✗';
+                if (value === 3) return 'Pagado';
+                if (value === 2) return 'En Revisión';
+                if (value === 1) return 'Vencido';
+                if (value === 0.5) return 'Pendiente';
                 return 'Sin Deuda';
               }
             }
@@ -315,16 +350,22 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
         scales: {
           y: { 
             beginAtZero: true,
-            max: 1,
+            max: 3,
             ticks: {
-              stepSize: 0.1,
+              stepSize: 0.5,
               callback: function(value) {
-                if (value === 1) return 'Pagado';
-                if (value === 0.5) return 'En Revisión';
-                if (value === 0.1) return 'Requiere Pago';
+                if (value === 3) return 'Pagado';
+                if (value === 2) return 'En Revisión';
+                if (value === 1) return 'Vencido';
+                if (value === 0.5) return 'Pendiente';
                 if (value === 0) return '';
                 return '';
               }
+            }
+          },
+          x: {
+            grid: {
+              display: false
             }
           }
         }
@@ -345,11 +386,13 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
         const monthIndex = debt.month - 1;
         
         if (debt.status === 'Paid') {
-          status[monthIndex] = 1; // Pagado
+          status[monthIndex] = 3; // Pagado
         } else if (debt.status === 'PaymentSubmitted') {
-          status[monthIndex] = 0.5; // En Revisión
-        } else if (debt.status === 'Pending' || debt.status === 'Overdue') {
-          status[monthIndex] = 0.1; // Requiere Pago (valor mínimo para visualizar)
+          status[monthIndex] = 2; // En Revisión
+        } else if (debt.status === 'Overdue') {
+          status[monthIndex] = 1; // Vencido
+        } else if (debt.status === 'Pending') {
+          status[monthIndex] = 0.5; // Pendiente
         }
       }
     });
@@ -367,15 +410,21 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
       const debtsForYear = this.allDebts().filter(debt => debt.year === selectedYearNum);
       
       // Contar por estado solo las deudas del año seleccionado
-      const requirePayment = debtsForYear.filter(d => d.status === 'Pending' || d.status === 'Overdue').length;
+      const pending = debtsForYear.filter(d => d.status === 'Pending').length;
+      const overdue = debtsForYear.filter(d => d.status === 'Overdue').length;
       const inReview = debtsForYear.filter(d => d.status === 'PaymentSubmitted').length;
       const paid = debtsForYear.filter(d => d.status === 'Paid').length;
       
-      const hasData = requirePayment > 0 || inReview > 0 || paid > 0;
-      this.pieChart.data.datasets[0].data = hasData ? [requirePayment, inReview, paid] : [1];
-      this.pieChart.data.labels = hasData ? ['Requieren Pago', 'En Revisión', 'Pagadas'] : ['Sin deudas registradas'];
-      this.pieChart.data.datasets[0].backgroundColor = hasData ? ['#ef4444', '#f59e0b', '#10b981'] : ['#e5e7eb'];
-      this.pieChart.options.plugins!.tooltip!.enabled = hasData;
+      const hasData = pending > 0 || overdue > 0 || inReview > 0 || paid > 0;
+      this.pieChart.data.datasets[0].data = hasData ? [pending, overdue, inReview, paid] : [1];
+      this.pieChart.data.labels = hasData ? ['Pendientes', 'Vencidos', 'En Revisión', 'Pagados'] : ['Sin deudas registradas'];
+      this.pieChart.data.datasets[0].backgroundColor = hasData ? ['#f59e0b', '#ef4444', '#f97316', '#10b981'] : ['#e5e7eb'];
+      
+      // Actualizar configuración del tooltip
+      if (this.pieChart.options.plugins?.tooltip) {
+        this.pieChart.options.plugins.tooltip.enabled = hasData;
+      }
+      
       this.pieChart.update();
     }
     
@@ -384,9 +433,10 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
       this.lineChart.data.labels = complianceData.labels;
       this.lineChart.data.datasets[0].data = complianceData.status;
       this.lineChart.data.datasets[0].backgroundColor = complianceData.status.map(status => {
-        if (status === 1) return '#10b981';
-        if (status === 0.5) return '#f59e0b';
-        if (status === 0.1) return '#ef4444';
+        if (status === 3) return '#10b981'; // Pagado
+        if (status === 2) return '#f97316'; // En Revisión
+        if (status === 1) return '#ef4444'; // Vencido
+        if (status === 0.5) return '#f59e0b'; // Pendiente
         return '#e5e7eb';
       });
       this.lineChart.update();

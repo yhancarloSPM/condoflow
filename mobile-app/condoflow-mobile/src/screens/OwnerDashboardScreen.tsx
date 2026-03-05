@@ -30,7 +30,8 @@ interface DashboardStats {
 }
 
 interface YearlyStats {
-  requirePaymentCount: number;
+  pendingCount: number;
+  overdueCount: number;
   inReviewCount: number;
   paidCount: number;
 }
@@ -50,7 +51,8 @@ export default function OwnerDashboardScreen({ navigation }: any) {
     overdueAmount: 0,
   });
   const [yearlyStats, setYearlyStats] = useState<YearlyStats>({
-    requirePaymentCount: 0,
+    pendingCount: 0,
+    overdueCount: 0,
     inReviewCount: 0,
     paidCount: 0,
   });
@@ -77,12 +79,14 @@ export default function OwnerDashboardScreen({ navigation }: any) {
     const debts = allDebts.filter(debt => debt.year === selectedYear);
     
     // Calcular estadísticas por estado para el año seleccionado
-    const requirePaymentDebts = debts.filter(d => d.status === 'Pending' || d.status === 'Overdue');
+    const pendingDebts = debts.filter(d => d.status === 'Pending');
+    const overdueDebts = debts.filter(d => d.status === 'Overdue');
     const inReviewDebts = debts.filter(d => d.status === 'PaymentSubmitted');
     const paidDebts = debts.filter(d => d.status === 'Paid');
 
     const newStats = {
-      requirePaymentCount: requirePaymentDebts.length,
+      pendingCount: pendingDebts.length,
+      overdueCount: overdueDebts.length,
       inReviewCount: inReviewDebts.length,
       paidCount: paidDebts.length,
     };
@@ -104,13 +108,15 @@ export default function OwnerDashboardScreen({ navigation }: any) {
       
       const paid = monthDebts.filter(d => d.status === 'Paid').length;
       const inReview = monthDebts.filter(d => d.status === 'PaymentSubmitted').length;
-      const requirePayment = monthDebts.filter(d => d.status === 'Pending' || d.status === 'Overdue').length;
+      const overdue = monthDebts.filter(d => d.status === 'Overdue').length;
+      const pending = monthDebts.filter(d => d.status === 'Pending').length;
       
       return {
         month,
         paid,
         inReview,
-        requirePayment
+        overdue,
+        pending
       };
     });
     
@@ -145,12 +151,14 @@ export default function OwnerDashboardScreen({ navigation }: any) {
         // Calcular estadísticas del año inmediatamente con las deudas cargadas
         const yearDebts = debts.filter(debt => debt.year === currentYear);
         
-        const requirePaymentDebts = yearDebts.filter(d => d.status === 'Pending' || d.status === 'Overdue');
+        const pendingDebts = yearDebts.filter(d => d.status === 'Pending');
+        const overdueDebts = yearDebts.filter(d => d.status === 'Overdue');
         const inReviewDebts = yearDebts.filter(d => d.status === 'PaymentSubmitted');
         const paidDebts = yearDebts.filter(d => d.status === 'Paid');
 
         setYearlyStats({
-          requirePaymentCount: requirePaymentDebts.length,
+          pendingCount: pendingDebts.length,
+          overdueCount: overdueDebts.length,
           inReviewCount: inReviewDebts.length,
           paidCount: paidDebts.length,
         });
@@ -331,14 +339,16 @@ export default function OwnerDashboardScreen({ navigation }: any) {
         <Text style={styles.sectionTitle}>Estado de Mis Deudas {selectedYear}</Text>
         <View style={styles.chartContainer}>
           <VictoryPie
-            key={`pie-chart-${selectedYear}-${yearlyStats.requirePaymentCount}-${yearlyStats.inReviewCount}-${yearlyStats.paidCount}`}
+            key={`pie-chart-${selectedYear}-${yearlyStats.pendingCount}-${yearlyStats.overdueCount}-${yearlyStats.inReviewCount}-${yearlyStats.paidCount}`}
             data={[
-              ...(yearlyStats.requirePaymentCount > 0 ? [{ x: 'Requieren Pago', y: yearlyStats.requirePaymentCount, fill: '#EF4444' }] : []),
-              ...(yearlyStats.inReviewCount > 0 ? [{ x: 'Revisión', y: yearlyStats.inReviewCount, fill: '#F59E0B' }] : []),
+              ...(yearlyStats.pendingCount > 0 ? [{ x: 'Pendientes', y: yearlyStats.pendingCount, fill: '#F59E0B' }] : []),
+              ...(yearlyStats.overdueCount > 0 ? [{ x: 'Vencidos', y: yearlyStats.overdueCount, fill: '#EF4444' }] : []),
+              ...(yearlyStats.inReviewCount > 0 ? [{ x: 'En Revisión', y: yearlyStats.inReviewCount, fill: '#f97316' }] : []),
               ...(yearlyStats.paidCount > 0 ? [{ x: 'Pagados', y: yearlyStats.paidCount, fill: '#10B981' }] : []),
             ].length > 0 ? [
-              ...(yearlyStats.requirePaymentCount > 0 ? [{ x: 'Requieren Pago', y: yearlyStats.requirePaymentCount, fill: '#EF4444' }] : []),
-              ...(yearlyStats.inReviewCount > 0 ? [{ x: 'Revisión', y: yearlyStats.inReviewCount, fill: '#F59E0B' }] : []),
+              ...(yearlyStats.pendingCount > 0 ? [{ x: 'Pendientes', y: yearlyStats.pendingCount, fill: '#F59E0B' }] : []),
+              ...(yearlyStats.overdueCount > 0 ? [{ x: 'Vencidos', y: yearlyStats.overdueCount, fill: '#EF4444' }] : []),
+              ...(yearlyStats.inReviewCount > 0 ? [{ x: 'En Revisión', y: yearlyStats.inReviewCount, fill: '#f97316' }] : []),
               ...(yearlyStats.paidCount > 0 ? [{ x: 'Pagados', y: yearlyStats.paidCount, fill: '#10B981' }] : []),
             ] : [{ x: 'Sin datos', y: 1, fill: '#9ca3af' }]}
             width={screenWidth - 64}
@@ -358,12 +368,16 @@ export default function OwnerDashboardScreen({ navigation }: any) {
           {/* Leyenda personalizada */}
           <View style={styles.legend}>
             <View style={styles.legendItem}>
-              <View style={[styles.legendColor, { backgroundColor: '#EF4444' }]} />
-              <Text style={styles.legendText}>Requieren Pago</Text>
+              <View style={[styles.legendColor, { backgroundColor: '#F59E0B' }]} />
+              <Text style={styles.legendText}>Pendientes</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendColor, { backgroundColor: '#F59E0B' }]} />
-              <Text style={styles.legendText}>Revisión</Text>
+              <View style={[styles.legendColor, { backgroundColor: '#EF4444' }]} />
+              <Text style={styles.legendText}>Vencidos</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendColor, { backgroundColor: '#f97316' }]} />
+              <Text style={styles.legendText}>En Revisión</Text>
             </View>
             <View style={styles.legendItem}>
               <View style={[styles.legendColor, { backgroundColor: '#10B981' }]} />
@@ -382,7 +396,7 @@ export default function OwnerDashboardScreen({ navigation }: any) {
             height={300}
             domainPadding={{ x: 8 }}
             padding={{ top: 20, bottom: 50, left: 100, right: 20 }}
-            domain={{ y: [0, 3] }}
+            domain={{ y: [0, 4] }}
           >
             <VictoryAxis
               style={{
@@ -392,8 +406,8 @@ export default function OwnerDashboardScreen({ navigation }: any) {
             />
             <VictoryAxis
               dependentAxis
-              tickValues={[1, 2, 3]}
-              tickFormat={['Requiere Pago', 'En Revisión', 'Pagado']}
+              tickValues={[0.5, 1, 2, 3]}
+              tickFormat={['Pendiente', 'Vencido', 'En Revisión', 'Pagado']}
               style={{
                 axis: { stroke: 'transparent' },
                 tickLabels: { 
@@ -421,17 +435,27 @@ export default function OwnerDashboardScreen({ navigation }: any) {
                 y: d.inReview > 0 ? 2 : 0
               }))}
               style={{
-                data: { fill: '#F59E0B' }
+                data: { fill: '#f97316' }
               }}
               barWidth={12}
             />
             <VictoryBar
               data={monthlyChartData.map(d => ({ 
                 x: d.month, 
-                y: d.requirePayment > 0 ? 1 : 0
+                y: d.overdue > 0 ? 1 : 0
               }))}
               style={{
                 data: { fill: '#EF4444' }
+              }}
+              barWidth={12}
+            />
+            <VictoryBar
+              data={monthlyChartData.map(d => ({ 
+                x: d.month, 
+                y: d.pending > 0 ? 0.5 : 0
+              }))}
+              style={{
+                data: { fill: '#F59E0B' }
               }}
               barWidth={12}
             />
