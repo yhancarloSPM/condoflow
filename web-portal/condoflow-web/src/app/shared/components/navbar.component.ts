@@ -95,8 +95,8 @@ import { NotificationService } from '../../core/services/notification.service';
               </div>
               <div class="user-details">
                 <span class="user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span>
-                @if (!isAdmin() && currentUser()?.apartmentNumber) {
-                  <span class="user-apartment">{{ currentUser()?.apartmentNumber }}</span>
+                @if (!isAdmin() && currentUser()?.apartment) {
+                  <span class="user-apartment">{{ currentUser()?.apartment }}</span>
                 } @else {
                   <span class="user-role">{{ isAdmin() ? 'Administrador' : 'Propietario' }}</span>
                 }
