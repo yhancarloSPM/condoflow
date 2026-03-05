@@ -40,7 +40,7 @@ export class MyProfileComponent implements OnInit {
     this.editForm = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
-      phoneNumber: ['', Validators.required]
+      phoneNumber: ['', [Validators.required, this.dominicanPhoneValidator]]
     });
     
     this.passwordForm = this.fb.group({
@@ -349,6 +349,29 @@ Información personal actualizada exitosamente
       if (Object.keys(confirmPassword.errors).length === 0) {
         confirmPassword.setErrors(null);
       }
+    }
+    
+    return null;
+  }
+
+  dominicanPhoneValidator(control: any) {
+    if (!control.value) {
+      return null;
+    }
+    
+    const phoneNumber = control.value.replace(/\D/g, '');
+    
+    // Debe tener exactamente 10 dígitos
+    if (phoneNumber.length !== 10) {
+      return { invalidPhone: true };
+    }
+    
+    // Debe iniciar con 809, 829 o 849
+    const validPrefixes = ['809', '829', '849'];
+    const prefix = phoneNumber.substring(0, 3);
+    
+    if (!validPrefixes.includes(prefix)) {
+      return { invalidPrefix: true };
     }
     
     return null;

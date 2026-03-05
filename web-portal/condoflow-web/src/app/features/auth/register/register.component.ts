@@ -378,10 +378,17 @@ import { AuthService } from '../../../core/services/auth.service';
                   formControlName="phoneNumber"
                   type="text"
                   class="form-control"
-                  placeholder="000-000-0000"
+                  [class.is-invalid]="registerForm.get('phoneNumber')?.invalid && registerForm.get('phoneNumber')?.touched"
+                  placeholder="809-123-4567"
                   (input)="formatPhoneNumber($event)"
                   maxlength="12"
                 />
+                @if (registerForm.get('phoneNumber')?.errors?.['invalidPrefix'] && registerForm.get('phoneNumber')?.touched) {
+                  <div class="invalid-feedback d-block">El número debe iniciar con 809, 829 o 849</div>
+                }
+                @if (registerForm.get('phoneNumber')?.errors?.['invalidPhone'] && registerForm.get('phoneNumber')?.touched) {
+                  <div class="invalid-feedback d-block">El número debe tener 10 dígitos</div>
+                }
               </div>
             </div>
             
@@ -530,7 +537,7 @@ export class RegisterComponent {
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{3}-\d{3}-\d{4}$/)]],
+      phoneNumber: ['', [Validators.required, this.dominicanPhoneValidator]],
       block: ['', Validators.required],
       apartment: [{value: '', disabled: true}, Validators.required],
       role: ['Owner'],
@@ -604,6 +611,29 @@ export class RegisterComponent {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
     return password?.value === confirmPassword?.value ? null : { passwordMismatch: true };
+  }
+
+  dominicanPhoneValidator(control: any) {
+    if (!control.value) {
+      return null;
+    }
+    
+    const phoneNumber = control.value.replace(/\D/g, '');
+    
+    // Debe tener exactamente 10 dígitos
+    if (phoneNumber.length !== 10) {
+      return { invalidPhone: true };
+    }
+    
+    // Debe iniciar con 809, 829 o 849
+    const validPrefixes = ['809', '829', '849'];
+    const prefix = phoneNumber.substring(0, 3);
+    
+    if (!validPrefixes.includes(prefix)) {
+      return { invalidPrefix: true };
+    }
+    
+    return null;
   }
 
   formatPhoneNumber(event: any): void {

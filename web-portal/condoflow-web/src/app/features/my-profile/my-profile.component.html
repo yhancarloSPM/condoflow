@@ -128,9 +128,17 @@
                         type="tel" 
                         [value]="applyPhoneFormat(editForm.get('phoneNumber')?.value || '')"
                         class="form-control" 
+                        [class.is-invalid]="editForm.get('phoneNumber')?.invalid && editForm.get('phoneNumber')?.touched"
                         placeholder="(809) 123-4567"
                         (input)="onPhoneNumberInput($event)"
+                        (blur)="editForm.get('phoneNumber')?.markAsTouched()"
                         maxlength="14">
+                      @if (editForm.get('phoneNumber')?.errors?.['invalidPrefix'] && editForm.get('phoneNumber')?.touched) {
+                        <div class="invalid-feedback d-block">El número debe iniciar con 809, 829 o 849</div>
+                      }
+                      @if (editForm.get('phoneNumber')?.errors?.['invalidPhone'] && editForm.get('phoneNumber')?.touched) {
+                        <div class="invalid-feedback d-block">El número debe tener 10 dígitos</div>
+                      }
                     </div>
                   </div>
                 </div>
