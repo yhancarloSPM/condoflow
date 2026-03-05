@@ -185,6 +185,10 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/my-debts']);
   }
 
+  navigateToDebtsByStatus(status: string): void {
+    this.router.navigate(['/my-debts'], { queryParams: { status: status } });
+  }
+
   navigateToPayments(): void {
     this.router.navigate(['/my-payments']);
   }

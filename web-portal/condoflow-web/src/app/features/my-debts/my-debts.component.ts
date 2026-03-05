@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { DebtService } from '../../core/services/debt.service';
@@ -27,12 +27,14 @@ export class MyDebtsComponent implements OnInit, OnDestroy {
   selectedYear = new Date().getFullYear();
   availableYears: number[] = [];
   private routerSubscription?: Subscription;
+  filterStatus = signal<string | null>(null); // Filtro de estado desde query params
 
   months = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
   constructor(
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private debtService: DebtService,
     private paymentService: PaymentService
   ) {}
@@ -40,14 +42,19 @@ export class MyDebtsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.currentUser.set(this.authService.currentUser());
     this.initializeYears(); // Inicializar años antes de cargar datos
-    this.loadDebts();
-    this.loadRecentPayments();
+    
+    // Leer el parámetro de filtro de estado desde query params
+    this.route.queryParams.subscribe(params => {
+      this.filterStatus.set(params['status'] || null);
+      this.loadDebts();
+      this.loadRecentPayments();
+    });
     
     // Recargar datos cuando se navega a esta ruta
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
-        if (event.url === '/my-debts') {
+        if (event.url.startsWith('/my-debts')) {
           this.loadDebts();
           this.loadRecentPayments();
         }
@@ -168,10 +175,53 @@ export class MyDebtsComponent implements OnInit, OnDestroy {
       });
     };
     
-    this.currentDebts.set(filterByYear(this.allDebtsData.currentDebts || []));
-    this.overdueDebts.set(filterByYear(this.allDebtsData.overdueDebts || []));
-    this.paidDebts.set(filterByYear(this.allDebtsData.paidDebts || []));
-    this.paymentSubmittedDebts.set(filterByYear(this.allDebtsData.paymentSubmittedDebts || []));
+    const currentDebts = filterByYear(this.allDebtsData.currentDebts || []);
+    const overdueDebts = filterByYear(this.allDebtsData.overdueDebts || []);
+    const paidDebts = filterByYear(this.allDebtsData.paidDebts || []);
+    const paymentSubmittedDebts = filterByYear(this.allDebtsData.paymentSubmittedDebts || []);
+    
+    // Aplicar filtro de estado si existe
+    const status = this.filterStatus();
+    if (status) {
+      switch (status) {
+        case 'Pending':
+          this.currentDebts.set(currentDebts);
+          this.overdueDebts.set([]);
+          this.paidDebts.set([]);
+          this.paymentSubmittedDebts.set([]);
+          break;
+        case 'Overdue':
+          this.currentDebts.set([]);
+          this.overdueDebts.set(overdueDebts);
+          this.paidDebts.set([]);
+          this.paymentSubmittedDebts.set([]);
+          break;
+        case 'PaymentSubmitted':
+          this.currentDebts.set([]);
+          this.overdueDebts.set([]);
+          this.paidDebts.set([]);
+          this.paymentSubmittedDebts.set(paymentSubmittedDebts);
+          break;
+        case 'Paid':
+          this.currentDebts.set([]);
+          this.overdueDebts.set([]);
+          this.paidDebts.set(paidDebts);
+          this.paymentSubmittedDebts.set([]);
+          break;
+        default:
+          // Mostrar todos
+          this.currentDebts.set(currentDebts);
+          this.overdueDebts.set(overdueDebts);
+          this.paidDebts.set(paidDebts);
+          this.paymentSubmittedDebts.set(paymentSubmittedDebts);
+      }
+    } else {
+      // Sin filtro, mostrar todos
+      this.currentDebts.set(currentDebts);
+      this.overdueDebts.set(overdueDebts);
+      this.paidDebts.set(paidDebts);
+      this.paymentSubmittedDebts.set(paymentSubmittedDebts);
+    }
   }
 
   loadRecentPayments() {
@@ -297,5 +347,20 @@ export class MyDebtsComponent implements OnInit, OnDestroy {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/auth']);
+  }
+
+  getFilterStatusText(): string {
+    const status = this.filterStatus();
+    switch (status) {
+      case 'Pending': return 'Pendientes';
+      case 'Overdue': return 'Vencidos';
+      case 'PaymentSubmitted': return 'En Revisión';
+      case 'Paid': return 'Pagados';
+      default: return 'Todos';
+    }
+  }
+
+  clearFilter(): void {
+    this.router.navigate(['/my-debts']);
   }
 }
