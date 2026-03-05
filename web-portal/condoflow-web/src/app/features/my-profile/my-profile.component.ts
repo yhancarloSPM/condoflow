@@ -79,11 +79,78 @@ export class MyProfileComponent implements OnInit {
     const user = this.currentUser();
     const details = this.userDetails();
     
+    // Limpiar el número antes de mostrarlo en el formulario
+    let phoneNumber = details?.phoneNumber || '';
+    if (phoneNumber) {
+      phoneNumber = phoneNumber.replace(/\D/g, '');
+      if (phoneNumber.startsWith('1') && phoneNumber.length === 11) {
+        phoneNumber = phoneNumber.substring(1);
+      }
+    }
+    
+    // Guardar el número limpio en el formulario
     this.editForm.patchValue({
       firstName: user?.firstName || '',
       lastName: user?.lastName || '',
-      phoneNumber: this.formatPhoneNumber(details?.phoneNumber) || ''
+      phoneNumber: phoneNumber
     });
+  }
+
+  applyPhoneFormat(value: string): string {
+    const cleaned = value.replace(/\D/g, '');
+    
+    if (cleaned.length === 0) return '';
+    
+    let formatted = '(' + cleaned.substring(0, Math.min(3, cleaned.length));
+    if (cleaned.length > 3) {
+      formatted += ') ' + cleaned.substring(3, Math.min(6, cleaned.length));
+      if (cleaned.length > 6) {
+        formatted += '-' + cleaned.substring(6, Math.min(10, cleaned.length));
+      }
+    }
+    
+    return formatted;
+  }
+
+  onPhoneNumberInput(event: any) {
+    const input = event.target;
+    
+    // Obtener solo los números del valor actual
+    let value = input.value.replace(/\D/g, '');
+    
+    // Limitar a 10 dígitos
+    if (value.length > 10) {
+      value = value.substring(0, 10);
+    }
+    
+    // Guardar posición del cursor antes del cambio
+    const cursorPos = input.selectionStart || 0;
+    const prevValue = input.value;
+    
+    // Aplicar formato
+    const formatted = this.applyPhoneFormat(value);
+    
+    // Actualizar el input
+    input.value = formatted;
+    
+    // Ajustar cursor: si agregamos caracteres de formato, mover el cursor
+    let newCursorPos = cursorPos;
+    if (formatted.length > prevValue.length) {
+      // Se agregó formato, ajustar cursor
+      if (cursorPos === 4 && formatted.charAt(3) === ')') {
+        newCursorPos = cursorPos + 2; // Después de ") "
+      } else if (cursorPos === 9 && formatted.charAt(8) === '-') {
+        newCursorPos = cursorPos + 1; // Después de "-"
+      }
+    }
+    
+    // Restaurar posición del cursor
+    setTimeout(() => {
+      input.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+    
+    // Actualizar el formulario con el valor sin formato
+    this.editForm.get('phoneNumber')?.setValue(value, { emitEvent: false });
   }
 
   setActiveTab(tab: string) {
@@ -235,11 +302,30 @@ Información personal actualizada exitosamente
 
   formatPhoneNumber(phoneNumber: string): string {
     if (!phoneNumber) return '';
+    
+    // Limpiar el número de cualquier formato previo
+    let cleaned = phoneNumber.replace(/\D/g, '');
+    
     // Si empieza con 1 y tiene 11 dígitos, quitar el 1
-    if (phoneNumber.startsWith('1') && phoneNumber.length === 11) {
-      return phoneNumber.substring(1);
+    if (cleaned.startsWith('1') && cleaned.length === 11) {
+      cleaned = cleaned.substring(1);
     }
-    return phoneNumber;
+    
+    // Aplicar formato (809) 123-4567
+    if (cleaned.length === 10) {
+      return `(${cleaned.substring(0, 3)}) ${cleaned.substring(3, 6)}-${cleaned.substring(6)}`;
+    }
+    
+    // Si tiene menos de 10 dígitos, aplicar formato parcial
+    if (cleaned.length > 6) {
+      return `(${cleaned.substring(0, 3)}) ${cleaned.substring(3, 6)}-${cleaned.substring(6)}`;
+    } else if (cleaned.length > 3) {
+      return `(${cleaned.substring(0, 3)}) ${cleaned.substring(3)}`;
+    } else if (cleaned.length > 0) {
+      return `(${cleaned}`;
+    }
+    
+    return cleaned;
   }
 
   loadNotificationSettings() {

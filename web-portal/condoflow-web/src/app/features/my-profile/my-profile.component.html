@@ -90,7 +90,7 @@
                   <h4>Información del Apartamento</h4>
                   <div class="info-row">
                     <span class="label"><i class="pi pi-home me-2"></i>Ubicación</span>
-                    <span class="value">Bloque {{ userDetails()?.block }}, Apartamento {{ userDetails()?.apartment }}</span>
+                    <span class="value">{{ currentUser()?.apartment || 'No asignado' }}</span>
                   </div>
                   <div class="info-row">
                     <span class="label"><i class="pi pi-check-circle me-2"></i>Estado</span>
@@ -124,7 +124,13 @@
                     </div>
                     <div class="form-group">
                       <label class="form-label"><i class="pi pi-phone me-2"></i>Teléfono</label>
-                      <input type="tel" formControlName="phoneNumber" class="form-control" placeholder="Ej: 8091234567">
+                      <input 
+                        type="tel" 
+                        [value]="applyPhoneFormat(editForm.get('phoneNumber')?.value || '')"
+                        class="form-control" 
+                        placeholder="(809) 123-4567"
+                        (input)="onPhoneNumberInput($event)"
+                        maxlength="14">
                     </div>
                   </div>
                 </div>
