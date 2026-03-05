@@ -453,6 +453,18 @@ export class MyPaymentsComponent implements OnInit {
     this.payments.set(paginatedPayments);
   }
 
+  hasActiveFilters(): boolean {
+    return !!(this.statusFilter || this.methodFilter || this.dateFromFilter || this.dateToFilter);
+  }
+
+  clearFilters() {
+    this.statusFilter = '';
+    this.methodFilter = '';
+    this.dateFromFilter = '';
+    this.dateToFilter = '';
+    this.applyFilters();
+  }
+
   getPageNumbers(): (number | string)[] {
     const pages: (number | string)[] = [];
     const total = this.totalPages();
@@ -496,5 +508,15 @@ export class MyPaymentsComponent implements OnInit {
       'Tarjeta': 'tarjeta'
     };
     return methodMap[method] || 'transferencia';
+  }
+
+  getMethodIcon(method: string): string {
+    const iconMap: { [key: string]: string } = {
+      'Transferencia': 'pi-arrow-right-arrow-left',
+      'Efectivo': 'pi-money-bill',
+      'Cheque': 'pi-file-edit',
+      'Tarjeta': 'pi-credit-card'
+    };
+    return iconMap[method] || 'pi-arrow-right-arrow-left';
   }
 }

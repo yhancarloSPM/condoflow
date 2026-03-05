@@ -25,7 +25,6 @@ registerLocaleData(localeEs);
               </div>
               <div class="header-text">
                 <h2 class="header-title">Comunicados</h2>
-                <hr class="title-divider">
                 <p class="header-subtitle">Res. Michelle Marie II - Mantente informado sobre las novedades importantes</p>
               </div>
             </div>
