@@ -167,11 +167,13 @@ import { NotificationService } from '../../core/services/notification.service';
     .notification-read:hover { opacity: 1 !important; }
     .notification-deleted { background: #f3f4f6 !important; border-left: 3px solid #9ca3af !important; }
     .btn-delete-notification { background: transparent; border: none; color: #dc3545; padding: 0.25rem 0.5rem; cursor: pointer; transition: all 0.2s ease; border-radius: 4px; font-size: 0.875rem; }
+    .notification-read { background: #fafafa !important; opacity: 0.8; }
+    .notification-read:hover { opacity: 1 !important; }
+    .notification-deleted { background: #f3f4f6 !important; border-left: 3px solid #9ca3af !important; }
+    .btn-delete-notification { background: transparent; border: none; color: #dc3545; padding: 0.25rem 0.5rem; cursor: pointer; transition: all 0.2s ease; border-radius: 4px; font-size: 0.875rem; }
     .btn-delete-notification:hover { background: #fee; color: #b91c1c; }
     .btn-undo { background: #2563EB; color: white; border: none; padding: 0.375rem 0.75rem; border-radius: 6px; font-size: 0.875rem; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; }
     .btn-undo:hover { background: #1d4ed8; }
-    .notification-read { background: #fafafa !important; opacity: 0.8; }
-    .notification-read:hover { opacity: 1 !important; }
   `]
 })
 export class NavbarComponent implements OnInit, OnDestroy {
