@@ -62,8 +62,8 @@ public class DebtsController : ControllerBase
             })
             .ToListAsync();
 
-        var currentDebts = debts.Where(d => d.Status == StatusPayments.Pending && !d.IsOverdue).ToList();
-        var overdueDebts = debts.Where(d => d.Status == StatusPayments.Overdue && d.IsOverdue).ToList();
+        var currentDebts = debts.Where(d => d.Status == StatusPayments.Pending).ToList();
+        var overdueDebts = debts.Where(d => d.Status == StatusPayments.Overdue).ToList();
         var paidDebts = debts.Where(d => d.Status == StatusPayments.Paid).ToList();
         var paymentSubmittedDebts = debts.Where(d => d.Status == StatusPayments.PaymentSubmitted).ToList();
 
