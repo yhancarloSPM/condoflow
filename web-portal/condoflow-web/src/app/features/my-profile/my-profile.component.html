@@ -116,11 +116,27 @@
                   <div class="form-grid">
                     <div class="form-group">
                       <label class="form-label"><i class="pi pi-user me-2"></i>Nombre</label>
-                      <input type="text" formControlName="firstName" class="form-control" placeholder="Ingresa tu nombre">
+                      <input 
+                        type="text" 
+                        formControlName="firstName" 
+                        class="form-control" 
+                        [class.is-invalid]="editForm.get('firstName')?.invalid && editForm.get('firstName')?.touched"
+                        placeholder="Ingresa tu nombre">
+                      @if (editForm.get('firstName')?.errors?.['invalidName'] && editForm.get('firstName')?.touched) {
+                        <div class="invalid-feedback d-block">El nombre solo puede contener letras</div>
+                      }
                     </div>
                     <div class="form-group">
                       <label class="form-label"><i class="pi pi-user me-2"></i>Apellido</label>
-                      <input type="text" formControlName="lastName" class="form-control" placeholder="Ingresa tu apellido">
+                      <input 
+                        type="text" 
+                        formControlName="lastName" 
+                        class="form-control" 
+                        [class.is-invalid]="editForm.get('lastName')?.invalid && editForm.get('lastName')?.touched"
+                        placeholder="Ingresa tu apellido">
+                      @if (editForm.get('lastName')?.errors?.['invalidName'] && editForm.get('lastName')?.touched) {
+                        <div class="invalid-feedback d-block">El apellido solo puede contener letras</div>
+                      }
                     </div>
                     <div class="form-group">
                       <label class="form-label"><i class="pi pi-phone me-2"></i>Teléfono</label>

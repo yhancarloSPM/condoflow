@@ -339,8 +339,12 @@ import { AuthService } from '../../../core/services/auth.service';
                   formControlName="firstName"
                   type="text"
                   class="form-control"
+                  [class.is-invalid]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched"
                   placeholder="Tu nombre"
                 />
+                @if (registerForm.get('firstName')?.errors?.['invalidName'] && registerForm.get('firstName')?.touched) {
+                  <div class="invalid-feedback d-block">El nombre solo puede contener letras</div>
+                }
               </div>
               <div class="form-group">
                 <label class="form-label">
@@ -351,8 +355,12 @@ import { AuthService } from '../../../core/services/auth.service';
                   formControlName="lastName"
                   type="text"
                   class="form-control"
+                  [class.is-invalid]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched"
                   placeholder="Tu apellido"
                 />
+                @if (registerForm.get('lastName')?.errors?.['invalidName'] && registerForm.get('lastName')?.touched) {
+                  <div class="invalid-feedback d-block">El apellido solo puede contener letras</div>
+                }
               </div>
             </div>
             
@@ -534,8 +542,8 @@ export class RegisterComponent {
     private http: HttpClient
   ) {
     this.registerForm = this.fb.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
+      firstName: ['', [Validators.required, this.nameValidator]],
+      lastName: ['', [Validators.required, this.nameValidator]],
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', [Validators.required, this.dominicanPhoneValidator]],
       block: ['', Validators.required],
@@ -631,6 +639,21 @@ export class RegisterComponent {
     
     if (!validPrefixes.includes(prefix)) {
       return { invalidPrefix: true };
+    }
+    
+    return null;
+  }
+
+  nameValidator(control: any) {
+    if (!control.value) {
+      return null;
+    }
+    
+    // Solo permite letras (incluyendo acentos y ñ) y espacios
+    const namePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    
+    if (!namePattern.test(control.value)) {
+      return { invalidName: true };
     }
     
     return null;

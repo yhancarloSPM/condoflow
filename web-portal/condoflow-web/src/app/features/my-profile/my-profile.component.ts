@@ -38,8 +38,8 @@ export class MyProfileComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.editForm = this.fb.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
+      firstName: ['', [Validators.required, this.nameValidator]],
+      lastName: ['', [Validators.required, this.nameValidator]],
       phoneNumber: ['', [Validators.required, this.dominicanPhoneValidator]]
     });
     
@@ -372,6 +372,21 @@ Información personal actualizada exitosamente
     
     if (!validPrefixes.includes(prefix)) {
       return { invalidPrefix: true };
+    }
+    
+    return null;
+  }
+
+  nameValidator(control: any) {
+    if (!control.value) {
+      return null;
+    }
+    
+    // Solo permite letras (incluyendo acentos y ñ) y espacios
+    const namePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    
+    if (!namePattern.test(control.value)) {
+      return { invalidName: true };
     }
     
     return null;
