@@ -95,7 +95,11 @@ import { NotificationService } from '../../core/services/notification.service';
               </div>
               <div class="user-details">
                 <span class="user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span>
-                <span class="user-role">{{ isAdmin() ? 'Administrador' : 'Propietario' }}</span>
+                @if (!isAdmin() && currentUser()?.apartmentNumber) {
+                  <span class="user-apartment">{{ currentUser()?.apartmentNumber }}</span>
+                } @else {
+                  <span class="user-role">{{ isAdmin() ? 'Administrador' : 'Propietario' }}</span>
+                }
               </div>
             </div>
             <button 
@@ -123,6 +127,7 @@ import { NotificationService } from '../../core/services/notification.service';
     .user-details { display: flex; flex-direction: column; }
     .user-name { font-weight: 600; color: white; font-size: 0.875rem; }
     .user-role { font-size: 0.75rem; color: rgba(255, 255, 255, 0.8); }
+    .user-apartment { font-size: 0.75rem; color: rgba(255, 255, 255, 0.9); font-weight: 600; text-transform: uppercase; }
     .logout-button { background: transparent; border: none; color: white; width: 2.5rem; height: 2.5rem; padding: 0; cursor: pointer; transition: all 0.2s ease; }
     .logout-button:hover { color: rgba(255, 255, 255, 0.8); }
     
