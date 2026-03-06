@@ -146,6 +146,66 @@ public class PollsController : ControllerBase
         }
     }
 
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<ApiResponse<PollDto>>> UpdatePoll(int id, [FromBody] CreatePollDto updateDto)
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new ApiResponse<PollDto>
+                {
+                    Success = false,
+                    Message = "Usuario no autenticado"
+                });
+            }
+
+            if (updateDto.Options.Count < 2)
+            {
+                return BadRequest(new ApiResponse<PollDto>
+                {
+                    Success = false,
+                    Message = "La encuesta debe tener al menos 2 opciones"
+                });
+            }
+
+            if (updateDto.EndDate <= updateDto.StartDate)
+            {
+                return BadRequest(new ApiResponse<PollDto>
+                {
+                    Success = false,
+                    Message = "La fecha de fin debe ser posterior a la fecha de inicio"
+                });
+            }
+
+            var poll = await _pollService.UpdatePollAsync(id, updateDto, userId);
+            return Ok(new ApiResponse<PollDto>
+            {
+                Success = true,
+                Data = poll,
+                Message = "Encuesta actualizada exitosamente"
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ApiResponse<PollDto>
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ApiResponse<PollDto>
+            {
+                Success = false,
+                Message = $"Error interno del servidor: {ex.Message}"
+            });
+        }
+    }
+
     [HttpPost("{id}/vote")]
     public async Task<ActionResult<ApiResponse<object>>> Vote(int id, [FromBody] VoteDto voteDto)
     {

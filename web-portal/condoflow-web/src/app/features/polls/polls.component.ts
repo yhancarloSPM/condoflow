@@ -188,17 +188,17 @@ export class PollsComponent implements OnInit {
           this.messageService.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: this.isEditing() ? 'Encuesta actualizada exitosamente.' : 'Encuesta creada exitosamente.'
+            detail: this.isEditing() ? 'Encuesta actualizada exitosamente' : 'Encuesta creada exitosamente'
           });
         }
         this.loading.set(false);
       },
       error: (error) => {
-        console.error('Error saving poll:', error);
+        const errorMsg = error.error?.message || 'Error al guardar la encuesta. Inténtalo de nuevo.';
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Error al guardar la encuesta. Inténtalo de nuevo.'
+          detail: errorMsg
         });
         this.loading.set(false);
       }
@@ -248,6 +248,7 @@ export class PollsComponent implements OnInit {
   }
 
   vote(poll: Poll, optionId: number) {
+    const isChangingVote = poll.hasUserVoted;
     this.http.post<any>(`${environment.apiUrl}/polls/${poll.id}/vote`, { optionId }).subscribe({
       next: (response) => {
         if (response.success) {
@@ -255,12 +256,11 @@ export class PollsComponent implements OnInit {
           this.messageService.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Voto registrado correctamente'
+            detail: isChangingVote ? 'Voto cambiado correctamente' : 'Voto registrado correctamente'
           });
         }
       },
       error: (error) => {
-        console.error('Error voting:', error);
         const errorMsg = error.error?.message || 'Error al votar. Inténtalo de nuevo.';
         this.messageService.add({
           severity: 'error',
@@ -387,10 +387,24 @@ export class PollsComponent implements OnInit {
   }
 
   submitMultipleVote(poll: Poll) {
+    const isChangingVote = poll.hasUserVoted;
+    
+    // Combinar opciones seleccionadas con las ya votadas
+    let optionsToVote = [...this.selectedOptions];
+    
+    // Si hay opciones ya votadas que no están en selectedOptions, mantenerlas
+    if (poll.userVoteOptionIds) {
+      poll.userVoteOptionIds.forEach(id => {
+        if (!optionsToVote.includes(id)) {
+          optionsToVote.push(id);
+        }
+      });
+    }
+    
     // Si hay opción personalizada seleccionada, usar endpoint especial
     if (this.customOptionSelected && this.customOptionText?.trim()) {
       this.http.post<any>(`${environment.apiUrl}/polls/${poll.id}/vote-custom-multiple`, { 
-        optionIds: this.selectedOptions,
+        optionIds: optionsToVote,
         customText: this.customOptionText.trim() 
       }).subscribe({
         next: (response) => {
@@ -402,7 +416,7 @@ export class PollsComponent implements OnInit {
             this.messageService.add({
               severity: 'success',
               summary: 'Éxito',
-              detail: 'Votos registrados correctamente'
+              detail: isChangingVote ? 'Voto cambiado correctamente' : 'Votos registrados correctamente'
             });
           }
         },
@@ -419,7 +433,7 @@ export class PollsComponent implements OnInit {
     }
 
     // Votación múltiple normal sin opción personalizada
-    if (this.selectedOptions.length === 0) {
+    if (optionsToVote.length === 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Validación',
@@ -429,7 +443,7 @@ export class PollsComponent implements OnInit {
     }
 
     this.http.post<any>(`${environment.apiUrl}/polls/${poll.id}/vote-multiple`, { 
-      optionIds: this.selectedOptions 
+      optionIds: optionsToVote
     }).subscribe({
       next: (response) => {
         if (response.success) {
@@ -438,7 +452,7 @@ export class PollsComponent implements OnInit {
           this.messageService.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Votos registrados correctamente'
+            detail: isChangingVote ? 'Voto cambiado correctamente' : 'Votos registrados correctamente'
           });
         }
       },
@@ -588,5 +602,10 @@ export class PollsComponent implements OnInit {
       count++;
     }
     return count;
+  }
+
+  getOptionText(poll: Poll, optionId: number): string {
+    const option = poll.options.find(o => o.id === optionId);
+    return option ? option.text : 'Opción desconocida';
   }
 }

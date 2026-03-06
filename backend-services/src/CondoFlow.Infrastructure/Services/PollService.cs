@@ -11,6 +11,7 @@ public interface IPollService
     Task<IEnumerable<PollDto>> GetAllPollsAsync(string userId);
     Task<PollDto?> GetPollByIdAsync(int id, string userId);
     Task<PollDto> CreatePollAsync(CreatePollDto createDto, string userId);
+    Task<PollDto> UpdatePollAsync(int pollId, CreatePollDto updateDto, string userId);
     Task<bool> VoteAsync(VoteDto voteDto, string userId);
     Task<bool> VoteMultipleAsync(MultipleVoteDto voteDto, string userId);
     Task<bool> VoteCustomAsync(CustomVoteDto voteDto, string userId);
@@ -102,6 +103,49 @@ public class PollService : IPollService
         await _notificationService.NotifyNewPollAsync(poll.Id, poll.Title);
 
         return await GetPollByIdAsync(poll.Id, userId) ?? throw new InvalidOperationException("Failed to create poll");
+    }
+
+    public async Task<PollDto> UpdatePollAsync(int pollId, CreatePollDto updateDto, string userId)
+    {
+        var poll = await _context.Polls
+            .Include(p => p.Options)
+            .Include(p => p.Votes)
+            .FirstOrDefaultAsync(p => p.Id == pollId && p.IsActive && !p.IsDeleted);
+
+        if (poll == null)
+            throw new InvalidOperationException("Poll not found");
+
+        // Solo permitir edición si no hay votos aún
+        if (poll.Votes.Any())
+            throw new InvalidOperationException("Cannot edit poll with existing votes");
+
+        // Actualizar propiedades de la encuesta
+        poll.Title = updateDto.Title;
+        poll.Description = updateDto.Description;
+        poll.Type = (PollType)updateDto.Type;
+        poll.StartDate = updateDto.StartDate;
+        poll.EndDate = updateDto.EndDate;
+        poll.IsAnonymous = updateDto.IsAnonymous;
+        poll.ShowResults = updateDto.ShowResults;
+        poll.QuorumRequired = updateDto.QuorumRequired;
+        poll.AllowOther = updateDto.AllowOther;
+        poll.UpdatedAt = DateTime.UtcNow;
+
+        // Eliminar opciones existentes
+        _context.PollOptions.RemoveRange(poll.Options);
+
+        // Agregar nuevas opciones
+        var newOptions = updateDto.Options.Select((text, index) => new PollOption
+        {
+            PollId = poll.Id,
+            Text = text,
+            Order = index + 1
+        }).ToList();
+
+        _context.PollOptions.AddRange(newOptions);
+        await _context.SaveChangesAsync();
+
+        return await GetPollByIdAsync(poll.Id, userId) ?? throw new InvalidOperationException("Failed to update poll");
     }
 
     public async Task<bool> VoteAsync(VoteDto voteDto, string userId)

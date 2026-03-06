@@ -118,12 +118,26 @@
             </div>
           </div>
 
-          <div class="poll-voting" *ngIf="poll.stats.status === 'Active' && !poll.hasUserVoted && !isAdmin()">
+          <div class="poll-voting" *ngIf="poll.stats.status === 'Active' && !isAdmin()">
             <h4>Tu voto:</h4>
+            
+            <!-- Mostrar voto actual si ya votó -->
+            <div class="current-vote-info" *ngIf="poll.hasUserVoted">
+              <p class="vote-label">Has votado por:</p>
+              <div class="voted-options">
+                <span class="voted-option" *ngFor="let optionId of poll.userVoteOptionIds">
+                  {{ getOptionText(poll, optionId) }}
+                </span>
+              </div>
+              <p class="change-vote-hint">Puedes cambiar tu voto seleccionando otra opción:</p>
+            </div>
+            
             <div class="voting-options" *ngIf="poll.type === 'Simple'">
               <button class="btn btn-outline-primary vote-btn" 
                       *ngFor="let option of poll.options"
+                      [class.current-vote]="poll.userVoteOptionIds?.includes(option.id)"
                       (click)="vote(poll, option.id)">
+                <i class="pi pi-check-circle" *ngIf="poll.userVoteOptionIds?.includes(option.id)"></i>
                 {{ option.text }}
               </button>
               
@@ -165,11 +179,11 @@
                 <input type="checkbox" 
                        [id]="'option-' + poll.id + '-' + option.id" 
                        [value]="option.id"
-                       [checked]="selectedOptions.includes(option.id)"
+                       [checked]="selectedOptions.includes(option.id) || poll.userVoteOptionIds?.includes(option.id)"
                        (change)="toggleMultipleOption(option.id, $event)">
                 <label [for]="'option-' + poll.id + '-' + option.id">
-                  <i class="pi pi-check-square" *ngIf="selectedOptions.includes(option.id)"></i>
-                  <i class="pi pi-square" *ngIf="!selectedOptions.includes(option.id)"></i>
+                  <i class="pi pi-check-square" *ngIf="selectedOptions.includes(option.id) || poll.userVoteOptionIds?.includes(option.id)"></i>
+                  <i class="pi pi-square" *ngIf="!selectedOptions.includes(option.id) && !poll.userVoteOptionIds?.includes(option.id)"></i>
                   {{ option.text }}
                 </label>
               </div>
@@ -196,9 +210,9 @@
               
               <button class="btn btn-primary vote-submit-btn" 
                       (click)="submitMultipleVote(poll)"
-                      [disabled]="selectedOptions.length === 0 && !customOptionText?.trim()">
+                      [disabled]="getVoteCount() === 0">
                 <i class="pi pi-check"></i>
-                Votar ({{ getVoteCount() }} seleccionada{{ getVoteCount() !== 1 ? 's' : '' }})
+                {{ poll.hasUserVoted ? 'Cambiar voto' : 'Votar' }} ({{ getVoteCount() }} seleccionada{{ getVoteCount() !== 1 ? 's' : '' }})
               </button>
             </div>
           </div>
