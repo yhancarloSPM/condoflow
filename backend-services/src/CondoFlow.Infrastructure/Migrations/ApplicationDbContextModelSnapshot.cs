@@ -67,7 +67,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasIndex("AnnouncementTypeId");
 
-                    b.ToTable("Announcements");
+                    b.ToTable("Announcements", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.AnnouncementType", b =>
@@ -104,7 +104,7 @@ namespace CondoFlow.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_AnnouncementTypes_Code_Unique");
 
-                    b.ToTable("AnnouncementTypes");
+                    b.ToTable("AnnouncementTypes", (string)null);
 
                     b.HasData(
                         new
@@ -171,7 +171,7 @@ namespace CondoFlow.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Apartment_Block_Number_Unique");
 
-                    b.ToTable("Apartments");
+                    b.ToTable("Apartments", (string)null);
 
                     b.HasData(
                         new
@@ -541,7 +541,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Blocks");
+                    b.ToTable("Blocks", (string)null);
 
                     b.HasData(
                         new
@@ -611,7 +611,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Debt", b =>
@@ -650,7 +650,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Debts");
+                    b.ToTable("Debts", (string)null);
 
                     b.HasData(
                         new
@@ -737,7 +737,7 @@ namespace CondoFlow.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_EventTypes_Code_Unique");
 
-                    b.ToTable("EventTypes");
+                    b.ToTable("EventTypes", (string)null);
 
                     b.HasData(
                         new
@@ -828,7 +828,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Expenses");
+                    b.ToTable("Expenses", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.ExpenseCategory", b =>
@@ -852,7 +852,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ExpenseCategories");
+                    b.ToTable("ExpenseCategories", (string)null);
 
                     b.HasData(
                         new
@@ -948,7 +948,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Incidents");
+                    b.ToTable("Incidents", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Notification", b =>
@@ -998,7 +998,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.NotificationHistory", b =>
@@ -1035,7 +1035,7 @@ namespace CondoFlow.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_NotificationHistory_Debt_Type_Unique");
 
-                    b.ToTable("NotificationHistories");
+                    b.ToTable("NotificationHistories", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Payment", b =>
@@ -1083,7 +1083,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasIndex("DebtId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.PaymentConcept", b =>
@@ -1123,7 +1123,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PaymentConcepts");
+                    b.ToTable("PaymentConcepts", (string)null);
 
                     b.HasData(
                         new
@@ -1215,7 +1215,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Polls");
+                    b.ToTable("Polls", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.PollOption", b =>
@@ -1241,7 +1241,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasIndex("PollId");
 
-                    b.ToTable("PollOptions");
+                    b.ToTable("PollOptions", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.PollVote", b =>
@@ -1274,7 +1274,7 @@ namespace CondoFlow.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_PollVote_Poll_User_Unique");
 
-                    b.ToTable("PollVotes");
+                    b.ToTable("PollVotes", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Priority", b =>
@@ -1307,7 +1307,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Priorities");
+                    b.ToTable("Priorities", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Provider", b =>
@@ -1352,7 +1352,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Providers");
+                    b.ToTable("Providers", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Reservation", b =>
@@ -1405,7 +1405,7 @@ namespace CondoFlow.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Reservation_DateTime_Unique");
 
-                    b.ToTable("Reservations");
+                    b.ToTable("Reservations", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.ReservationSlot", b =>
@@ -1436,7 +1436,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ReservationSlots");
+                    b.ToTable("ReservationSlots", (string)null);
                 });
 
             modelBuilder.Entity("CondoFlow.Domain.Entities.Status", b =>
@@ -1469,7 +1469,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Statuses");
+                    b.ToTable("Statuses", (string)null);
 
                     b.HasData(
                         new
@@ -1802,7 +1802,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                             b1.HasKey("DebtId");
 
-                            b1.ToTable("Debts");
+                            b1.ToTable("Debts", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("DebtId");
@@ -1852,7 +1852,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                             b1.HasKey("DebtId");
 
-                            b1.ToTable("Debts");
+                            b1.ToTable("Debts", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("DebtId");
@@ -1941,7 +1941,7 @@ namespace CondoFlow.Infrastructure.Migrations
 
                             b1.HasKey("PaymentId");
 
-                            b1.ToTable("Payments");
+                            b1.ToTable("Payments", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("PaymentId");

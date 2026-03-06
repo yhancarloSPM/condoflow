@@ -3,19 +3,15 @@
 
   <div class="main-content">
     <div class="container-fluid">
-      <div class="row mb-3">
-        <div class="col-12">
-          <div class="header-card">
-            <div class="header-content">
-              <div class="header-info">
-                <div class="header-icon">
-                  <i class="pi pi-user"></i>
-                </div>
-                <div class="header-text">
-                  <h2 class="header-title">Mi Perfil</h2>
-                  <p class="header-subtitle">Gestiona tu información personal y configuración</p>
-                </div>
-              </div>
+      <div class="page-header">
+        <div class="header-content">
+          <div class="header-info">
+            <div class="header-icon">
+              <i class="pi pi-user"></i>
+            </div>
+            <div class="header-text">
+              <h1 class="header-title">Mi Perfil</h1>
+              <p class="header-subtitle">Gestiona tu información personal y configuración</p>
             </div>
           </div>
         </div>
@@ -222,7 +218,7 @@
           @if (activeTab() === 'notifications') {
             <div class="notifications-section">
               <div class="form-section">
-                <h4>Preferencias de Notificaciones</h4>
+                <h4>Notificaciones</h4>
                 <div class="notification-settings">
                   <div class="setting-item">
                     <div class="setting-info">
@@ -253,6 +249,17 @@
                     </div>
                     <label class="toggle">
                       <input type="checkbox" [(ngModel)]="notificationSettings.announcements">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  
+                  <div class="setting-item">
+                    <div class="setting-info">
+                      <span class="setting-title"><i class="pi pi-list-check me-2"></i>Encuestas y Votaciones</span>
+                      <span class="setting-desc">Notificaciones de nuevas encuestas y votaciones</span>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" [(ngModel)]="notificationSettings.polls">
                       <span class="slider"></span>
                     </label>
                   </div>

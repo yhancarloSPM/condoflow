@@ -27,6 +27,7 @@ interface Poll {
   stats: PollStats;
   hasUserVoted: boolean;
   userVoteOptionId?: number;
+  userVoteOptionIds: number[];
 }
 
 interface PollOption {
@@ -89,7 +90,7 @@ export class PollsComponent implements OnInit {
   newPoll: CreatePoll & { allowOther?: boolean } = {
     title: '',
     description: '',
-    type: 1, // Simple
+    type: 0, // Simple
     startDate: '',
     endDate: '',
     isAnonymous: false,
@@ -147,7 +148,7 @@ export class PollsComponent implements OnInit {
     this.newPoll = {
       title: '',
       description: '',
-      type: 1,
+      type: 0,
       startDate: '',
       endDate: '',
       isAnonymous: false,
@@ -377,19 +378,47 @@ export class PollsComponent implements OnInit {
 
   toggleMultipleOption(optionId: number, event: any) {
     if (event.target.checked) {
-      this.selectedOptions.push(optionId);
+      if (!this.selectedOptions.includes(optionId)) {
+        this.selectedOptions.push(optionId);
+      }
     } else {
       this.selectedOptions = this.selectedOptions.filter(id => id !== optionId);
     }
   }
 
   submitMultipleVote(poll: Poll) {
-    // For now, vote for the first selected option
-    // TODO: Implement backend support for multiple votes
-    if (this.selectedOptions.length > 0) {
-      this.vote(poll, this.selectedOptions[0]);
-      this.selectedOptions = [];
+    if (this.selectedOptions.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validación',
+        detail: 'Debe seleccionar al menos una opción'
+      });
+      return;
     }
+
+    this.http.post<any>(`${environment.apiUrl}/polls/${poll.id}/vote-multiple`, { 
+      optionIds: this.selectedOptions 
+    }).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.selectedOptions = [];
+          this.loadPolls();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Votos registrados correctamente'
+          });
+        }
+      },
+      error: (error) => {
+        const errorMsg = error.error?.message || 'Error al votar. Inténtalo de nuevo.';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: errorMsg
+        });
+      }
+    });
   }
 
   get totalPages(): number {
@@ -423,7 +452,7 @@ export class PollsComponent implements OnInit {
     this.newPoll = {
       title: poll.title,
       description: poll.description,
-      type: poll.type === 'Simple' ? 1 : 2,
+      type: poll.type === 'Simple' ? 0 : 1,
       startDate: poll.startDate.slice(0, 16),
       endDate: poll.endDate.slice(0, 16),
       isAnonymous: poll.isAnonymous,
@@ -463,6 +492,19 @@ export class PollsComponent implements OnInit {
     }
 
     return pages;
+  }
+
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'Active':
+        return 'pi-check-circle';
+      case 'Closed':
+        return 'pi-times-circle';
+      case 'Pending':
+        return 'pi-clock';
+      default:
+        return 'pi-circle';
+    }
   }
 
   toggleCustomOption(event: any) {

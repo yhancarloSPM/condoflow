@@ -189,6 +189,58 @@ public class PollsController : ControllerBase
         }
     }
 
+    [HttpPost("{id}/vote-multiple")]
+    public async Task<ActionResult<ApiResponse<object>>> VoteMultiple(int id, [FromBody] MultipleVoteDto voteDto)
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Usuario no autenticado"
+                });
+            }
+
+            if (voteDto.OptionIds == null || !voteDto.OptionIds.Any())
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Debe seleccionar al menos una opción"
+                });
+            }
+
+            voteDto.PollId = id; // Asegurar que el ID coincida
+            var success = await _pollService.VoteMultipleAsync(voteDto, userId);
+            
+            if (!success)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "No se pudo registrar el voto. Verifique que la encuesta esté activa y las opciones sean válidas."
+                });
+            }
+
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Votos registrados exitosamente"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ApiResponse<object>
+            {
+                Success = false,
+                Message = $"Error interno del servidor: {ex.Message}"
+            });
+        }
+    }
+
     [HttpPut("{id}/close")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<ApiResponse<object>>> ClosePoll(int id)

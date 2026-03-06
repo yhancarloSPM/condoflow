@@ -17,4 +17,5 @@ public interface INotificationService
     Task MarkNotificationAsReadAsync(Guid notificationId);
     Task CreateNotificationAsync(string userId, string title, string message, string type, string? relatedEntityId = null);
     Task SendAdminNotificationAsync(string title, string message, string type, string? relatedEntityId = null);
+    Task NotifyNewPollAsync(int pollId, string pollTitle);
 }

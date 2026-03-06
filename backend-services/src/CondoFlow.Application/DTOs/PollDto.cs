@@ -12,6 +12,7 @@ public class PollDto
     public bool IsAnonymous { get; set; }
     public bool ShowResults { get; set; }
     public int? QuorumRequired { get; set; }
+    public bool AllowOther { get; set; }
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     
@@ -19,6 +20,7 @@ public class PollDto
     public PollStatsDto Stats { get; set; } = new();
     public bool HasUserVoted { get; set; }
     public int? UserVoteOptionId { get; set; }
+    public List<int> UserVoteOptionIds { get; set; } = new();
 }
 
 public class PollOptionDto
@@ -50,12 +52,13 @@ public class CreatePollDto
 {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public int Type { get; set; } // 1=Survey, 2=Vote
+    public int Type { get; set; } // 0=Simple, 1=Multiple
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public bool IsAnonymous { get; set; } = false;
     public bool ShowResults { get; set; } = true;
     public int? QuorumRequired { get; set; }
+    public bool AllowOther { get; set; } = false;
     public List<string> Options { get; set; } = new();
 }
 
@@ -63,4 +66,10 @@ public class VoteDto
 {
     public int PollId { get; set; }
     public int OptionId { get; set; }
+}
+
+public class MultipleVoteDto
+{
+    public int PollId { get; set; }
+    public List<int> OptionIds { get; set; } = new();
 }

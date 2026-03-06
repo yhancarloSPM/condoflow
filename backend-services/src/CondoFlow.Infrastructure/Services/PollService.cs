@@ -1,4 +1,5 @@
 using CondoFlow.Application.DTOs;
+using CondoFlow.Application.Common.Services;
 using CondoFlow.Domain.Entities;
 using CondoFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ public interface IPollService
     Task<PollDto?> GetPollByIdAsync(int id, string userId);
     Task<PollDto> CreatePollAsync(CreatePollDto createDto, string userId);
     Task<bool> VoteAsync(VoteDto voteDto, string userId);
+    Task<bool> VoteMultipleAsync(MultipleVoteDto voteDto, string userId);
     Task<bool> DeletePollAsync(int id);
     Task<bool> ClosePollAsync(int id);
 }
@@ -18,10 +20,12 @@ public interface IPollService
 public class PollService : IPollService
 {
     private readonly ApplicationDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public PollService(ApplicationDbContext context)
+    public PollService(ApplicationDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<IEnumerable<PollDto>> GetAllPollsAsync(string userId)
@@ -73,6 +77,7 @@ public class PollService : IPollService
             IsAnonymous = createDto.IsAnonymous,
             ShowResults = createDto.ShowResults,
             QuorumRequired = createDto.QuorumRequired,
+            AllowOther = createDto.AllowOther,
             CreatedBy = userId,
             CreatedAt = DateTime.UtcNow
         };
@@ -90,6 +95,9 @@ public class PollService : IPollService
 
         _context.PollOptions.AddRange(options);
         await _context.SaveChangesAsync();
+
+        // Enviar notificación a todos los propietarios
+        await _notificationService.NotifyNewPollAsync(poll.Id, poll.Title);
 
         return await GetPollByIdAsync(poll.Id, userId) ?? throw new InvalidOperationException("Failed to create poll");
     }
@@ -115,28 +123,73 @@ public class PollService : IPollService
         if (user == null) return false;
         
         // Verificar si el usuario ya votó
-        var existingVote = await _context.PollVotes
-            .FirstOrDefaultAsync(v => v.PollId == voteDto.PollId && v.UserId == userId);
+        var existingVotes = await _context.PollVotes
+            .Where(v => v.PollId == voteDto.PollId && v.UserId == userId)
+            .ToListAsync();
 
-        if (existingVote != null)
+        if (existingVotes.Any())
         {
-            // Actualizar voto existente
-            existingVote.PollOptionId = voteDto.OptionId;
-            existingVote.VotedAt = DateTime.UtcNow;
-        }
-        else
-        {
-            // Crear nuevo voto
-            var vote = new PollVote
-            {
-                PollId = voteDto.PollId,
-                PollOptionId = voteDto.OptionId,
-                UserId = userId,
-                VotedAt = DateTime.UtcNow
-            };
-            _context.PollVotes.Add(vote);
+            // Eliminar votos existentes
+            _context.PollVotes.RemoveRange(existingVotes);
         }
 
+        // Crear nuevo voto
+        var vote = new PollVote
+        {
+            PollId = voteDto.PollId,
+            PollOptionId = voteDto.OptionId,
+            UserId = userId,
+            VotedAt = DateTime.UtcNow
+        };
+        _context.PollVotes.Add(vote);
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> VoteMultipleAsync(MultipleVoteDto voteDto, string userId)
+    {
+        // Verificar que la encuesta existe y está activa
+        var poll = await _context.Polls
+            .Include(p => p.Options)
+            .FirstOrDefaultAsync(p => p.Id == voteDto.PollId && p.IsActive);
+
+        if (poll == null) return false;
+
+        // Verificar que la encuesta es de tipo múltiple
+        if (poll.Type != PollType.Multiple) return false;
+
+        // Verificar que la encuesta no ha terminado
+        if (DateTime.UtcNow > poll.EndDate) return false;
+
+        // Verificar que todas las opciones existen
+        var validOptionIds = poll.Options.Select(o => o.Id).ToList();
+        if (!voteDto.OptionIds.All(id => validOptionIds.Contains(id))) return false;
+
+        // Verificar que el usuario existe
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return false;
+        
+        // Eliminar votos existentes del usuario en esta encuesta
+        var existingVotes = await _context.PollVotes
+            .Where(v => v.PollId == voteDto.PollId && v.UserId == userId)
+            .ToListAsync();
+
+        if (existingVotes.Any())
+        {
+            _context.PollVotes.RemoveRange(existingVotes);
+        }
+
+        // Crear nuevos votos para cada opción seleccionada
+        var newVotes = voteDto.OptionIds.Select(optionId => new PollVote
+        {
+            PollId = voteDto.PollId,
+            PollOptionId = optionId,
+            UserId = userId,
+            VotedAt = DateTime.UtcNow
+        }).ToList();
+
+        _context.PollVotes.AddRange(newVotes);
         await _context.SaveChangesAsync();
         return true;
     }
@@ -164,15 +217,15 @@ public class PollService : IPollService
 
     private PollDto MapToPollDto(Poll poll, string userId, int totalUsers)
     {
-        var totalVotes = poll.Votes.Count;
-        var userVote = poll.Votes.FirstOrDefault(v => v.UserId == userId);
+        var userVotes = poll.Votes.Where(v => v.UserId == userId).ToList();
+        var totalVotes = poll.Votes.GroupBy(v => v.UserId).Count(); // Contar usuarios únicos que votaron
         
         var options = poll.Options.Select(o => new PollOptionDto
         {
             Id = o.Id,
             Text = o.Text,
             VoteCount = o.Votes.Count,
-            Percentage = totalVotes > 0 ? Math.Round((decimal)o.Votes.Count / totalVotes * 100, 1) : 0,
+            Percentage = totalVotes > 0 ? Math.Round((decimal)o.Votes.Count / poll.Votes.Count * 100, 1) : 0,
             Voters = poll.IsAnonymous ? new List<VoterDto>() : 
                 o.Votes.Select(v => new VoterDto
                 {
@@ -200,6 +253,7 @@ public class PollService : IPollService
             IsAnonymous = poll.IsAnonymous,
             ShowResults = poll.ShowResults,
             QuorumRequired = poll.QuorumRequired,
+            AllowOther = poll.AllowOther,
             CreatedBy = poll.CreatedBy,
             CreatedAt = poll.CreatedAt,
             Options = options,
@@ -211,8 +265,9 @@ public class PollService : IPollService
                 HasQuorum = hasQuorum,
                 Status = status
             },
-            HasUserVoted = userVote != null,
-            UserVoteOptionId = userVote?.PollOptionId
+            HasUserVoted = userVotes.Any(),
+            UserVoteOptionId = userVotes.FirstOrDefault()?.PollOptionId,
+            UserVoteOptionIds = userVotes.Select(v => v.PollOptionId).ToList()
         };
     }
     

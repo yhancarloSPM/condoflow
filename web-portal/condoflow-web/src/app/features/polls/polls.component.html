@@ -11,7 +11,7 @@
           </div>
           <div class="header-text">
             <h1 class="header-title">Encuestas y Votaciones</h1>
-            <p class="header-subtitle">Gestiona las votaciones del condominio</p>
+            <p class="header-subtitle">Participa en las votaciones del condominio</p>
           </div>
         </div>
         <div class="header-actions">
@@ -28,29 +28,49 @@
              *ngFor="let poll of paginatedPolls()">
           <div class="poll-header">
             <div class="poll-actions">
-              <span class="poll-status" [class]="'status-' + poll.stats.status.toLowerCase()">
-                {{ (poll.stats.status === 'Active' ? 'ACTIVA' : 
-                   poll.stats.status === 'Closed' ? 'CERRADA' : 'PENDIENTE') }}
-              </span>
-              <div *ngIf="isAdmin()">
-                <button class="btn btn-sm btn-secondary" 
+              <div class="status-badges">
+                <span class="poll-status" [class]="'status-' + poll.stats.status.toLowerCase()">
+                  <i class="pi" [ngClass]="getStatusIcon(poll.stats.status)"></i>
+                  {{ (poll.stats.status === 'Active' ? 'ACTIVA' : 
+                     poll.stats.status === 'Closed' ? 'CERRADA' : 'PENDIENTE') }}
+                </span>
+                <span class="poll-admin-badge" *ngIf="isAdmin()">
+                  <i class="pi pi-shield"></i>
+                  Admin
+                </span>
+              </div>
+              <div class="action-buttons" *ngIf="isAdmin()">
+                <button class="action-icon edit-icon" 
                         *ngIf="poll.stats.status === 'Active'"
-                        (click)="editPoll(poll)">
+                        (click)="editPoll(poll)"
+                        title="Editar encuesta">
                   <i class="pi pi-pencil"></i>
                 </button>
-                <button class="btn btn-sm btn-warning" 
+                <button class="action-icon close-icon" 
                         *ngIf="poll.stats.status === 'Active'"
-                        (click)="closePoll(poll)">
+                        (click)="closePoll(poll)"
+                        title="Cerrar encuesta">
                   <i class="pi pi-times-circle"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" 
+                <button class="action-icon delete-icon" 
                         *ngIf="poll.stats.status === 'Active'"
-                        (click)="deletePoll(poll)">
+                        (click)="deletePoll(poll)"
+                        title="Eliminar encuesta">
                   <i class="pi pi-trash"></i>
                 </button>
               </div>
             </div>
+            
             <h3>{{ poll.title }}</h3>
+            <div class="poll-type-badge">
+              <i class="pi" [ngClass]="poll.type === 'Simple' ? 'pi-check' : 'pi-list'"></i>
+              {{ poll.type === 'Simple' ? 'Votación Simple' : 'Votación Múltiple' }}
+            </div>
+          </div>
+          
+          <div class="poll-voted-banner" *ngIf="poll.hasUserVoted && !isAdmin()">
+            <i class="pi pi-check-circle"></i>
+            <span>Ya has votado en esta encuesta</span>
           </div>
 
           <p class="poll-description">{{ poll.description }}</p>
@@ -74,9 +94,14 @@
 
           <div class="poll-options">
             <div class="option-item" *ngFor="let option of poll.options" 
-                 [ngClass]="{ 'user-voted': poll.userVoteOptionId === option.id }">
+                 [ngClass]="{ 'user-voted': poll.userVoteOptionIds?.includes(option.id) }">
               <div class="option-header">
-                <span class="option-text">{{ option.text }}</span>
+                <span class="option-text">
+                  {{ option.text }}
+                  <i class="pi pi-check-circle" 
+                     *ngIf="poll.userVoteOptionIds?.includes(option.id)"
+                     style="color: #10b981; margin-left: 0.5rem; font-size: 0.9rem;"></i>
+                </span>
                 <span class="option-percentage">{{ option.percentage }}%</span>
               </div>
               <div class="option-bar">
@@ -103,26 +128,27 @@
               </button>
             </div>
             <div class="voting-options-multiple" *ngIf="poll.type === 'Multiple'">
+              <p class="voting-instructions">Selecciona una o más opciones:</p>
               <div class="option-checkbox" *ngFor="let option of poll.options">
                 <input type="checkbox" 
-                       [id]="'option-' + option.id" 
+                       [id]="'option-' + poll.id + '-' + option.id" 
                        [value]="option.id"
+                       [checked]="selectedOptions.includes(option.id)"
                        (change)="toggleMultipleOption(option.id, $event)">
-                <label [for]="'option-' + option.id">{{ option.text }}</label>
+                <label [for]="'option-' + poll.id + '-' + option.id">
+                  <i class="pi pi-check-square" *ngIf="selectedOptions.includes(option.id)"></i>
+                  <i class="pi pi-square" *ngIf="!selectedOptions.includes(option.id)"></i>
+                  {{ option.text }}
+                </label>
               </div>
-              <button class="btn btn-primary" 
+              <button class="btn btn-primary vote-submit-btn" 
                       (click)="submitMultipleVote(poll)"
                       [disabled]="selectedOptions.length === 0">
-                Votar
+                <i class="pi pi-check"></i>
+                Votar ({{ selectedOptions.length }} seleccionada{{ selectedOptions.length !== 1 ? 's' : '' }})
               </button>
             </div>
           </div>
-
-          <div class="poll-voted" *ngIf="poll.hasUserVoted && !isAdmin()">
-            <i class="pi pi-check-circle text-success"></i>
-            <span>Ya has votado en esta encuesta</span>
-          </div>
-          
 
         </div>
       </div>
@@ -207,8 +233,8 @@
         <div class="form-group">
           <label for="type">Tipo</label>
           <select id="type" [(ngModel)]="newPoll.type" name="type" class="form-control">
-            <option value="1">Votación Simple</option>
-            <option value="2">Votación Múltiple</option>
+            <option [value]="0">Votación Simple</option>
+            <option [value]="1">Votación Múltiple</option>
           </select>
         </div>
 

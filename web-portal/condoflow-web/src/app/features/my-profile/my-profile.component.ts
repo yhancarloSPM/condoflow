@@ -28,7 +28,8 @@ export class MyProfileComponent implements OnInit {
   notificationSettings = {
     payments: true,
     reminders: true,
-    announcements: false
+    announcements: false,
+    polls: true
   };
 
   constructor(
@@ -331,7 +332,12 @@ Información personal actualizada exitosamente
   loadNotificationSettings() {
     const saved = localStorage.getItem('notificationSettings');
     if (saved) {
-      this.notificationSettings = JSON.parse(saved);
+      const savedSettings = JSON.parse(saved);
+      // Merge con los valores por defecto para asegurar que todas las propiedades existan
+      this.notificationSettings = {
+        ...this.notificationSettings,
+        ...savedSettings
+      };
     }
   }
 

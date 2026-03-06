@@ -356,4 +356,41 @@ public class NotificationService : INotificationService
             createdAt = notification.CreatedAt
         });
     }
+
+    public async Task NotifyNewPollAsync(int pollId, string pollTitle)
+    {
+        // Obtener todos los usuarios aprobados (propietarios)
+        var approvedUsers = await _context.Users
+            .Where(u => u.IsApproved)
+            .Select(u => u.Id)
+            .ToListAsync();
+        
+        // Crear notificación para cada usuario
+        foreach (var userId in approvedUsers)
+        {
+            var notification = new Notification(
+                "Nueva Encuesta",
+                $"Nueva encuesta disponible: {pollTitle}",
+                "NewPoll",
+                "User",
+                userId,
+                pollId.ToString()
+            );
+            
+            _context.Notifications.Add(notification);
+            
+            // Enviar notificación en tiempo real con categoría
+            await _hubContext.Clients.Group($"User_{userId}").SendAsync("NewNotification", new
+            {
+                id = notification.Id,
+                title = notification.Title,
+                message = notification.Message,
+                type = notification.Type,
+                createdAt = notification.CreatedAt,
+                category = "polls" // Agregar categoría para filtrar en el frontend
+            });
+        }
+        
+        await _context.SaveChangesAsync();
+    }
 }

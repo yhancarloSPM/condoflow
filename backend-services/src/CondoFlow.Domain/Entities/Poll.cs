@@ -13,6 +13,7 @@ public class Poll
     public bool IsAnonymous { get; set; } = false;
     public bool ShowResults { get; set; } = true;
     public int? QuorumRequired { get; set; }
+    public bool AllowOther { get; set; } = false;
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
