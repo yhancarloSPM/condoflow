@@ -13,12 +13,8 @@
 
 .page-header {
   margin-bottom: 1rem;
-  padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 0;
+  background: transparent;
 }
 
 .header-content {
@@ -26,6 +22,8 @@
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
 }
 
 .header-info {
@@ -36,16 +34,18 @@
 }
 
 .header-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  background: linear-gradient(135deg, #10b981, #059669);
+  width: 4rem;
+  height: 4rem;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.25);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.75rem;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  font-size: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .header-text {
@@ -53,17 +53,17 @@
 }
 
 .header-title {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: white;
-  margin: 0 0 0.15rem 0;
+  margin: 0 0 0.25rem 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .header-subtitle {
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 
 .profile-tabs-card { 

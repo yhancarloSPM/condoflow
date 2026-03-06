@@ -55,22 +55,18 @@
           <!-- Tab: Información -->
           @if (activeTab() === 'info') {
             <div class="profile-info-section">
-              <div class="profile-header-section">
-                <div class="profile-avatar">
-                  <div class="avatar-circle">{{ getUserInitials() }}</div>
-                </div>
-                <div class="profile-details">
-                  <h3>{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</h3>
-                  <p class="profile-email">{{ currentUser()?.email }}</p>
-                </div>
-              </div>
-
               <div class="info-sections">
                 <div class="info-section">
                   <h4>Información Personal</h4>
                   <div class="info-row">
                     <span class="label"><i class="pi pi-user me-2"></i>Nombre Completo</span>
                     <span class="value">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="label"><i class="pi pi-shield me-2"></i>Rol</span>
+                    <span class="badge status-badge" [class]="currentUser()?.role === 'Admin' ? 'bg-primary' : 'bg-success'">
+                      {{ currentUser()?.role === 'Admin' ? 'ADMINISTRADOR' : 'PROPIETARIO' }}
+                    </span>
                   </div>
                   <div class="info-row">
                     <span class="label"><i class="pi pi-envelope me-2"></i>Email</span>

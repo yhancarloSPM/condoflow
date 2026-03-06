@@ -94,12 +94,12 @@
 
           <div class="poll-options">
             <div class="option-item" *ngFor="let option of poll.options" 
-                 [ngClass]="{ 'user-voted': poll.userVoteOptionIds?.includes(option.id) }">
+                 [ngClass]="{ 'user-voted': poll.userVoteOptionIds.includes(option.id) }">
               <div class="option-header">
                 <span class="option-text">
                   {{ option.text }}
                   <i class="pi pi-check-circle" 
-                     *ngIf="poll.userVoteOptionIds?.includes(option.id)"
+                     *ngIf="poll.userVoteOptionIds.includes(option.id)"
                      style="color: #10b981; margin-left: 0.5rem; font-size: 0.9rem;"></i>
                 </span>
                 <span class="option-percentage">{{ option.percentage }}%</span>
@@ -135,9 +135,9 @@
             <div class="voting-options" *ngIf="poll.type === 'Simple'">
               <button class="btn btn-outline-primary vote-btn" 
                       *ngFor="let option of poll.options"
-                      [class.current-vote]="poll.userVoteOptionIds?.includes(option.id)"
+                      [class.current-vote]="poll.userVoteOptionIds.includes(option.id)"
                       (click)="vote(poll, option.id)">
-                <i class="pi pi-check-circle" *ngIf="poll.userVoteOptionIds?.includes(option.id)"></i>
+                <i class="pi pi-check-circle" *ngIf="poll.userVoteOptionIds.includes(option.id)"></i>
                 {{ option.text }}
               </button>
               
@@ -159,7 +159,7 @@
                   <div class="custom-option-actions">
                     <button class="btn btn-primary" 
                             (click)="voteCustom(poll)"
-                            [disabled]="!customOptionText?.trim()">
+                            [disabled]="!customOptionText || !customOptionText.trim()">
                       <i class="pi pi-check"></i>
                       Votar
                     </button>
@@ -179,11 +179,11 @@
                 <input type="checkbox" 
                        [id]="'option-' + poll.id + '-' + option.id" 
                        [value]="option.id"
-                       [checked]="selectedOptions.includes(option.id) || poll.userVoteOptionIds?.includes(option.id)"
-                       (change)="toggleMultipleOption(option.id, $event)">
+                       [checked]="isOptionSelected(poll.id, option.id)"
+                       (change)="toggleMultipleOption(poll.id, option.id, $event)">
                 <label [for]="'option-' + poll.id + '-' + option.id">
-                  <i class="pi pi-check-square" *ngIf="selectedOptions.includes(option.id) || poll.userVoteOptionIds?.includes(option.id)"></i>
-                  <i class="pi pi-square" *ngIf="!selectedOptions.includes(option.id) && !poll.userVoteOptionIds?.includes(option.id)"></i>
+                  <i class="pi pi-check-square" *ngIf="isOptionSelected(poll.id, option.id)"></i>
+                  <i class="pi pi-square" *ngIf="!isOptionSelected(poll.id, option.id)"></i>
                   {{ option.text }}
                 </label>
               </div>
@@ -210,9 +210,9 @@
               
               <button class="btn btn-primary vote-submit-btn" 
                       (click)="submitMultipleVote(poll)"
-                      [disabled]="getVoteCount() === 0">
+                      [disabled]="getVoteCountForPoll(poll.id) === 0">
                 <i class="pi pi-check"></i>
-                {{ poll.hasUserVoted ? 'Cambiar voto' : 'Votar' }} ({{ getVoteCount() }} seleccionada{{ getVoteCount() !== 1 ? 's' : '' }})
+                {{ poll.hasUserVoted ? 'Cambiar voto' : 'Votar' }} ({{ getVoteCountForPoll(poll.id) }} seleccionada{{ getVoteCountForPoll(poll.id) !== 1 ? 's' : '' }})
               </button>
             </div>
           </div>

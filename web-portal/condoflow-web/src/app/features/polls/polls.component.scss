@@ -19,7 +19,7 @@
 .polls-section {
   background: transparent;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 0;
   max-width: 100%;
   overflow: hidden;
   flex: 1;
@@ -32,7 +32,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
   
   .header-info {
     display: flex;
@@ -43,14 +44,16 @@
   .header-icon {
     width: 4rem;
     height: 4rem;
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.25);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 2rem;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   }
   
   .header-text {
@@ -867,6 +870,13 @@
   flex-direction: column;
   gap: 0.75rem;
   margin-top: 0.75rem;
+  
+  .text-muted {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.75rem;
+    font-style: italic;
+    margin-top: -0.5rem;
+  }
   
   .form-control {
     background: rgba(255,255,255,0.08);

@@ -515,10 +515,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(e => e.PollOptionId)
                   .OnDelete(DeleteBehavior.Restrict);
             
-            // Un usuario solo puede votar una vez por encuesta
-            entity.HasIndex(e => new { e.PollId, e.UserId })
+            // Un usuario puede votar múltiples opciones en votación múltiple
+            // El índice único debe incluir PollOptionId para permitir múltiples votos
+            entity.HasIndex(e => new { e.PollId, e.UserId, e.PollOptionId })
                   .IsUnique()
-                  .HasDatabaseName("IX_PollVote_Poll_User_Unique");
+                  .HasDatabaseName("IX_PollVote_Poll_User_Option_Unique");
         });
         
 

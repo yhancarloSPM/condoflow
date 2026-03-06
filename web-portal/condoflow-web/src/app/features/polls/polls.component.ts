@@ -82,6 +82,7 @@ export class PollsComponent implements OnInit {
   pollToDelete = signal<Poll | null>(null);
   pollToClose = signal<Poll | null>(null);
   selectedOptions: number[] = [];
+  selectedOptionsByPoll: Map<number, number[]> = new Map();
   customOptionText = '';
   customOptionSelected = false;
   currentPage = 1;
@@ -119,6 +120,12 @@ export class PollsComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.polls.set(response.data);
+          // Inicializar selectedOptions con los votos actuales del usuario
+          response.data.forEach((poll: Poll) => {
+            if (poll.hasUserVoted && poll.type === 'Multiple') {
+              this.selectedOptionsByPoll.set(poll.id, [...poll.userVoteOptionIds]);
+            }
+          });
         }
         this.loading.set(false);
       },
@@ -376,21 +383,26 @@ export class PollsComponent implements OnInit {
     return index;
   }
 
-  toggleMultipleOption(optionId: number, event: any) {
+  toggleMultipleOption(pollId: number, optionId: number, event: any) {
+    const currentSelections = this.selectedOptionsByPoll.get(pollId) || [];
+    
     if (event.target.checked) {
-      if (!this.selectedOptions.includes(optionId)) {
-        this.selectedOptions.push(optionId);
+      if (!currentSelections.includes(optionId)) {
+        currentSelections.push(optionId);
       }
     } else {
-      this.selectedOptions = this.selectedOptions.filter(id => id !== optionId);
+      const index = currentSelections.indexOf(optionId);
+      if (index > -1) {
+        currentSelections.splice(index, 1);
+      }
     }
+    
+    this.selectedOptionsByPoll.set(pollId, currentSelections);
   }
 
   submitMultipleVote(poll: Poll) {
     const isChangingVote = poll.hasUserVoted;
-    
-    // Usar solo las opciones actualmente seleccionadas
-    let optionsToVote = [...this.selectedOptions];
+    const optionsToVote = this.selectedOptionsByPoll.get(poll.id) || [];
     
     // Si hay opción personalizada seleccionada, usar endpoint especial
     if (this.customOptionSelected && this.customOptionText?.trim()) {
@@ -400,19 +412,19 @@ export class PollsComponent implements OnInit {
       }).subscribe({
         next: (response) => {
           if (response.success) {
-            this.selectedOptions = [];
+            this.selectedOptionsByPoll.delete(poll.id);
             this.customOptionText = '';
             this.customOptionSelected = false;
             this.loadPolls();
             this.messageService.add({
               severity: 'success',
               summary: 'Éxito',
-              detail: isChangingVote ? 'Voto cambiado correctamente' : 'Votos registrados correctamente'
+              detail: isChangingVote ? 'Voto actualizado correctamente' : 'Votos registrados correctamente'
             });
           }
         },
         error: (error) => {
-          const errorMsg = error.error?.message || 'Error al votar. Inténtalo de nuevo.';
+          const errorMsg = error.error?.message || 'Error al votar';
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
@@ -438,35 +450,17 @@ export class PollsComponent implements OnInit {
     }).subscribe({
       next: (response) => {
         if (response.success) {
-          this.selectedOptions = [];
+          this.selectedOptionsByPoll.delete(poll.id);
           this.loadPolls();
           this.messageService.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: isChangingVote ? 'Voto cambiado correctamente' : 'Votos registrados correctamente'
+            detail: isChangingVote ? 'Voto actualizado correctamente' : 'Votos registrados correctamente'
           });
         }
       },
       error: (error) => {
-        const errorMsg = error.error?.message || 'Error al votar. Inténtalo de nuevo.';
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: errorMsg
-        });
-      }
-    });
-  }
-          this.loadPolls();
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Éxito',
-            detail: isChangingVote ? 'Voto cambiado correctamente' : 'Votos registrados correctamente'
-          });
-        }
-      },
-      error: (error) => {
-        const errorMsg = error.error?.message || 'Error al votar. Inténtalo de nuevo.';
+        const errorMsg = error.error?.message || 'Error al votar';
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -611,6 +605,20 @@ export class PollsComponent implements OnInit {
       count++;
     }
     return count;
+  }
+
+  getVoteCountForPoll(pollId: number): number {
+    const selections = this.selectedOptionsByPoll.get(pollId) || [];
+    let count = selections.length;
+    if (this.customOptionSelected && this.customOptionText?.trim()) {
+      count++;
+    }
+    return count;
+  }
+
+  isOptionSelected(pollId: number, optionId: number): boolean {
+    const selections = this.selectedOptionsByPoll.get(pollId) || [];
+    return selections.includes(optionId);
   }
 
   getOptionText(poll: Poll, optionId: number): string {
