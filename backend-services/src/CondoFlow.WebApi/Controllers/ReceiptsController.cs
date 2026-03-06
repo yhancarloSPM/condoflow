@@ -22,26 +22,17 @@ public class ReceiptsController : ControllerBase
         try
         {
             var payment = await _paymentRepository.GetByIdAsync(paymentId);
-            if (payment == null)
+            if (payment == null || string.IsNullOrEmpty(payment.ReceiptData))
                 return NotFound();
 
-            // Si el receiptUrl contiene base64, extraerlo
-            if (payment.ReceiptUrl?.StartsWith("data:") == true)
+            // El receiptData ya está en formato data:image/jpeg;base64,xxx
+            if (payment.ReceiptData.StartsWith("data:"))
             {
-                var base64Data = payment.ReceiptUrl.Split(',')[1];
-                var mimeType = payment.ReceiptUrl.Split(';')[0].Split(':')[1];
+                var base64Data = payment.ReceiptData.Split(',')[1];
+                var mimeType = payment.ReceiptData.Split(';')[0].Split(':')[1];
                 var fileBytes = Convert.FromBase64String(base64Data);
                 
                 return File(fileBytes, mimeType);
-            }
-            
-            // Si es una ruta de archivo físico
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", payment.ReceiptUrl.TrimStart('/'));
-            if (System.IO.File.Exists(filePath))
-            {
-                var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-                var contentType = GetContentType(filePath);
-                return File(fileBytes, contentType);
             }
 
             return NotFound();
@@ -50,17 +41,5 @@ public class ReceiptsController : ControllerBase
         {
             return StatusCode(500);
         }
-    }
-
-    private string GetContentType(string filePath)
-    {
-        var extension = Path.GetExtension(filePath).ToLowerInvariant();
-        return extension switch
-        {
-            ".pdf" => "application/pdf",
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".png" => "image/png",
-            _ => "application/octet-stream"
-        };
     }
 }

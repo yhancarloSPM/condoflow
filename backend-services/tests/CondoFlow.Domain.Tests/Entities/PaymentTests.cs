@@ -25,16 +25,16 @@ public class PaymentTests
     }
 
     [Fact]
-    public void AddReceipt_ShouldUpdateReceiptUrl()
+    public void AddReceipt_ShouldUpdateReceiptData()
     {
         // Arrange
         var payment = new Payment(Guid.NewGuid(), new Money(500), DateTime.UtcNow, "Cash");
 
         // Act
-        payment.AddReceipt("receipt.jpg");
+        payment.AddReceipt("data:image/jpeg;base64,/9j/4AAQSkZJRg==");
 
         // Assert
-        Assert.Equal("receipt.jpg", payment.ReceiptUrl);
+        Assert.Equal("data:image/jpeg;base64,/9j/4AAQSkZJRg==", payment.ReceiptData);
     }
 
     [Fact]

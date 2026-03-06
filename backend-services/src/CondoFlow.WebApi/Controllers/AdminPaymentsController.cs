@@ -94,7 +94,7 @@ public class AdminPaymentsController : ControllerBase
                     Currency = payment.Amount.Currency,
                     PaymentDate = payment.PaymentDate,
                     PaymentMethod = payment.PaymentMethod,
-                    ReceiptUrl = payment.ReceiptUrl,
+                    ReceiptUrl = payment.ReceiptData,
                     Status = payment.Status.ToString().ToLower(),
                     RejectionReason = payment.RejectionReason,
                     CreatedAt = payment.CreatedAt,

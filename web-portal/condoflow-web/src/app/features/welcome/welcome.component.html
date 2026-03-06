@@ -86,6 +86,13 @@
               </div>
               <h3>Usuarios</h3>
             </div>
+            
+            <div class="action-card" (click)="navigateTo('/my-profile')">
+              <div class="action-icon profile">
+                <i class="pi pi-user"></i>
+              </div>
+              <h3>Mi Perfil</h3>
+            </div>
           } @else {
             <div class="action-card" (click)="navigateTo('/owner-dashboard')">
               <div class="action-icon dashboard">

@@ -11,7 +11,7 @@ public class Payment : BaseEntity
     public Money Amount { get; private set; } = null!;
     public DateTime PaymentDate { get; private set; }
     public string PaymentMethod { get; private set; } = null!;
-    public string? ReceiptUrl { get; private set; }
+    public string? ReceiptData { get; private set; }
     public string Status { get; private set; } = null!;
     public string? RejectionReason { get; private set; }
 
@@ -37,9 +37,9 @@ public class Payment : BaseEntity
     {
     }
 
-    public void AddReceipt(string receiptUrl)
+    public void AddReceipt(string receiptData)
     {
-        ReceiptUrl = receiptUrl ?? throw new ArgumentNullException(nameof(receiptUrl));
+        ReceiptData = receiptData ?? throw new ArgumentNullException(nameof(receiptData));
         SetUpdatedAt();
     }
 

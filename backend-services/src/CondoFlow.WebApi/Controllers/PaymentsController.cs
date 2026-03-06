@@ -98,8 +98,8 @@ public class PaymentsController : ControllerBase
             // Guardar comprobante si existe
             if (request.Receipt != null)
             {
-                var receiptUrl = await _fileService.SaveReceiptAsync(request.Receipt, ownerId, payment.Id);
-                payment.AddReceipt(receiptUrl);
+                var receiptBase64 = await _fileService.ConvertToBase64Async(request.Receipt);
+                payment.AddReceipt(receiptBase64);
             }
 
             await _paymentRepository.AddAsync(payment);
@@ -140,7 +140,7 @@ public class PaymentsController : ControllerBase
                 Currency = payment.Amount.Currency,
                 PaymentDate = payment.PaymentDate,
                 PaymentMethod = payment.PaymentMethod,
-                ReceiptUrl = payment.ReceiptUrl,
+                ReceiptUrl = payment.ReceiptData,
                 Status = payment.Status,
                 CreatedAt = payment.CreatedAt
             };
@@ -205,13 +205,11 @@ public class PaymentsController : ControllerBase
             var payment = new Payment(ownerId, request.Concept, money, request.PaymentDate, request.PaymentMethod, debtId);
 
             // Guardar comprobante desde base64
-            var receiptUrl = await _fileService.SaveReceiptFromBase64Async(
+            var receiptBase64 = _fileService.ConvertToBase64(
                 request.Receipt.FileName, 
                 request.Receipt.FileType, 
-                request.Receipt.FileContent, 
-                ownerId, 
-                payment.Id);
-            payment.AddReceipt(receiptUrl);
+                request.Receipt.FileContent);
+            payment.AddReceipt(receiptBase64);
 
             await _paymentRepository.AddAsync(payment);
 
@@ -251,7 +249,7 @@ public class PaymentsController : ControllerBase
                 Currency = payment.Amount.Currency,
                 PaymentDate = payment.PaymentDate,
                 PaymentMethod = payment.PaymentMethod,
-                ReceiptUrl = payment.ReceiptUrl,
+                ReceiptUrl = payment.ReceiptData,
                 Status = payment.Status,
                 CreatedAt = payment.CreatedAt
             };
@@ -280,7 +278,7 @@ public class PaymentsController : ControllerBase
                 Currency = p.Amount.Currency,
                 PaymentDate = p.PaymentDate,
                 PaymentMethod = p.PaymentMethod,
-                ReceiptUrl = p.ReceiptUrl,
+                ReceiptUrl = p.ReceiptData,
                 Status = p.Status,
                 RejectionReason = p.RejectionReason,
                 CreatedAt = p.CreatedAt

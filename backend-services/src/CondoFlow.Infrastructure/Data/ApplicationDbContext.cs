@@ -43,7 +43,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.OwnerId).IsRequired();
             entity.Property(e => e.DebtId);
             entity.Property(e => e.PaymentMethod).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.ReceiptUrl).HasMaxLength(500);
+            entity.Property(e => e.ReceiptData);
             entity.Property(e => e.Status).HasConversion<string>();
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.PaymentDate).IsRequired();

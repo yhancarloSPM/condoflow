@@ -366,10 +366,38 @@ export class MyPaymentsComponent implements OnInit {
   }
 
   viewReceipt(payment: any) {
-    if (payment.id) {
-      const token = this.authService.getToken();
-      const url = `https://localhost:7009/api/receipts/${payment.id}?access_token=${token}`;
-      window.open(url, '_blank');
+    if (payment.receiptUrl) {
+      // Si el receiptUrl es base64, mostrarlo directamente
+      if (payment.receiptUrl.startsWith('data:')) {
+        // Crear una nueva ventana con la imagen base64
+        const newWindow = window.open('', '_blank');
+        if (newWindow) {
+          newWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>Comprobante de Pago</title>
+                <style>
+                  body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
+                  img, embed { max-width: 100%; max-height: 100vh; object-fit: contain; }
+                </style>
+              </head>
+              <body>
+                ${payment.receiptUrl.includes('application/pdf') 
+                  ? `<embed src="${payment.receiptUrl}" type="application/pdf" width="100%" height="100%" />`
+                  : `<img src="${payment.receiptUrl}" alt="Comprobante" />`
+                }
+              </body>
+            </html>
+          `);
+          newWindow.document.close();
+        }
+      } else {
+        // Fallback para URLs antiguas (si existen)
+        const token = this.authService.getToken();
+        const url = `http://localhost:7009/api/receipts/${payment.id}?access_token=${token}`;
+        window.open(url, '_blank');
+      }
     }
   }
 

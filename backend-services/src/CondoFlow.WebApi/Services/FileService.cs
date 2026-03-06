@@ -2,50 +2,30 @@ namespace CondoFlow.WebApi.Services;
 
 public class FileService : IFileService
 {
-    private readonly IWebHostEnvironment _environment;
     private readonly string[] _allowedExtensions = { ".jpg", ".jpeg", ".png", ".pdf" };
     private const long MaxFileSize = 5 * 1024 * 1024; // 5MB
 
-    public FileService(IWebHostEnvironment environment)
-    {
-        _environment = environment;
-    }
-
-    public async Task<string> SaveReceiptAsync(IFormFile file, Guid ownerId, Guid paymentId)
+    public async Task<string> ConvertToBase64Async(IFormFile file)
     {
         if (!IsValidReceiptFile(file))
             throw new ArgumentException("Invalid file format or size");
 
-        var webRootPath = _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot");
-        var uploadsFolder = Path.Combine(webRootPath, "receipts", ownerId.ToString());
-        Directory.CreateDirectory(uploadsFolder);
-
-        var fileName = $"{paymentId}_{DateTime.UtcNow:yyyyMMddHHmmss}{Path.GetExtension(file.FileName)}";
-        var filePath = Path.Combine(uploadsFolder, fileName);
-
-        using var stream = new FileStream(filePath, FileMode.Create);
-        await file.CopyToAsync(stream);
-
-        return $"/receipts/{ownerId}/{fileName}";
+        using var memoryStream = new MemoryStream();
+        await file.CopyToAsync(memoryStream);
+        var fileBytes = memoryStream.ToArray();
+        var base64String = Convert.ToBase64String(fileBytes);
+        
+        var contentType = GetContentType(file.FileName);
+        return $"data:{contentType};base64,{base64String}";
     }
 
-    public async Task<string> SaveReceiptFromBase64Async(string fileName, string fileType, string base64Content, Guid ownerId, Guid paymentId)
+    public string ConvertToBase64(string fileName, string fileType, string base64Content)
     {
         if (!IsValidReceiptFile(fileName, fileType, base64Content))
             throw new ArgumentException("Invalid file format or size");
 
-        var webRootPath = _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot");
-        var uploadsFolder = Path.Combine(webRootPath, "receipts", ownerId.ToString());
-        Directory.CreateDirectory(uploadsFolder);
-
-        var extension = Path.GetExtension(fileName).ToLowerInvariant();
-        var newFileName = $"{paymentId}_{DateTime.UtcNow:yyyyMMddHHmmss}{extension}";
-        var filePath = Path.Combine(uploadsFolder, newFileName);
-
-        var fileBytes = Convert.FromBase64String(base64Content);
-        await File.WriteAllBytesAsync(filePath, fileBytes);
-
-        return $"/receipts/{ownerId}/{newFileName}";
+        var contentType = GetContentType(fileName);
+        return $"data:{contentType};base64,{base64Content}";
     }
 
     public bool IsValidReceiptFile(IFormFile file)
@@ -78,5 +58,17 @@ public class FileService : IFileService
         {
             return false;
         }
+    }
+
+    private string GetContentType(string fileName)
+    {
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+        return extension switch
+        {
+            ".pdf" => "application/pdf",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            _ => "application/octet-stream"
+        };
     }
 }

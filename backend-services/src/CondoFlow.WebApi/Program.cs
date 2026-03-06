@@ -104,13 +104,6 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// Configurar directorio para archivos estáticos
-var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "receipts");
-if (!Directory.Exists(uploadsPath))
-{
-    Directory.CreateDirectory(uploadsPath);
-}
-
 // Custom services
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<ILocalizationService, LocalizationService>();
