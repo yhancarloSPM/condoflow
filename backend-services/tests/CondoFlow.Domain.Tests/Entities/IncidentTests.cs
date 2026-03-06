@@ -9,7 +9,7 @@ public class IncidentTests
     {
         // Arrange & Act
         var ownerId = Guid.NewGuid();
-        var incident = new Incident(ownerId, "Water leak", "Leak in bathroom", "plumbing", "high", "image.jpg");
+        var incident = new Incident(ownerId, "Water leak", "Leak in bathroom", "plumbing", "high", "data:image/jpeg;base64,/9j/4AAQ");
 
         // Assert
         Assert.Equal(ownerId, incident.OwnerId);
@@ -18,7 +18,7 @@ public class IncidentTests
         Assert.Equal("reported", incident.Status);
         Assert.Equal("high", incident.Priority);
         Assert.Equal("plumbing", incident.Category);
-        Assert.Equal("image.jpg", incident.ImageUrl);
+        Assert.Equal("data:image/jpeg;base64,/9j/4AAQ", incident.ImageData);
     }
 
     [Fact]
@@ -35,15 +35,15 @@ public class IncidentTests
     }
 
     [Fact]
-    public void AddImage_ShouldUpdateImageUrl()
+    public void AddImage_ShouldUpdateImageData()
     {
         // Arrange
         var incident = new Incident(Guid.NewGuid(), "Test", "Test description", "general");
 
         // Act
-        incident.AddImage("new-image.jpg");
+        incident.AddImage("data:image/jpeg;base64,/9j/4AAQ");
 
         // Assert
-        Assert.Equal("new-image.jpg", incident.ImageUrl);
+        Assert.Equal("data:image/jpeg;base64,/9j/4AAQ", incident.ImageData);
     }
 }

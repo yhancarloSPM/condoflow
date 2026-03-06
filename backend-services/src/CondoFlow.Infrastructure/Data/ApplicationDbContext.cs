@@ -91,7 +91,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Priority).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Category).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.ImageUrl).HasMaxLength(500);
+            entity.Property(e => e.ImageData);
             entity.Property(e => e.CreatedAt).IsRequired();
         });
         

@@ -39,7 +39,7 @@ public class IncidentsController : ControllerBase
                 return BadRequest(ApiResponse.ErrorResult("Usuario no encontrado", 400));
             }
 
-            string? imageUrl = null;
+            string? imageData = null;
             if (image != null)
             {
                 // Validar imagen
@@ -54,22 +54,12 @@ public class IncidentsController : ControllerBase
                     return BadRequest(ApiResponse.ErrorResult("La imagen no puede ser mayor a 5MB.", 400));
                 }
                 
-                // Guardar imagen
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "incidents");
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-                
-                var fileName = $"{Guid.NewGuid()}_{image.FileName}";
-                var filePath = Path.Combine(uploadsFolder, fileName);
-                
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await image.CopyToAsync(stream);
-                }
-                
-                imageUrl = $"/incidents/{fileName}";
+                // Convertir imagen a base64
+                using var memoryStream = new MemoryStream();
+                await image.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+                var base64String = Convert.ToBase64String(fileBytes);
+                imageData = $"data:{image.ContentType};base64,{base64String}";
             }
 
             var incident = new Incident(
@@ -78,7 +68,7 @@ public class IncidentsController : ControllerBase
                 request.Description,
                 request.Category,
                 request.Priority,
-                imageUrl
+                imageData
             );
 
             _context.Incidents.Add(incident);
@@ -143,7 +133,7 @@ public class IncidentsController : ControllerBase
                     priority = i.Priority,
                     status = i.Status,
                     adminComment = i.AdminComment,
-                    imageUrl = i.ImageUrl,
+                    imageUrl = i.ImageData,
                     createdAt = i.CreatedAt,
                     updatedAt = i.UpdatedAt
                 })
@@ -315,37 +305,26 @@ public class IncidentsController : ControllerBase
                 return Forbid();
             }
 
-            if (string.IsNullOrEmpty(incident.ImageUrl))
+            if (string.IsNullOrEmpty(incident.ImageData))
             {
                 return NotFound();
             }
 
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", incident.ImageUrl.TrimStart('/'));
-            if (!System.IO.File.Exists(filePath))
+            // Si ImageData es base64, extraerlo y devolverlo
+            if (incident.ImageData?.StartsWith("data:") == true)
             {
-                return NotFound();
+                var base64Data = incident.ImageData.Split(',')[1];
+                var mimeType = incident.ImageData.Split(';')[0].Split(':')[1];
+                var fileBytes = Convert.FromBase64String(base64Data);
+                
+                return File(fileBytes, mimeType);
             }
 
-            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-            var contentType = GetContentType(filePath);
-            
-            return File(fileBytes, contentType);
+            return NotFound();
         }
         catch (Exception ex)
         {
             return StatusCode(500, ApiResponse.ErrorResult("Error interno del servidor", 500));
         }
-    }
-
-    private string GetContentType(string filePath)
-    {
-        var extension = Path.GetExtension(filePath).ToLowerInvariant();
-        return extension switch
-        {
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".png" => "image/png",
-            ".gif" => "image/gif",
-            _ => "application/octet-stream"
-        };
     }
 }

@@ -10,7 +10,7 @@ public class Incident : BaseEntity
     public string Status { get; private set; } = null!;
     public string Priority { get; private set; } = null!;
     public string Category { get; private set; } = null!;
-    public string? ImageUrl { get; private set; }
+    public string? ImageData { get; private set; }
     public string? AdminComment { get; private set; }
 
     public Owner Owner { get; private set; } = null!;
@@ -18,7 +18,7 @@ public class Incident : BaseEntity
     private Incident() { }
 
     public Incident(Guid ownerId, string title, string description, 
-                   string category, string priority = "medium", string? imageUrl = null)
+                   string category, string priority = "medium", string? imageData = null)
     {
         OwnerId = ownerId;
         Title = title ?? throw new ArgumentNullException(nameof(title));
@@ -26,7 +26,7 @@ public class Incident : BaseEntity
         Status = "reported";
         Priority = priority;
         Category = category ?? throw new ArgumentNullException(nameof(category));
-        ImageUrl = imageUrl;
+        ImageData = imageData;
     }
 
     public void ChangeStatus(string newStatus, string? adminComment = null)
@@ -36,9 +36,9 @@ public class Incident : BaseEntity
         SetUpdatedAt();
     }
 
-    public void AddImage(string imageUrl)
+    public void AddImage(string imageData)
     {
-        ImageUrl = imageUrl;
+        ImageData = imageData;
         SetUpdatedAt();
     }
 }
