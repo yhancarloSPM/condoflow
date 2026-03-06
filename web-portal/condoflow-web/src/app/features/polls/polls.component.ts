@@ -387,6 +387,38 @@ export class PollsComponent implements OnInit {
   }
 
   submitMultipleVote(poll: Poll) {
+    // Si hay opción personalizada seleccionada, usar endpoint especial
+    if (this.customOptionSelected && this.customOptionText?.trim()) {
+      this.http.post<any>(`${environment.apiUrl}/polls/${poll.id}/vote-custom-multiple`, { 
+        optionIds: this.selectedOptions,
+        customText: this.customOptionText.trim() 
+      }).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.selectedOptions = [];
+            this.customOptionText = '';
+            this.customOptionSelected = false;
+            this.loadPolls();
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Votos registrados correctamente'
+            });
+          }
+        },
+        error: (error) => {
+          const errorMsg = error.error?.message || 'Error al votar. Inténtalo de nuevo.';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: errorMsg
+          });
+        }
+      });
+      return;
+    }
+
+    // Votación múltiple normal sin opción personalizada
     if (this.selectedOptions.length === 0) {
       this.messageService.add({
         severity: 'warn',
@@ -515,29 +547,46 @@ export class PollsComponent implements OnInit {
   }
 
   voteCustom(poll: Poll) {
-    if (!this.customOptionText?.trim()) return;
+    if (!this.customOptionText?.trim()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validación',
+        detail: 'Debe escribir una opción personalizada'
+      });
+      return;
+    }
     
     this.http.post<any>(`${environment.apiUrl}/polls/${poll.id}/vote-custom`, { 
       customText: this.customOptionText.trim() 
     }).subscribe({
       next: (response) => {
         if (response.success) {
+          this.customOptionText = '';
+          this.customOptionSelected = false;
+          this.loadPolls();
           this.messageService.add({
             severity: 'success',
-            summary: 'Voto registrado',
-            detail: 'Tu voto personalizado ha sido registrado exitosamente'
+            summary: 'Éxito',
+            detail: 'Voto personalizado registrado correctamente'
           });
-          this.customOptionText = '';
-          this.loadPolls();
         }
       },
       error: (error) => {
+        const errorMsg = error.error?.message || 'Error al registrar el voto';
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: error.error?.message || 'Error al registrar el voto'
+          detail: errorMsg
         });
       }
     });
+  }
+
+  getVoteCount(): number {
+    let count = this.selectedOptions.length;
+    if (this.customOptionSelected && this.customOptionText?.trim()) {
+      count++;
+    }
+    return count;
   }
 }

@@ -73,3 +73,16 @@ public class MultipleVoteDto
     public int PollId { get; set; }
     public List<int> OptionIds { get; set; } = new();
 }
+
+public class CustomVoteDto
+{
+    public int PollId { get; set; }
+    public string CustomText { get; set; } = string.Empty;
+}
+
+public class CustomMultipleVoteDto
+{
+    public int PollId { get; set; }
+    public List<int> OptionIds { get; set; } = new();
+    public string CustomText { get; set; } = string.Empty;
+}

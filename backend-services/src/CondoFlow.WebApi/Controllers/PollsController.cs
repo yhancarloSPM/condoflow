@@ -241,6 +241,110 @@ public class PollsController : ControllerBase
         }
     }
 
+    [HttpPost("{id}/vote-custom")]
+    public async Task<ActionResult<ApiResponse<object>>> VoteCustom(int id, [FromBody] CustomVoteDto voteDto)
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Usuario no autenticado"
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(voteDto.CustomText))
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Debe proporcionar un texto personalizado"
+                });
+            }
+
+            voteDto.PollId = id;
+            var success = await _pollService.VoteCustomAsync(voteDto, userId);
+            
+            if (!success)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "No se pudo registrar el voto. Verifique que la encuesta permita opciones personalizadas."
+                });
+            }
+
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Voto personalizado registrado exitosamente"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ApiResponse<object>
+            {
+                Success = false,
+                Message = $"Error interno del servidor: {ex.Message}"
+            });
+        }
+    }
+
+    [HttpPost("{id}/vote-custom-multiple")]
+    public async Task<ActionResult<ApiResponse<object>>> VoteCustomMultiple(int id, [FromBody] CustomMultipleVoteDto voteDto)
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Usuario no autenticado"
+                });
+            }
+
+            if ((voteDto.OptionIds == null || !voteDto.OptionIds.Any()) && string.IsNullOrWhiteSpace(voteDto.CustomText))
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Debe seleccionar al menos una opción o proporcionar texto personalizado"
+                });
+            }
+
+            voteDto.PollId = id;
+            var success = await _pollService.VoteCustomMultipleAsync(voteDto, userId);
+            
+            if (!success)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "No se pudo registrar el voto. Verifique que la encuesta esté activa y permita opciones personalizadas."
+                });
+            }
+
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Votos registrados exitosamente"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ApiResponse<object>
+            {
+                Success = false,
+                Message = $"Error interno del servidor: {ex.Message}"
+            });
+        }
+    }
+
     [HttpPut("{id}/close")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<ApiResponse<object>>> ClosePoll(int id)

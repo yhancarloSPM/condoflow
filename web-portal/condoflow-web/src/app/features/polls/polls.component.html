@@ -126,7 +126,25 @@
                       (click)="vote(poll, option.id)">
                 {{ option.text }}
               </button>
+              
+              <!-- Opción "Otro" para votación simple -->
+              <div class="custom-option-container" *ngIf="poll.allowOther">
+                <div class="custom-option-input">
+                  <input type="text" 
+                         class="form-control" 
+                         [(ngModel)]="customOptionText"
+                         placeholder="Escribe tu opción personalizada..."
+                         [disabled]="!customOptionSelected">
+                  <button class="btn btn-primary" 
+                          (click)="voteCustom(poll)"
+                          [disabled]="!customOptionText?.trim()">
+                    <i class="pi pi-check"></i>
+                    Votar con opción personalizada
+                  </button>
+                </div>
+              </div>
             </div>
+            
             <div class="voting-options-multiple" *ngIf="poll.type === 'Multiple'">
               <p class="voting-instructions">Selecciona una o más opciones:</p>
               <div class="option-checkbox" *ngFor="let option of poll.options">
@@ -141,11 +159,32 @@
                   {{ option.text }}
                 </label>
               </div>
+              
+              <!-- Opción "Otro" para votación múltiple -->
+              <div class="option-checkbox custom-option-checkbox" *ngIf="poll.allowOther">
+                <input type="checkbox" 
+                       [id]="'option-custom-' + poll.id" 
+                       [checked]="customOptionSelected"
+                       (change)="toggleCustomOption($event)">
+                <label [for]="'option-custom-' + poll.id">
+                  <i class="pi pi-check-square" *ngIf="customOptionSelected"></i>
+                  <i class="pi pi-square" *ngIf="!customOptionSelected"></i>
+                  Otro (personalizado)
+                </label>
+              </div>
+              
+              <div class="custom-option-input" *ngIf="poll.allowOther && customOptionSelected">
+                <input type="text" 
+                       class="form-control" 
+                       [(ngModel)]="customOptionText"
+                       placeholder="Escribe tu opción personalizada...">
+              </div>
+              
               <button class="btn btn-primary vote-submit-btn" 
                       (click)="submitMultipleVote(poll)"
-                      [disabled]="selectedOptions.length === 0">
+                      [disabled]="selectedOptions.length === 0 && !customOptionText?.trim()">
                 <i class="pi pi-check"></i>
-                Votar ({{ selectedOptions.length }} seleccionada{{ selectedOptions.length !== 1 ? 's' : '' }})
+                Votar ({{ getVoteCount() }} seleccionada{{ getVoteCount() !== 1 ? 's' : '' }})
               </button>
             </div>
           </div>

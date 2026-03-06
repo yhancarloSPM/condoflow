@@ -13,6 +13,8 @@ public interface IPollService
     Task<PollDto> CreatePollAsync(CreatePollDto createDto, string userId);
     Task<bool> VoteAsync(VoteDto voteDto, string userId);
     Task<bool> VoteMultipleAsync(MultipleVoteDto voteDto, string userId);
+    Task<bool> VoteCustomAsync(CustomVoteDto voteDto, string userId);
+    Task<bool> VoteCustomMultipleAsync(CustomMultipleVoteDto voteDto, string userId);
     Task<bool> DeletePollAsync(int id);
     Task<bool> ClosePollAsync(int id);
 }
@@ -188,6 +190,143 @@ public class PollService : IPollService
             UserId = userId,
             VotedAt = DateTime.UtcNow
         }).ToList();
+
+        _context.PollVotes.AddRange(newVotes);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> VoteCustomAsync(CustomVoteDto voteDto, string userId)
+    {
+        // Verificar que la encuesta existe y está activa
+        var poll = await _context.Polls
+            .Include(p => p.Options)
+            .FirstOrDefaultAsync(p => p.Id == voteDto.PollId && p.IsActive);
+
+        if (poll == null) return false;
+
+        // Verificar que la encuesta permite opción personalizada
+        if (!poll.AllowOther) return false;
+
+        // Verificar que la encuesta no ha terminado
+        if (DateTime.UtcNow > poll.EndDate) return false;
+
+        // Verificar que el usuario existe
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return false;
+
+        // Eliminar votos existentes del usuario en esta encuesta
+        var existingVotes = await _context.PollVotes
+            .Where(v => v.PollId == voteDto.PollId && v.UserId == userId)
+            .ToListAsync();
+
+        if (existingVotes.Any())
+        {
+            _context.PollVotes.RemoveRange(existingVotes);
+        }
+
+        // Crear o encontrar la opción "Otro" con el texto personalizado
+        var customOption = poll.Options.FirstOrDefault(o => o.Text == voteDto.CustomText);
+        if (customOption == null)
+        {
+            // Crear nueva opción personalizada
+            customOption = new PollOption
+            {
+                PollId = poll.Id,
+                Text = voteDto.CustomText,
+                Order = poll.Options.Count + 1
+            };
+            _context.PollOptions.Add(customOption);
+            await _context.SaveChangesAsync();
+        }
+
+        // Crear voto para la opción personalizada
+        var vote = new PollVote
+        {
+            PollId = voteDto.PollId,
+            PollOptionId = customOption.Id,
+            UserId = userId,
+            VotedAt = DateTime.UtcNow
+        };
+        _context.PollVotes.Add(vote);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> VoteCustomMultipleAsync(CustomMultipleVoteDto voteDto, string userId)
+    {
+        // Verificar que la encuesta existe y está activa
+        var poll = await _context.Polls
+            .Include(p => p.Options)
+            .FirstOrDefaultAsync(p => p.Id == voteDto.PollId && p.IsActive);
+
+        if (poll == null) return false;
+
+        // Verificar que la encuesta es de tipo múltiple
+        if (poll.Type != PollType.Multiple) return false;
+
+        // Verificar que la encuesta permite opción personalizada
+        if (!poll.AllowOther) return false;
+
+        // Verificar que la encuesta no ha terminado
+        if (DateTime.UtcNow > poll.EndDate) return false;
+
+        // Verificar que todas las opciones existen
+        var validOptionIds = poll.Options.Select(o => o.Id).ToList();
+        if (voteDto.OptionIds.Any() && !voteDto.OptionIds.All(id => validOptionIds.Contains(id))) return false;
+
+        // Verificar que el usuario existe
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return false;
+
+        // Eliminar votos existentes del usuario en esta encuesta
+        var existingVotes = await _context.PollVotes
+            .Where(v => v.PollId == voteDto.PollId && v.UserId == userId)
+            .ToListAsync();
+
+        if (existingVotes.Any())
+        {
+            _context.PollVotes.RemoveRange(existingVotes);
+        }
+
+        // Crear votos para opciones seleccionadas
+        var newVotes = new List<PollVote>();
+        
+        foreach (var optionId in voteDto.OptionIds)
+        {
+            newVotes.Add(new PollVote
+            {
+                PollId = voteDto.PollId,
+                PollOptionId = optionId,
+                UserId = userId,
+                VotedAt = DateTime.UtcNow
+            });
+        }
+
+        // Crear o encontrar la opción personalizada
+        if (!string.IsNullOrWhiteSpace(voteDto.CustomText))
+        {
+            var customOption = poll.Options.FirstOrDefault(o => o.Text == voteDto.CustomText);
+            if (customOption == null)
+            {
+                customOption = new PollOption
+                {
+                    PollId = poll.Id,
+                    Text = voteDto.CustomText,
+                    Order = poll.Options.Count + 1
+                };
+                _context.PollOptions.Add(customOption);
+                await _context.SaveChangesAsync();
+            }
+
+            newVotes.Add(new PollVote
+            {
+                PollId = voteDto.PollId,
+                PollOptionId = customOption.Id,
+                UserId = userId,
+                VotedAt = DateTime.UtcNow
+            });
+        }
 
         _context.PollVotes.AddRange(newVotes);
         await _context.SaveChangesAsync();
