@@ -1,12 +1,8 @@
 using CondoFlow.Application.Common.DTOs.Debt;
 using CondoFlow.Application.Common.Models;
-using CondoFlow.Domain.Entities;
-using CondoFlow.Domain.Enums;
-using CondoFlow.Domain.ValueObjects;
-using CondoFlow.Infrastructure.Data;
+using CondoFlow.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CondoFlow.WebApi.Controllers;
 
@@ -15,11 +11,11 @@ namespace CondoFlow.WebApi.Controllers;
 [Authorize]
 public class DebtsController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IDebtService _debtService;
 
-    public DebtsController(ApplicationDbContext context)
+    public DebtsController(IDebtService debtService)
     {
-        _context = context;
+        _debtService = debtService;
     }
 
     [HttpGet]
@@ -36,54 +32,7 @@ public class DebtsController : ControllerBase
         if (!Guid.TryParse(ownerId, out var ownerGuid))
             return BadRequest(ApiResponse.ErrorResult("OwnerId inválido", 400));
 
-        var debts = await _context.Debts
-            .Where(d => d.OwnerId == ownerGuid)
-            .OrderByDescending(d => d.Year)
-            .ThenByDescending(d => d.Month)
-            .Select(d => new
-            {
-                d.Id,
-                d.Amount.Amount,
-                d.Amount.Currency,
-                PaidAmount = d.PaidAmount.Amount,
-                RemainingAmount = d.RemainingAmount.Amount,
-                d.DueDate,
-                d.Concept,
-                // Devolver el status correcto basado en IsOverdue
-                Status = d.Status == StatusPayments.PaymentSubmitted ? StatusPayments.PaymentSubmitted :
-                         d.Status == StatusPayments.Paid ? StatusPayments.Paid :
-                         d.IsOverdue ? StatusPayments.Overdue : StatusPayments.Pending,
-                d.Month,
-                d.Year,
-                d.CreatedAt,
-                IsOverdue = d.IsOverdue,
-                IsPaid = d.IsPaid,
-                IsPartiallyPaid = d.IsPartiallyPaid
-            })
-            .ToListAsync();
-
-        var currentDebts = debts.Where(d => d.Status == StatusPayments.Pending).ToList();
-        var overdueDebts = debts.Where(d => d.Status == StatusPayments.Overdue).ToList();
-        var paidDebts = debts.Where(d => d.Status == StatusPayments.Paid).ToList();
-        var paymentSubmittedDebts = debts.Where(d => d.Status == StatusPayments.PaymentSubmitted).ToList();
-
-        var totalPending = currentDebts.Sum(d => d.RemainingAmount) + overdueDebts.Sum(d => d.RemainingAmount);
-
-        var debtData = new
-        {
-            currentDebts,
-            overdueDebts,
-            paymentSubmittedDebts,
-            paidDebts,
-            totalPending,
-            summary = new
-            {
-                totalCurrent = currentDebts.Count,
-                totalOverdue = overdueDebts.Count,
-                totalPaymentSubmitted = paymentSubmittedDebts.Count,
-                totalPaid = paidDebts.Count
-            }
-        };
+        var debtData = await _debtService.GetOwnerDebtsAsync(ownerGuid);
         return Ok(ApiResponse<object>.SuccessResult(debtData, "Deudas obtenidas exitosamente", 200));
     }
 
@@ -93,42 +42,15 @@ public class DebtsController : ControllerBase
     {
         try
         {
-            // Obtener el concepto de mantenimiento y el apartamento del owner
-            var maintenanceConcept = await _context.PaymentConcepts
-                .FirstOrDefaultAsync(c => c.Code == "maintenance" && c.IsActive);
-            
-            if (maintenanceConcept == null)
-                return BadRequest(ApiResponse.ErrorResult("Concepto de mantenimiento no encontrado", 400));
-            
-            var user = await _context.Users
-                .Include(u => u.ApartmentEntity)
-                .FirstOrDefaultAsync(u => u.Id == ownerId);
-            
-            if (user?.ApartmentEntity == null)
-                return BadRequest(ApiResponse.ErrorResult("Owner no tiene apartamento asignado", 400));
-            
-            // Determinar si es apartamento de azotea
-            var isRoofApartment = user.ApartmentEntity.Number == "501" || user.ApartmentEntity.Number == "502";
-            var amount = isRoofApartment ? maintenanceConcept.RoofAmount!.Value : maintenanceConcept.DefaultAmount!.Value;
-            var dueDate = new DateTime(request.Year, request.Month, DateTime.DaysInMonth(request.Year, request.Month));
-            
-            var debt = new Debt
-            {
-                Id = Guid.NewGuid(),
-                OwnerId = Guid.Parse(ownerId),
-                Amount = new Money(amount, "DOP"),
-                DueDate = dueDate,
-                Concept = request.Concept,
-                Month = request.Month,
-                Year = request.Year,
-                Status = "Pending",
-                CreatedAt = DateTime.UtcNow
-            };
+            if (!Guid.TryParse(ownerId, out var ownerGuid))
+                return BadRequest(ApiResponse.ErrorResult("OwnerId inválido", 400));
 
-            _context.Debts.Add(debt);
-            await _context.SaveChangesAsync();
-
-            return Ok(ApiResponse<object>.SuccessResult(new { debtId = debt.Id }, "Deuda creada exitosamente", 201));
+            var debtId = await _debtService.CreateDebtAsync(ownerGuid, request.Month, request.Year, request.Concept);
+            return Ok(ApiResponse<object>.SuccessResult(new { debtId }, "Deuda creada exitosamente", 201));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse.ErrorResult(ex.Message, 400));
         }
         catch (Exception)
         {

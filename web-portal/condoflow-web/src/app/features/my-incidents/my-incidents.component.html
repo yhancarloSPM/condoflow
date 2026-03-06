@@ -219,7 +219,7 @@
                           @if (!loading()) {
                             <div class="action-buttons">
                               <button 
-                                class="btn-action btn-view"
+                                class="btn-action btn-info"
                                 (click)="viewIncidentDetail(incident)"
                                 title="Ver detalle completo">
                                 <i class="pi pi-info-circle"></i>
@@ -229,12 +229,15 @@
                                   class="btn-action btn-image"
                                   (click)="viewImage(incident)"
                                   title="Ver imagen adjunta">
-                                  <i class="pi pi-camera"></i>
+                                  <i class="pi pi-image"></i>
                                 </button>
                               } @else {
-                                <span class="btn-action btn-no-image" title="Sin imagen">
-                                  <i class="pi pi-camera"></i>
-                                </span>
+                                <button 
+                                  class="btn-action btn-no-image"
+                                  disabled
+                                  title="Sin imagen adjunta">
+                                  <i class="pi pi-image"></i>
+                                </button>
                               }
                               @if (incident.status === 'reported') {
                                 <button 
@@ -270,6 +273,45 @@
                   </tbody>
                 </table>
               </div>
+              
+              <!-- Paginación -->
+              @if (totalPages() > 1) {
+                <div class="pagination-container">
+                  <div class="pagination-info">
+                    <small class="text-white">
+                      Mostrando {{ (currentPage() - 1) * pageSize + 1 }} - {{ Math.min(currentPage() * pageSize, incidents().length) }} de {{ incidents().length }} incidencias
+                    </small>
+                  </div>
+                  <div class="pagination">
+                    <button 
+                      class="pagination-btn"
+                      (click)="goToPage(currentPage() - 1)"
+                      [disabled]="currentPage() === 1">
+                      <i class="pi pi-chevron-left"></i>
+                    </button>
+                    
+                    @for (page of getPageNumbers(); track page) {
+                      @if (page === '...') {
+                        <span class="pagination-dots">...</span>
+                      } @else if (isPageNumber(page)) {
+                        <button 
+                          class="pagination-btn"
+                          [class.active]="page === currentPage()"
+                          (click)="goToPage(page)">
+                          {{ page }}
+                        </button>
+                      }
+                    }
+                    
+                    <button 
+                      class="pagination-btn"
+                      (click)="goToPage(currentPage() + 1)"
+                      [disabled]="currentPage() === totalPages()">
+                      <i class="pi pi-chevron-right"></i>
+                    </button>
+                  </div>
+                </div>
+              }
             }
           </div>
         </div>

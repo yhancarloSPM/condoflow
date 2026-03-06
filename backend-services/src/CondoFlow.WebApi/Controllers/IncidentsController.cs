@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using CondoFlow.Infrastructure.Data;
+using CondoFlow.Application.Interfaces.Services;
 using CondoFlow.Domain.Entities;
 using CondoFlow.WebApi.DTOs;
 using CondoFlow.Application.Common.Models;
@@ -14,11 +13,11 @@ namespace CondoFlow.WebApi.Controllers;
 [Authorize]
 public class IncidentsController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IIncidentService _incidentService;
 
-    public IncidentsController(ApplicationDbContext context)
+    public IncidentsController(IIncidentService incidentService)
     {
-        _context = context;
+        _incidentService = incidentService;
     }
 
     [HttpPost]
@@ -30,13 +29,6 @@ public class IncidentsController : ControllerBase
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
             {
                 return Unauthorized(ApiResponse.ErrorResult("Usuario no autenticado", 401));
-            }
-
-            // Buscar el usuario
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userIdClaim);
-            if (user == null)
-            {
-                return BadRequest(ApiResponse.ErrorResult("Usuario no encontrado", 400));
             }
 
             string? imageData = null;
@@ -62,30 +54,7 @@ public class IncidentsController : ControllerBase
                 imageData = $"data:{image.ContentType};base64,{base64String}";
             }
 
-            var incident = new Incident(
-                userId, // Usar directamente el userId
-                request.Title,
-                request.Description,
-                request.Category,
-                request.Priority,
-                imageData
-            );
-
-            _context.Incidents.Add(incident);
-            await _context.SaveChangesAsync();
-
-            // Enviar notificación al admin
-            var notification = new Notification(
-                "Nueva Incidencia Reportada",
-                $"Se ha reportado una nueva incidencia: {incident.Title}",
-                "IncidentReported",
-                "Admin",
-                null,
-                incident.Id.ToString()
-            );
-
-            _context.Notifications.Add(notification);
-            await _context.SaveChangesAsync();
+            var incident = await _incidentService.CreateIncidentAsync(userId, request.Title, request.Description, request.Category, request.Priority, imageData);
 
             var response = new {
                 id = incident.Id,
@@ -115,30 +84,7 @@ public class IncidentsController : ControllerBase
                 return Unauthorized(ApiResponse.ErrorResult("Usuario no autenticado", 401));
             }
 
-            // Buscar el usuario
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userIdClaim);
-            if (user == null)
-            {
-                return BadRequest(ApiResponse.ErrorResult("Usuario no encontrado", 400));
-            }
-
-            var incidents = await _context.Incidents
-                .Where(i => i.OwnerId == userId)
-                .OrderByDescending(i => i.CreatedAt)
-                .Select(i => new {
-                    id = i.Id,
-                    title = i.Title,
-                    description = i.Description,
-                    category = i.Category,
-                    priority = i.Priority,
-                    status = i.Status,
-                    adminComment = i.AdminComment,
-                    imageUrl = i.ImageData,
-                    createdAt = i.CreatedAt,
-                    updatedAt = i.UpdatedAt
-                })
-                .ToListAsync();
-
+            var incidents = await _incidentService.GetMyIncidentsAsync(userId);
             return Ok(ApiResponse<object>.SuccessResult(incidents, "Incidencias obtenidas exitosamente", 200));
         }
         catch (Exception ex)
@@ -153,25 +99,7 @@ public class IncidentsController : ControllerBase
     {
         try
         {
-            var incidents = await _context.Incidents
-                .Join(_context.Users, i => i.OwnerId.ToString(), u => u.Id, (i, u) => new { i, u })
-                .GroupJoin(_context.Apartments.Include(a => a.Block), x => x.u.ApartmentId, a => (int?)a.Id, (x, apartments) => new { x.i, x.u, apartment = apartments.FirstOrDefault() })
-                .Select(x => new {
-                    id = x.i.Id,
-                    title = x.i.Title,
-                    description = x.i.Description,
-                    category = x.i.Category,
-                    priority = x.i.Priority,
-                    status = x.i.Status,
-                    adminComment = x.i.AdminComment,
-                    ownerName = $"{x.u.FirstName} {x.u.LastName}",
-                    apartment = x.apartment != null ? $"{x.apartment.Block.Name}-{x.apartment.Number}" : "",
-                    createdAt = x.i.CreatedAt,
-                    updatedAt = x.i.UpdatedAt
-                })
-                .OrderByDescending(i => i.createdAt)
-                .ToListAsync();
-
+            var incidents = await _incidentService.GetAllIncidentsAsync();
             return Ok(ApiResponse<object>.SuccessResult(incidents, "Incidencias obtenidas exitosamente", 200));
         }
         catch (Exception ex)
@@ -186,41 +114,12 @@ public class IncidentsController : ControllerBase
     {
         try
         {
-            var incident = await _context.Incidents.FindAsync(id);
-            if (incident == null)
-            {
-                return NotFound(ApiResponse.ErrorResult("Incidencia no encontrada", 404));
-            }
-
-            incident.ChangeStatus(request.Status, request.AdminComment);
-            await _context.SaveChangesAsync();
-
-            // Enviar notificación al propietario
-            var owner = await _context.Users.FindAsync(incident.OwnerId.ToString());
-            if (owner != null)
-            {
-                var statusMessage = request.Status switch
-                {
-                    "in_progress" => "Tu incidencia está siendo procesada",
-                    "resolved" => "Tu incidencia ha sido resuelta",
-                    "cancelled" => $"Tu incidencia ha sido cancelada. {request.AdminComment}",
-                    _ => "El estado de tu incidencia ha cambiado"
-                };
-
-                var notification = new Notification(
-                    "Estado de Incidencia Actualizado",
-                    statusMessage,
-                    "IncidentStatusUpdate",
-                    "Owner",
-                    owner.Id,
-                    incident.Id.ToString()
-                );
-
-                _context.Notifications.Add(notification);
-                await _context.SaveChangesAsync();
-            }
-
+            await _incidentService.UpdateIncidentStatusAsync(id, request.Status, request.AdminComment);
             return Ok(ApiResponse<object>.SuccessResult(null, "Estado de incidencia actualizado exitosamente", 200));
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(ApiResponse.ErrorResult("Incidencia no encontrada", 404));
         }
         catch (Exception ex)
         {
@@ -239,41 +138,20 @@ public class IncidentsController : ControllerBase
                 return Unauthorized(ApiResponse.ErrorResult("Usuario no autenticado", 401));
             }
 
-            var incident = await _context.Incidents.FindAsync(id);
-            if (incident == null)
-            {
-                return NotFound(ApiResponse.ErrorResult("Incidencia no encontrada", 404));
-            }
-
-            // Verificar que el owner sea el propietario de la incidencia
-            if (incident.OwnerId != userId)
-            {
-                return Forbid();
-            }
-
-            // Solo se pueden cancelar incidencias reportadas
-            if (incident.Status != "reported")
-            {
-                return BadRequest(ApiResponse.ErrorResult("Solo se pueden cancelar incidencias reportadas", 400));
-            }
-
-            incident.ChangeStatus("cancelled", request.Comment);
-            await _context.SaveChangesAsync();
-
-            // Enviar notificación al admin
-            var notification = new Notification(
-                "Incidencia Cancelada por Propietario",
-                $"El propietario ha cancelado la incidencia: {incident.Title}. Motivo: {request.Comment}",
-                "IncidentCancelledByOwner",
-                "Admin",
-                null,
-                incident.Id.ToString()
-            );
-
-            _context.Notifications.Add(notification);
-            await _context.SaveChangesAsync();
-
+            await _incidentService.CancelIncidentAsync(id, userId, request.Comment);
             return Ok(ApiResponse<object>.SuccessResult(null, "Incidencia cancelada exitosamente", 200));
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(ApiResponse.ErrorResult("Incidencia no encontrada", 404));
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse.ErrorResult(ex.Message, 400));
         }
         catch (Exception ex)
         {
@@ -292,35 +170,19 @@ public class IncidentsController : ControllerBase
                 return Unauthorized();
             }
 
-            var incident = await _context.Incidents.FindAsync(id);
-            if (incident == null)
-            {
-                return NotFound();
-            }
-
-            // Verificar que el usuario sea el propietario de la incidencia o sea admin
             var isAdmin = User.IsInRole("Admin");
-            if (!isAdmin && incident.OwnerId != userId)
-            {
-                return Forbid();
-            }
-
-            if (string.IsNullOrEmpty(incident.ImageData))
+            var result = await _incidentService.GetIncidentImageAsync(id, userId, isAdmin);
+            
+            if (result == null)
             {
                 return NotFound();
             }
 
-            // Si ImageData es base64, extraerlo y devolverlo
-            if (incident.ImageData?.StartsWith("data:") == true)
-            {
-                var base64Data = incident.ImageData.Split(',')[1];
-                var mimeType = incident.ImageData.Split(';')[0].Split(':')[1];
-                var fileBytes = Convert.FromBase64String(base64Data);
-                
-                return File(fileBytes, mimeType);
-            }
-
-            return NotFound();
+            return File(result.Value.fileBytes, result.Value.mimeType);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
         }
         catch (Exception ex)
         {

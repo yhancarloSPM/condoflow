@@ -1,8 +1,8 @@
 using CondoFlow.Application.Common.Models;
 using CondoFlow.Application.Common.Services;
-using CondoFlow.Infrastructure.Data;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Infrastructure.Identity;
-using CondoFlow.Infrastructure.Repositories;
+using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.WebApi.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -20,20 +20,20 @@ public class AdminPaymentsController : ControllerBase
     private readonly IPaymentRepository _paymentRepository;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly INotificationService _notificationService;
-    private readonly ApplicationDbContext _context;
+    private readonly IDebtRepository _debtRepository;
 
     public AdminPaymentsController(
         ILocalizationService localization,
         IPaymentRepository paymentRepository,
         UserManager<ApplicationUser> userManager,
         INotificationService notificationService,
-        ApplicationDbContext context)
+        IDebtRepository debtRepository)
     {
         _localization = localization;
         _paymentRepository = paymentRepository;
         _userManager = userManager;
         _notificationService = notificationService;
-        _context = context;
+        _debtRepository = debtRepository;
     }
 
     [HttpGet]
@@ -60,10 +60,9 @@ public class AdminPaymentsController : ControllerBase
 
                 // Obtener concepto de la deuda si es un pago de deuda
                 string concept = payment.Concept;
-                if (payment.Concept == "debt_payment" && payment.DebtId.HasValue)
+                if (payment.Concept == PaymentConceptCodes.DebtPayment && payment.DebtId.HasValue)
                 {
-                    var debtRepository = HttpContext.RequestServices.GetRequiredService<IDebtRepository>();
-                    var debt = await debtRepository.GetByIdAsync(payment.DebtId.Value);
+                    var debt = await _debtRepository.GetByIdAsync(payment.DebtId.Value);
                     if (debt != null)
                     {
                         concept = debt.Concept;
@@ -75,8 +74,7 @@ public class AdminPaymentsController : ControllerBase
                 int? debtYear = null;
                 if (payment.DebtId.HasValue)
                 {
-                    var debtRepository = HttpContext.RequestServices.GetRequiredService<IDebtRepository>();
-                    var debt = await debtRepository.GetByIdAsync(payment.DebtId.Value);
+                    var debt = await _debtRepository.GetByIdAsync(payment.DebtId.Value);
                     if (debt != null)
                     {
                         debtMonth = debt.Month;
@@ -124,14 +122,13 @@ public class AdminPaymentsController : ControllerBase
             payment.Approve();
             
             // Si es un abono a deuda, aplicar el pago a la deuda
-            if (payment.Concept == "debt_payment" && payment.DebtId.HasValue)
+            if (payment.Concept == PaymentConceptCodes.DebtPayment && payment.DebtId.HasValue)
             {
-                var debtRepository = HttpContext.RequestServices.GetRequiredService<IDebtRepository>();
-                var debt = await debtRepository.GetByIdAsync(payment.DebtId.Value);
+                var debt = await _debtRepository.GetByIdAsync(payment.DebtId.Value);
                 if (debt != null)
                 {
                     debt.AddPayment(payment.Amount);
-                    await debtRepository.UpdateAsync(debt);
+                    await _debtRepository.UpdateAsync(debt);
                 }
             }
             
@@ -174,12 +171,11 @@ public class AdminPaymentsController : ControllerBase
             // Si el pago está asociado a una deuda, revertir su estado
             if (payment.DebtId.HasValue)
             {
-                var debtRepository = HttpContext.RequestServices.GetRequiredService<IDebtRepository>();
-                var debt = await debtRepository.GetByIdAsync(payment.DebtId.Value);
+                var debt = await _debtRepository.GetByIdAsync(payment.DebtId.Value);
                 if (debt != null)
                 {
                     debt.RejectPayment();
-                    await debtRepository.UpdateAsync(debt);
+                    await _debtRepository.UpdateAsync(debt);
                 }
             }
             

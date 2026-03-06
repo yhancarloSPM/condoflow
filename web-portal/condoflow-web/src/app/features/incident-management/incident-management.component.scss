@@ -1,3 +1,7 @@
+// Import centralized styles
+@import '../../../styles/variables';
+@import '../../../styles/badges';
+
 .management-layout { 
   min-height: 100vh; 
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
@@ -32,9 +36,9 @@
 }
 
 .header-icon {
+  @include icon-bg-orange;
   width: 3rem;
   height: 3rem;
-  background: linear-gradient(135deg, #f97316, #ea580c);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -92,28 +96,23 @@
 }
 
 .card-header .badge.bg-warning {
-  background-color: rgba(245, 158, 11, 0.9) !important;
-  color: white !important;
+  @include status-badge-legacy('reported');
 }
 
 .card-header .badge.bg-info {
-  background-color: rgba(59, 130, 246, 0.9) !important;
-  color: white !important;
+  @include status-badge-legacy('in_progress');
 }
 
 .card-header .badge.bg-success {
-  background-color: rgba(16, 185, 129, 0.9) !important;
-  color: white !important;
+  @include status-badge-legacy('resolved');
 }
 
 .card-header .badge.bg-danger {
-  background-color: rgba(239, 68, 68, 0.9) !important;
-  color: white !important;
+  @include status-badge-legacy('cancelled_admin');
 }
 
 .card-header .badge.bg-secondary {
-  background-color: #9ca3af !important;
-  color: white !important;
+  @include status-badge-legacy('cancelled_owner');
 }
 
 .card-header {
@@ -222,9 +221,9 @@
 }
 
 .status-badge {
+  @include badge-base;
   width: 100px !important;
   height: 28px !important;
-  text-align: center !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -232,76 +231,56 @@
 }
 
 .priority-badge {
-  display: inline-block;
-  padding: 0.35rem 0.65rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  @include badge-base;
   width: 90px;
   height: 28px;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .priority-low {
-  background: rgba(16, 185, 129, 0.8);
-  color: white;
+  @include priority-badge-legacy('low');
 }
 
 .priority-medium {
-  background: rgba(245, 158, 11, 0.8);
-  color: white;
+  @include priority-badge-legacy('medium');
 }
 
 .priority-high {
-  background: rgba(249, 115, 22, 0.8);
-  color: white;
+  @include priority-badge-legacy('high');
 }
 
 .priority-critical {
-  background: rgba(255, 107, 107, 0.8);
-  color: white;
+  @include priority-badge-legacy('critical');
 }
 
 :host ::ng-deep .bg-warning {
-  background-color: rgba(245, 158, 11, 0.8) !important;
-  color: white !important;
+  @include status-badge-legacy('reported');
 }
 
 :host ::ng-deep .bg-info {
-  background-color: rgba(59, 130, 246, 0.8) !important;
-  color: white !important;
+  @include status-badge-legacy('in_progress');
 }
 
 :host ::ng-deep .bg-success {
-  background-color: rgba(16, 185, 129, 0.8) !important;
-  color: white !important;
+  @include status-badge-legacy('resolved');
 }
 
 :host ::ng-deep .bg-danger {
-  background-color: rgba(255, 107, 107, 0.8) !important;
-  color: white !important;
+  @include status-badge-legacy('cancelled_admin');
 }
 
 :host ::ng-deep .bg-secondary {
-  background-color: #9ca3af !important;
-  color: white !important;
+  @include status-badge-legacy('cancelled_owner');
 }
 
 :host ::ng-deep .bg-rejected {
-  background-color: rgba(255, 107, 107, 0.8) !important;
-  color: white !important;
+  @include status-badge-legacy('cancelled_admin');
 }
 
 :host ::ng-deep .bg-primary {
-  background-color: rgba(59, 130, 246, 0.8) !important;
-  color: white !important;
+  @include status-badge-legacy('in_progress');
 }
 
 .btn-receipt-compact {
@@ -323,7 +302,7 @@
 
 .btn-edit-reported {
   background: transparent;
-  color: #ffdd44;
+  color: $color-yellow;
   border: none;
   width: 2.5rem;
   height: 2.5rem;
@@ -335,14 +314,14 @@
   font-size: 1.1rem;
 
   &:hover {
-    color: #ffcc00;
+    color: darken($color-yellow, 10%);
     transform: translateY(-1px);
   }
 }
 
 .btn-edit-progress {
   background: transparent;
-  color: #66bbff;
+  color: $color-blue;
   border: none;
   width: 2.5rem;
   height: 2.5rem;
@@ -354,7 +333,7 @@
   font-size: 1.1rem;
 
   &:hover {
-    color: #4499ff;
+    color: darken($color-blue, 10%);
     transform: translateY(-1px);
   }
 }
@@ -368,15 +347,15 @@
   font-size: 1.2rem;
 
   &.resolved {
-    color: #00ff88;
+    color: $color-green;
   }
 
   &.cancelled-admin {
-    color: #ff6b6b;
+    color: $color-red;
   }
 
   &.cancelled-owner {
-    color: #94a3b8;
+    color: $color-gray;
   }
 }
 
@@ -487,23 +466,23 @@
 }
 
 .modal-body .badge.bg-warning {
-  background-color: #f59e0b !important;
+  background-color: $color-orange !important;
 }
 
 .modal-body .badge.bg-info {
-  background-color: #3b82f6 !important;
+  background-color: $color-blue !important;
 }
 
 .modal-body .badge.bg-success {
-  background-color: #10b981 !important;
+  background-color: $color-green !important;
 }
 
 .modal-body .badge.bg-danger {
-  background-color: #ef4444 !important;
+  background-color: $color-red !important;
 }
 
 .modal-body .badge.bg-secondary {
-  background-color: #9ca3af !important;
+  background-color: $color-gray !important;
 }
 
 .modal-header {
@@ -638,20 +617,20 @@
 
 .btn-outline-primary {
   background: white;
-  color: #2563EB;
-  border: 1px solid #2563EB;
+  color: $color-blue;
+  border: 1px solid $color-blue;
 
   &:hover:not(:disabled) {
-    background: #2563EB;
+    background: $color-blue;
     color: white;
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 2px 8px rgba($color-blue, 0.2);
   }
 }
 
 .btn-outline-secondary {
-  border: 1px solid #6b7280;
-  color: #6b7280;
+  border: 1px solid $color-gray;
+  color: $color-gray;
   min-width: 100px;
   font-weight: 400;
   padding: 0.5rem 1rem;
@@ -662,10 +641,10 @@
   justify-content: center;
 
   &:hover:not(:disabled) {
-    background: #6b7280;
+    background: $color-gray;
     color: white;
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
+    box-shadow: 0 2px 8px rgba($color-gray, 0.2);
   }
 }
 
@@ -679,7 +658,7 @@
   padding: 0.5rem 0.75rem;
   border: 1px solid #e5e7eb;
   background: white;
-  color: #6b7280;
+  color: $color-gray;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -690,15 +669,15 @@
   justify-content: center;
 
   &:hover:not(:disabled) {
-    border-color: #f97316;
-    color: #f97316;
+    border-color: $color-orange;
+    color: $color-orange;
     background: #fff7ed;
   }
 
   &.active {
-    background: #f97316;
+    background: $color-orange;
     color: white;
-    border-color: #f97316;
+    border-color: $color-orange;
   }
 
   &:disabled {
@@ -709,7 +688,7 @@
 
 .pagination-dots {
   padding: 0.5rem 0.75rem;
-  color: #6b7280;
+  color: $color-gray;
   font-weight: 500;
 }
 

@@ -1,4 +1,6 @@
 using CondoFlow.Domain.Entities;
+using CondoFlow.Domain.Enums;
+using CondoFlow.Domain.Helpers;
 using CondoFlow.Domain.ValueObjects;
 using CondoFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -93,7 +95,7 @@ public class MonthlyDebtGenerationService : BackgroundService
                     if (existingDebt == null)
                     {
                         var maintenanceConcept = await context.PaymentConcepts
-                            .FirstOrDefaultAsync(c => c.Code == "maintenance" && c.IsActive);
+                            .FirstOrDefaultAsync(c => c.Code == PaymentConceptCodes.Maintenance && c.IsActive);
                         
                         if (maintenanceConcept == null)
                         {
@@ -112,8 +114,8 @@ public class MonthlyDebtGenerationService : BackgroundService
                         debt.Month = month;
                         debt.Year = year;
                         debt.DueDate = new DateTime(year, month, DateTime.DaysInMonth(year, month));
-                        debt.Concept = $"Mantenimiento {GetMonthName(month)} {year}";
-                        debt.Status = "Pending";
+                        debt.Concept = $"Mantenimiento {DateHelper.GetMonthName(month)} {year}";
+                        debt.Status = StatusPayments.Pending;
                         debt.CreatedAt = DateTime.UtcNow;
 
                         context.Debts.Add(debt);
@@ -173,7 +175,7 @@ public class MonthlyDebtGenerationService : BackgroundService
                 if (existingDebt == null)
                 {
                     var maintenanceConcept = await context.PaymentConcepts
-                        .FirstOrDefaultAsync(c => c.Code == "maintenance" && c.IsActive);
+                        .FirstOrDefaultAsync(c => c.Code == PaymentConceptCodes.Maintenance && c.IsActive);
                     
                     if (maintenanceConcept == null)
                     {
@@ -192,8 +194,8 @@ public class MonthlyDebtGenerationService : BackgroundService
                     debt.Month = currentMonth;
                     debt.Year = currentYear;
                     debt.DueDate = new DateTime(currentYear, currentMonth, DateTime.DaysInMonth(currentYear, currentMonth));
-                    debt.Concept = $"Mantenimiento {GetMonthName(currentMonth)} {currentYear}";
-                    debt.Status = "Pending";
+                    debt.Concept = $"Mantenimiento {DateHelper.GetMonthName(currentMonth)} {currentYear}";
+                    debt.Status = StatusPayments.Pending;
                     debt.CreatedAt = DateTime.UtcNow;
 
                     context.Debts.Add(debt);
@@ -216,16 +218,5 @@ public class MonthlyDebtGenerationService : BackgroundService
             _logger.LogError(ex, "Error generando deudas mensuales");
             throw;
         }
-    }
-
-    private static string GetMonthName(int month)
-    {
-        return month switch
-        {
-            1 => "Enero", 2 => "Febrero", 3 => "Marzo", 4 => "Abril",
-            5 => "Mayo", 6 => "Junio", 7 => "Julio", 8 => "Agosto",
-            9 => "Septiembre", 10 => "Octubre", 11 => "Noviembre", 12 => "Diciembre",
-            _ => month.ToString()
-        };
     }
 }

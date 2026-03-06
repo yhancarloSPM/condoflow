@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using CondoFlow.Infrastructure.Data;
+using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Application.Common.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace CondoFlow.WebApi.Controllers;
 
@@ -9,28 +8,24 @@ namespace CondoFlow.WebApi.Controllers;
 [Route("api/payment-concepts")]
 public class PaymentConceptsController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ICatalogRepository _catalogRepository;
 
-    public PaymentConceptsController(ApplicationDbContext context)
+    public PaymentConceptsController(ICatalogRepository catalogRepository)
     {
-        _context = context;
+        _catalogRepository = catalogRepository;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetPaymentConcepts()
     {
-        var concepts = await _context.PaymentConcepts
-            .Where(c => c.IsActive)
-            .Select(c => new
-            {
-                value = c.Code,
-                label = c.Name,
-                amount = c.DefaultAmount,
-                roofAmount = c.RoofAmount,
-                autoAmount = c.IsAutoCalculated
-            })
-            .ToListAsync();
-
-        return Ok(ApiResponse<object>.SuccessResult(concepts, "Conceptos de pago obtenidos exitosamente", 200));
+        try
+        {
+            var concepts = await _catalogRepository.GetPaymentConceptsAsync();
+            return Ok(ApiResponse<object>.SuccessResult(concepts, "Conceptos de pago obtenidos exitosamente", 200));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<object>.ErrorResult("Error interno del servidor", 500));
+        }
     }
 }

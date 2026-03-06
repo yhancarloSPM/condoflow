@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CondoFlow.Infrastructure.Data;
+using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Application.Common.Models;
 
 namespace CondoFlow.WebApi.Controllers;
@@ -9,11 +8,11 @@ namespace CondoFlow.WebApi.Controllers;
 [Route("api/[controller]")]
 public class ApartmentsController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IApartmentRepository _apartmentRepository;
 
-    public ApartmentsController(ApplicationDbContext context)
+    public ApartmentsController(IApartmentRepository apartmentRepository)
     {
-        _context = context;
+        _apartmentRepository = apartmentRepository;
     }
 
     [HttpGet]
@@ -21,20 +20,7 @@ public class ApartmentsController : ControllerBase
     {
         try
         {
-            var apartments = await _context.Apartments
-                .Include(a => a.Block)
-                .Where(a => a.IsActive)
-                .OrderBy(a => a.Block.Name)
-                .ThenBy(a => a.Number)
-                .Select(a => new { 
-                    a.Id, 
-                    a.Number, 
-                    a.Floor,
-                    BlockName = a.Block.Name,
-                    BlockId = a.BlockId
-                })
-                .ToListAsync();
-
+            var apartments = await _apartmentRepository.GetAllApartmentsAsync();
             return Ok(ApiResponse<object>.SuccessResult(apartments, "Apartamentos obtenidos exitosamente", 200));
         }
         catch (Exception)
@@ -43,18 +29,12 @@ public class ApartmentsController : ControllerBase
         }
     }
 
-    [HttpGet("by-block/{blockName}")]
-    public async Task<IActionResult> GetApartmentsByBlock(string blockName)
+    [HttpGet("by-block/{blockId}")]
+    public async Task<IActionResult> GetApartmentsByBlock(int blockId)
     {
         try
         {
-            var apartments = await _context.Apartments
-                .Include(a => a.Block)
-                .Where(a => a.IsActive && a.Block.Name == blockName)
-                .OrderBy(a => a.Number)
-                .Select(a => new { a.Id, a.Number, a.Floor })
-                .ToListAsync();
-
+            var apartments = await _apartmentRepository.GetApartmentsByBlockAsync(blockId);
             return Ok(ApiResponse<object>.SuccessResult(apartments, "Apartamentos obtenidos exitosamente", 200));
         }
         catch (Exception)
@@ -68,9 +48,7 @@ public class ApartmentsController : ControllerBase
     {
         try
         {
-            var apartment = await _context.Apartments
-                .Include(a => a.Block)
-                .FirstOrDefaultAsync(a => a.Id == apartmentId && a.IsActive);
+            var apartment = await _apartmentRepository.GetApartmentByIdAsync(apartmentId);
 
             if (apartment == null)
             {

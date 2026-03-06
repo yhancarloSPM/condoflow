@@ -1,4 +1,4 @@
-using CondoFlow.Infrastructure.Repositories;
+using CondoFlow.Application.Interfaces.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

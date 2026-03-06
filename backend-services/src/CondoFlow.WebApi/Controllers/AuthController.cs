@@ -1,5 +1,6 @@
 using CondoFlow.Application.Common.Models;
 using CondoFlow.Application.Common.Services;
+using CondoFlow.Application.Interfaces.Services;
 using CondoFlow.Infrastructure.Data;
 using CondoFlow.Infrastructure.Identity;
 using CondoFlow.WebApi.DTOs;
@@ -21,6 +22,7 @@ public class AuthController : ControllerBase
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
     private readonly INotificationService _notificationService;
+    private readonly IAuthService _authService;
 
     public AuthController(
         UserManager<ApplicationUser> userManager,
@@ -29,7 +31,8 @@ public class AuthController : ControllerBase
         ILocalizationService localization,
         ApplicationDbContext context,
         IEmailService emailService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IAuthService authService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -38,6 +41,7 @@ public class AuthController : ControllerBase
         _context = context;
         _emailService = emailService;
         _notificationService = notificationService;
+        _authService = authService;
     }
 
     [HttpPost("login")]
@@ -84,12 +88,10 @@ public class AuthController : ControllerBase
             string? apartmentInfo = null;
             if (user.ApartmentId.HasValue)
             {
-                var apartment = await _context.Apartments
-                    .Include(a => a.Block)
-                    .FirstOrDefaultAsync(a => a.Id == user.ApartmentId.Value);
+                var apartment = await _authService.GetApartmentInfoAsync(user.ApartmentId.Value);
                 if (apartment != null)
                 {
-                    apartmentInfo = $"{apartment.Block.Name}-{apartment.Number}";
+                    apartmentInfo = $"{apartment.BlockName}-{apartment.Number}";
                 }
             }
 
@@ -109,8 +111,10 @@ public class AuthController : ControllerBase
             };
             return Ok(ApiResponse<object>.SuccessResult(userData, _localization.GetMessage("LoginSuccessful"), 200));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"[LOGIN ERROR] {ex.Message}");
+            Console.WriteLine($"[LOGIN ERROR STACK] {ex.StackTrace}");
             return StatusCode(500, ApiResponse.ErrorResult(_localization.GetMessage("LoginError"), 500));
         }
     }
@@ -144,19 +148,16 @@ public class AuthController : ControllerBase
 
 
             // Verificar que el apartamento existe y está disponible
-            var apartment = await _context.Apartments
-                .Include(a => a.Block)
-                .FirstOrDefaultAsync(a => a.Id == request.ApartmentId && a.IsActive);
-            
-            if (apartment == null)
+            var apartmentData = await _authService.GetApartmentInfoAsync(request.ApartmentId);
+            if (apartmentData == null)
                 return BadRequest(ApiResponse.ErrorResult("Apartamento no encontrado o no disponible", 400));
 
             // Verificar que el apartamento no esté ya asignado
-            var existingUserWithApartment = await _userManager.Users
-                .FirstOrDefaultAsync(u => u.ApartmentId == request.ApartmentId && u.IsApproved);
-            
-            if (existingUserWithApartment != null)
+            var isAvailable = await _authService.IsApartmentAvailableAsync(request.ApartmentId);
+            if (!isAvailable)
                 return BadRequest(ApiResponse.ErrorResult("Este apartamento ya está asignado a otro usuario", 400));
+
+            var apartment = apartmentData as dynamic;
 
             var user = new ApplicationUser
             {
@@ -293,6 +294,7 @@ public class AuthController : ControllerBase
                     if (apartment != null)
                     {
                         apartment.OwnerId = ownerId;
+                        await _context.SaveChangesAsync();
                     }
                 }
             }
@@ -300,9 +302,6 @@ public class AuthController : ControllerBase
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
                 return BadRequest(ApiResponse.ErrorResult(_localization.GetMessage("ApprovalError"), 400));
-            
-            // Guardar cambios en Apartments
-            await _context.SaveChangesAsync();
 
             // Enviar notificación al usuario
             try
@@ -382,31 +381,11 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var allUsers = await _userManager.Users.ToListAsync();
-
-            
-            var pendingUsers = allUsers
-                .Where(u => !u.IsApproved)
-                .Select(u => new {
-                    u.Id,
-                    u.Email,
-                    u.FirstName,
-                    u.LastName,
-                    u.PhoneNumber,
-                    ApartmentId = u.ApartmentId,
-                    u.CreatedAt,
-                    u.IsRejected,
-                    u.RejectedAt,
-                    u.RejectedBy
-                })
-                .ToList();
-
-
+            var pendingUsers = await _authService.GetPendingUsersAsync();
             return Ok(ApiResponse<object>.SuccessResult(pendingUsers, "Usuarios pendientes obtenidos", 200));
         }
         catch (Exception ex)
         {
-
             return StatusCode(500, ApiResponse.ErrorResult($"Error: {ex.Message}", 500));
         }
     }
@@ -417,32 +396,11 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var allUsers = await _userManager.Users.ToListAsync();
-            
-            var users = allUsers
-                .Select(u => new {
-                    u.Id,
-                    u.Email,
-                    u.FirstName,
-                    u.LastName,
-                    u.PhoneNumber,
-                    ApartmentId = u.ApartmentId,
-                    u.CreatedAt,
-                    u.IsApproved,
-                    u.ApprovedAt,
-                    u.ApprovedBy,
-                    u.IsRejected,
-                    u.RejectedAt,
-                    u.RejectedBy
-                })
-                .OrderByDescending(u => u.CreatedAt)
-                .ToList();
-
+            var users = await _authService.GetAllUsersAsync();
             return Ok(ApiResponse<object>.SuccessResult(users, "Usuarios obtenidos", 200));
         }
         catch (Exception ex)
         {
-
             return StatusCode(500, ApiResponse.ErrorResult($"Error: {ex.Message}", 500));
         }
     }

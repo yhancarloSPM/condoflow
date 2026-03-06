@@ -1,18 +1,10 @@
 using CondoFlow.Domain.Entities;
 using CondoFlow.Domain.Enums;
 using CondoFlow.Infrastructure.Data;
+using CondoFlow.Application.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace CondoFlow.Infrastructure.Repositories;
-
-public interface IDebtRepository
-{
-    Task<Debt> AddAsync(Debt debt);
-    Task<List<Debt>> GetByOwnerIdAsync(Guid ownerId);
-    Task<List<Debt>> GetPendingDebtsByOwnerIdAsync(Guid ownerId);
-    Task<Debt?> GetByIdAsync(Guid id);
-    Task UpdateAsync(Debt debt);
-}
 
 public class DebtRepository : IDebtRepository
 {
@@ -56,6 +48,43 @@ public class DebtRepository : IDebtRepository
                    (d.Status == StatusPayments.Pending || d.Status == StatusPayments.Overdue || d.Status == StatusPayments.PaymentSubmitted) &&
                    d.Status != StatusPayments.Paid)
             .OrderBy(d => d.DueDate)
+            .ToListAsync();
+    }
+
+    public async Task<List<Debt>> GetDebtsByOwnerIdAsync(Guid ownerId)
+    {
+        return await GetByOwnerIdAsync(ownerId);
+    }
+
+    public async Task<List<Debt>> GetActiveDebtsAsync()
+    {
+        var debts = await _context.Debts
+            .Where(d => d.Status == StatusPayments.Pending || d.Status == StatusPayments.Overdue || d.Status == StatusPayments.PaymentSubmitted)
+            .ToListAsync();
+
+        // Actualizar status basado en IsOverdue
+        foreach (var debt in debts)
+        {
+            if (debt.IsOverdue && debt.Status == StatusPayments.Pending)
+            {
+                debt.Status = StatusPayments.Overdue;
+            }
+        }
+
+        return debts;
+    }
+
+    public async Task<int> CountAsync()
+    {
+        return await _context.Debts.CountAsync();
+    }
+
+    public async Task<List<Debt>> GetAllAsync()
+    {
+        return await _context.Debts
+            .OrderByDescending(d => d.Year)
+            .ThenByDescending(d => d.Month)
+            .ThenBy(d => d.CreatedAt)
             .ToListAsync();
     }
 }

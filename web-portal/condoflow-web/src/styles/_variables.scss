@@ -1,27 +1,81 @@
-// CondoFlow Color Palette
-// Colores principales
-$primary: #2563EB;           // Azul profesional
-$primary-dark: #1d4ed8;      // Azul más oscuro para hover
-$secondary: #10B981;         // Verde jade
-$secondary-dark: #059669;    // Verde más oscuro para hover
+// ============================================
+// CondoFlow - Variables Globales
+// ============================================
+// Este archivo contiene TODAS las variables del proyecto
+// Es la única fuente de verdad para colores, espaciados, etc.
 
-// Colores neutrales
-$neutral-light: #F3F4F6;     // Gris claro
-$neutral-dark: #374151;      // Gris profundo
-$text: #374151;              // Texto principal
-$text-light: #6B7280;        // Texto secundario
+@use 'sass:color';
 
-// Feedback
-$danger: #EF4444;            // Rojo suave
-$success: #10B981;           // Verde jade (mismo que secondary)
+// ============================================
+// COLORES BASE (Paleta única)
+// ============================================
+$color-green: #10b981;
+$color-orange: #f59e0b;
+$color-red: #ef4444;
+$color-blue: #3b82f6;
+$color-purple: #8b5cf6;
+$color-yellow: #eab308;
+$color-gray: #6b7280;
+$color-pink: #ec4899;
+$color-teal: #14b8a6;
 
-// Utilidades
-$border: #E5E7EB;
-$background: #FFFFFF;
+// Colores para urgente
+$color-urgent: #ef4444;
+
+// ============================================
+// GRADIENTES (generados desde colores base)
+// ============================================
+$gradient-green: linear-gradient(135deg, $color-green, color.scale($color-green, $lightness: -15%));
+$gradient-orange: linear-gradient(135deg, $color-orange, color.scale($color-orange, $lightness: -15%));
+$gradient-red: linear-gradient(135deg, $color-red, color.scale($color-red, $lightness: -15%));
+$gradient-blue: linear-gradient(135deg, $color-blue, color.scale($color-blue, $lightness: -15%));
+$gradient-purple: linear-gradient(135deg, $color-purple, color.scale($color-purple, $lightness: -15%));
+$gradient-yellow: linear-gradient(135deg, $color-yellow, color.scale($color-yellow, $lightness: -15%));
+$gradient-gray: linear-gradient(135deg, $color-gray, color.scale($color-gray, $lightness: -15%));
+$gradient-pink: linear-gradient(135deg, $color-pink, color.scale($color-pink, $lightness: -15%));
+$gradient-teal: linear-gradient(135deg, $color-teal, color.scale($color-teal, $lightness: -15%));
+
+// ============================================
+// COLORES SEMÁNTICOS (alias de colores base)
+// ============================================
+$primary: $color-blue;
+$primary-dark: color.scale($color-blue, $lightness: -15%);
+$secondary: $color-green;
+$secondary-dark: color.scale($color-green, $lightness: -15%);
+$danger: $color-red;
+$success: $color-green;
+$warning: $color-orange;
+$info: $color-blue;
+
+// Colores para anuncios urgentes
+$urgent-color: $color-urgent;
+$urgent-bg: rgba($color-urgent, 0.1);
+
+// ============================================
+// COLORES NEUTRALES
+// ============================================
+$neutral-light: #f3f4f6;
+$neutral-dark: #374151;
+$text: #374151;
+$text-light: $color-gray;
+
+// ============================================
+// COLORES NEUTROS
+// ============================================
+$color-white: #ffffff;
+$color-black: #000000;
+
+// ============================================
+// UTILIDADES
+// ============================================
+$border: #e5e7eb;
+$background: $color-white;
 $shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 $shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 
-// Breakpoints
+// ============================================
+// BREAKPOINTS
+// ============================================
 $mobile: 576px;
 $tablet: 768px;
 $desktop: 992px;

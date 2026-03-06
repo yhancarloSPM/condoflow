@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CondoFlow.Infrastructure.Data;
+using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Application.Common.Models;
 
 namespace CondoFlow.WebApi.Controllers;
@@ -9,11 +8,11 @@ namespace CondoFlow.WebApi.Controllers;
 [Route("api/[controller]")]
 public class CategoriesController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ICatalogRepository _catalogRepository;
 
-    public CategoriesController(ApplicationDbContext context)
+    public CategoriesController(ICatalogRepository catalogRepository)
     {
-        _context = context;
+        _catalogRepository = catalogRepository;
     }
 
     [HttpGet]
@@ -21,19 +20,7 @@ public class CategoriesController : ControllerBase
     {
         try
         {
-            var categories = await _context.Categories
-                .Where(c => c.IsActive)
-                .OrderBy(c => c.Name)
-                .Select(c => new
-                {
-                    c.Id,
-                    c.Code,
-                    c.Name,
-                    c.Description,
-                    IsActive = c.IsActive
-                })
-                .ToListAsync();
-
+            var categories = await _catalogRepository.GetCategoriesAsync();
             return Ok(ApiResponse<object>.SuccessResult(categories, "Categorías obtenidas exitosamente"));
         }
         catch (Exception ex)

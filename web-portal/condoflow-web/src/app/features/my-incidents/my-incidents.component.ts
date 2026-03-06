@@ -28,6 +28,9 @@ export class MyIncidentsComponent implements OnInit {
   allIncidents: any[] = [];
   filteredIncidents = signal<any[]>([]);
   
+  // Exponer Math para el template
+  Math = Math;
+  
   paginatedIncidents = computed(() => {
     const start = (this.currentPage() - 1) * this.pageSize;
     const end = start + this.pageSize;
@@ -509,8 +512,6 @@ export class MyIncidentsComponent implements OnInit {
     
     return pages;
   }
-  
-  Math = Math;
 
   viewIncidentDetail(incident: any) {
     this.selectedIncident.set(incident);
@@ -518,10 +519,30 @@ export class MyIncidentsComponent implements OnInit {
   }
 
   viewImage(incident: any) {
-    if (incident.id) {
-      const token = this.authService.getToken();
-      const url = `https://localhost:7009/api/incidents/${incident.id}/image?access_token=${token}`;
-      window.open(url, '_blank');
+    if (incident.imageUrl && incident.imageUrl.startsWith('data:')) {
+      const newWindow = window.open('', '_blank');
+      if (newWindow) {
+        newWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Imagen de Incidencia</title>
+              <style>
+                body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
+                img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+              </style>
+            </head>
+            <body>
+              <img src="${incident.imageUrl}" alt="Imagen de Incidencia" />
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      }
     }
+  }
+
+  isPageNumber(page: number | string): page is number {
+    return typeof page === 'number';
   }
 }

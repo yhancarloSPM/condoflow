@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { DebtService } from '../../core/services/debt.service';
 import { NavbarComponent } from '../../shared/components/navbar.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-my-payments',
@@ -151,7 +152,7 @@ export class MyPaymentsComponent implements OnInit {
     const token = this.authService.getToken();
     const headers = { 'Authorization': `Bearer ${token}` };
     
-    fetch('https://localhost:7009/api/payment-concepts', { headers })
+    fetch(`${environment.apiUrl}/payment-concepts`, { headers })
       .then(response => response.json())
       .then(data => {
         console.log('Payment concepts response:', data);
@@ -366,37 +367,25 @@ export class MyPaymentsComponent implements OnInit {
   }
 
   viewReceipt(payment: any) {
-    if (payment.receiptUrl) {
-      // Si el receiptUrl es base64, mostrarlo directamente
-      if (payment.receiptUrl.startsWith('data:')) {
-        // Crear una nueva ventana con la imagen base64
-        const newWindow = window.open('', '_blank');
-        if (newWindow) {
-          newWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>Comprobante de Pago</title>
-                <style>
-                  body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
-                  img, embed { max-width: 100%; max-height: 100vh; object-fit: contain; }
-                </style>
-              </head>
-              <body>
-                ${payment.receiptUrl.includes('application/pdf') 
-                  ? `<embed src="${payment.receiptUrl}" type="application/pdf" width="100%" height="100%" />`
-                  : `<img src="${payment.receiptUrl}" alt="Comprobante" />`
-                }
-              </body>
-            </html>
-          `);
-          newWindow.document.close();
-        }
-      } else {
-        // Fallback para URLs antiguas (si existen)
-        const token = this.authService.getToken();
-        const url = `http://localhost:7009/api/receipts/${payment.id}?access_token=${token}`;
-        window.open(url, '_blank');
+    if (payment.receiptUrl && payment.receiptUrl.startsWith('data:')) {
+      const newWindow = window.open('', '_blank');
+      if (newWindow) {
+        newWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Comprobante de Pago</title>
+              <style>
+                body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
+                img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+              </style>
+            </head>
+            <body>
+              <img src="${payment.receiptUrl}" alt="Comprobante" />
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
       }
     }
   }
@@ -456,7 +445,10 @@ export class MyPaymentsComponent implements OnInit {
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
-      this.loadPayments();
+      const startIndex = (page - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      const paginatedPayments = this.filteredPayments().slice(startIndex, endIndex);
+      this.payments.set(paginatedPayments);
     }
   }
 
@@ -561,5 +553,9 @@ export class MyPaymentsComponent implements OnInit {
       'Tarjeta': 'pi-credit-card'
     };
     return iconMap[method] || 'pi-arrow-right-arrow-left';
+  }
+
+  isPageNumber(page: number | string): page is number {
+    return typeof page === 'number';
   }
 }

@@ -1,4 +1,5 @@
 using CondoFlow.Domain.Entities;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -278,7 +279,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 OwnerId = sampleOwnerId,
                 DueDate = new DateTime(2024, 12, 31),
                 Concept = "Mantenimiento Diciembre 2024",
-                Status = "Pending",
+                Status = StatusPayments.Pending,
                 Month = 12,
                 Year = 2024,
                 CreatedAt = new DateTime(2024, 12, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -290,7 +291,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 OwnerId = sampleOwnerId,
                 DueDate = new DateTime(2024, 11, 30),
                 Concept = "Mantenimiento Noviembre 2024",
-                Status = "Pending",
+                Status = StatusPayments.Pending,
                 Month = 11,
                 Year = 2024,
                 CreatedAt = new DateTime(2024, 11, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -314,7 +315,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 OwnerId = sampleOwnerId,
                 DueDate = new DateTime(2025, 1, 31),
                 Concept = "Mantenimiento Enero 2025",
-                Status = "Pending",
+                Status = StatusPayments.Pending,
                 Month = 1,
                 Year = 2025,
                 CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),

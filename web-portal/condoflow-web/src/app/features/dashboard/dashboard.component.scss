@@ -1,3 +1,7 @@
+// Import centralized styles
+@import '../../../styles/variables';
+@import '../../../styles/badges';
+
 .dashboard-layout { min-height: 100vh; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
 
 .dashboard-tabs {
@@ -164,11 +168,28 @@
 .summary-card.clickable { cursor: pointer; }
 .summary-card.clickable:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(249, 115, 22, 0.2), 0 0 0 1px rgba(249, 115, 22, 0.3); }
 .card-icon { width: 3rem; height: 3rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: white; }
-.summary-card.paid .card-icon { background: linear-gradient(135deg, #10B981, #059669); }
-.summary-card.pending .card-icon { background: linear-gradient(135deg, #F59E0B, #d97706); }
-.summary-card.overdue .card-icon { background: linear-gradient(135deg, #EF4444, #dc2626); }
-.summary-card.expected .card-icon { background: linear-gradient(135deg, #2563EB, #1d4ed8); }
-.summary-card.announcements .card-icon { background: linear-gradient(135deg, #8B5CF6, #7C3AED); }
+// Using centralized badge system
+.summary-card {
+  &.paid .card-icon {
+    @include icon-bg-paid;
+  }
+  
+  &.pending .card-icon {
+    @include icon-bg-pending;
+  }
+  
+  &.overdue .card-icon {
+    @include icon-bg-overdue;
+  }
+  
+  &.expected .card-icon {
+    background: linear-gradient(135deg, #2563EB, #1d4ed8);
+  }
+  
+  &.announcements .card-icon {
+    background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  }
+}
 .card-content h3 { font-size: 1.75rem; font-weight: 700; color: white; margin: 0; }
 .card-content p { color: rgba(255,255,255,0.8); margin: 0; font-size: 0.875rem; }
 

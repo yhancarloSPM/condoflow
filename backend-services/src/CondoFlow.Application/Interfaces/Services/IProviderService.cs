@@ -1,6 +1,6 @@
 using CondoFlow.Application.DTOs;
 
-namespace CondoFlow.Infrastructure.Services;
+namespace CondoFlow.Application.Interfaces.Services;
 
 public interface IProviderService
 {

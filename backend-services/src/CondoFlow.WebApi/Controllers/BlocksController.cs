@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CondoFlow.Infrastructure.Data;
+using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Application.Common.Models;
 
 namespace CondoFlow.WebApi.Controllers;
@@ -9,11 +8,11 @@ namespace CondoFlow.WebApi.Controllers;
 [Route("api/[controller]")]
 public class BlocksController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IBlockRepository _blockRepository;
 
-    public BlocksController(ApplicationDbContext context)
+    public BlocksController(IBlockRepository blockRepository)
     {
-        _context = context;
+        _blockRepository = blockRepository;
     }
 
     [HttpGet]
@@ -21,13 +20,9 @@ public class BlocksController : ControllerBase
     {
         try
         {
-            var blocks = await _context.Blocks
-                .Where(b => b.IsActive)
-                .OrderBy(b => b.Name)
-                .Select(b => new { b.Id, b.Name, b.Description })
-                .ToListAsync();
-
-            return Ok(ApiResponse<object>.SuccessResult(blocks, "Bloques obtenidos exitosamente", 200));
+            var blocks = await _blockRepository.GetAllBlocksAsync();
+            var blocksDto = blocks.Select(b => new { b.Id, b.Name, b.Description });
+            return Ok(ApiResponse<object>.SuccessResult(blocksDto, "Bloques obtenidos exitosamente", 200));
         }
         catch (Exception)
         {

@@ -1,10 +1,14 @@
 using CondoFlow.Infrastructure.Data;
 using CondoFlow.Infrastructure.Identity;
 using CondoFlow.Infrastructure.Repositories;
+using CondoFlow.Infrastructure.Services;
+using CondoFlow.Application.Interfaces.Repositories;
+using CondoFlow.Application.Interfaces.Services;
 using CondoFlow.WebApi.Middleware;
 using CondoFlow.WebApi.Services;
 using CondoFlow.WebApi.Hubs;
 using CondoFlow.Application.Common.Services;
+using CondoFlow.Domain.Configuration;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +22,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSignalR();
+
+// Configuration
+builder.Services.Configure<DebtConfiguration>(builder.Configuration.GetSection("DebtConfiguration"));
+
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(CondoFlow.Application.Mappings.MappingProfile));
 
 // CORS
 builder.Services.AddCors(options =>
@@ -108,18 +118,46 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 builder.Services.AddScoped<IFileService, FileService>();
-builder.Services.AddScoped<IEmailService, CondoFlow.Infrastructure.Services.GmailService>();
+builder.Services.AddScoped<IEmailService, GmailService>();
+
+// Repositories
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IDebtRepository, DebtRepository>();
 builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddScoped<IDebtReminderService, CondoFlow.Infrastructure.Services.DebtReminderService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
-builder.Services.AddScoped<CondoFlow.Infrastructure.Services.IExpenseService, CondoFlow.Infrastructure.Services.ExpenseService>();
-builder.Services.AddScoped<CondoFlow.Infrastructure.Services.IProviderService, CondoFlow.Infrastructure.Services.ProviderService>();
-builder.Services.AddScoped<CondoFlow.Infrastructure.Services.IPollService, CondoFlow.Infrastructure.Services.PollService>();
-builder.Services.AddHostedService<CondoFlow.Infrastructure.Services.MonthlyDebtGenerationService>();
-builder.Services.AddHostedService<CondoFlow.Infrastructure.Services.DebtReminderBackgroundService>();
+builder.Services.AddScoped<IApartmentRepository, ApartmentRepository>();
+builder.Services.AddScoped<IBlockRepository, BlockRepository>();
+builder.Services.AddScoped<ICatalogRepository, CatalogRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IProviderRepository, ProviderRepository>();
+builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
+builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+builder.Services.AddScoped<IExpenseCategoryRepository, ExpenseCategoryRepository>();
+builder.Services.AddScoped<IPollRepository, PollRepository>();
+builder.Services.AddScoped<IPollOptionRepository, PollOptionRepository>();
+builder.Services.AddScoped<IPollVoteRepository, PollVoteRepository>();
+builder.Services.AddScoped<IPaymentConceptRepository, PaymentConceptRepository>();
+builder.Services.AddScoped<IStatusRepository, StatusRepository>();
+
+// Infrastructure Services (external APIs, background jobs, Identity)
+builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IDebtReminderService, DebtReminderService>();
+builder.Services.AddHostedService<MonthlyDebtGenerationService>();
+builder.Services.AddHostedService<DebtReminderBackgroundService>();
+
+// Application Services (business logic)
+builder.Services.AddScoped<IExpenseService, CondoFlow.Application.Services.ExpenseService>();
+builder.Services.AddScoped<IProviderService, CondoFlow.Application.Services.ProviderService>();
+builder.Services.AddScoped<IPollService, CondoFlow.Application.Services.PollService>();
+builder.Services.AddScoped<IIncidentService, CondoFlow.Application.Services.IncidentService>();
+builder.Services.AddScoped<IDebtService, CondoFlow.Application.Services.DebtService>();
+builder.Services.AddScoped<IUserService, CondoFlow.Application.Services.UserService>();
+builder.Services.AddScoped<IOwnerService, CondoFlow.Application.Services.OwnerService>();
+builder.Services.AddScoped<IAnnouncementService, CondoFlow.Application.Services.AnnouncementService>();
+builder.Services.AddScoped<IAuthService, CondoFlow.Application.Services.AuthService>();
+builder.Services.AddScoped<IReservationService, CondoFlow.Application.Services.ReservationService>();
 
 var app = builder.Build();
 

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CondoFlow.Infrastructure.Data;
+using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Application.Common.Models;
 
 namespace CondoFlow.WebApi.Controllers;
@@ -9,11 +8,11 @@ namespace CondoFlow.WebApi.Controllers;
 [Route("api/[controller]")]
 public class EventTypesController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ICatalogRepository _catalogRepository;
 
-    public EventTypesController(ApplicationDbContext context)
+    public EventTypesController(ICatalogRepository catalogRepository)
     {
-        _context = context;
+        _catalogRepository = catalogRepository;
     }
 
     [HttpGet]
@@ -21,19 +20,7 @@ public class EventTypesController : ControllerBase
     {
         try
         {
-            var eventTypes = await _context.EventTypes
-                .Where(et => et.IsActive)
-                .OrderBy(et => et.Name)
-                .Select(et => new
-                {
-                    et.Id,
-                    et.Code,
-                    et.Name,
-                    et.Description,
-                    IsActive = et.IsActive
-                })
-                .ToListAsync();
-
+            var eventTypes = await _catalogRepository.GetEventTypesAsync();
             return Ok(ApiResponse<object>.SuccessResult(eventTypes, "Tipos de evento obtenidos exitosamente"));
         }
         catch (Exception ex)

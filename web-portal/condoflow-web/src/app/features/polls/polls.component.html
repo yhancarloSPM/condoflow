@@ -234,34 +234,36 @@
       </div>
       
       <div class="pagination-container" *ngIf="polls().length > pollsPerPage">
-        <div class="d-flex justify-content-between align-items-center pt-2">
-          <small style="color: rgba(255,255,255,0.8);">Mostrando {{ getStartIndex() + 1 }} - {{ getEndIndex() }} de {{ polls().length }} encuestas</small>
-          <div class="pagination">
+        <div class="pagination-info">
+          <small class="text-white">
+            Mostrando {{ getStartIndex() + 1 }} - {{ getEndIndex() }} de {{ polls().length }} encuestas
+          </small>
+        </div>
+        <div class="pagination">
+          <button 
+            class="pagination-btn"
+            [disabled]="currentPage === 1"
+            (click)="goToPage(currentPage - 1)">
+            <i class="pi pi-chevron-left"></i>
+          </button>
+          
+          <ng-container *ngFor="let page of getPageNumbers()">
+            <span *ngIf="page === '...'" class="pagination-dots">...</span>
             <button 
+              *ngIf="isPageNumber(page)"
               class="pagination-btn"
-              [disabled]="currentPage === 1"
-              (click)="goToPage(currentPage - 1)">
-              <i class="pi pi-chevron-left"></i>
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)">
+              {{ page }}
             </button>
-            
-            <ng-container *ngFor="let page of getVisiblePages()">
-              <button 
-                *ngIf="page !== -1"
-                class="pagination-btn"
-                [class.active]="page === currentPage"
-                (click)="goToPage(page)">
-                {{ page }}
-              </button>
-              <span *ngIf="page === -1" class="pagination-dots">...</span>
-            </ng-container>
-            
-            <button 
-              class="pagination-btn"
-              [disabled]="currentPage === totalPages"
-              (click)="goToPage(currentPage + 1)">
-              <i class="pi pi-chevron-right"></i>
-            </button>
-          </div>
+          </ng-container>
+          
+          <button 
+            class="pagination-btn"
+            [disabled]="currentPage === totalPages"
+            (click)="goToPage(currentPage + 1)">
+            <i class="pi pi-chevron-right"></i>
+          </button>
         </div>
       </div>
     </div>

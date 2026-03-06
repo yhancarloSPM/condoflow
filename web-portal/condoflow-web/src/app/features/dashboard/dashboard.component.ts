@@ -65,25 +65,81 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private http: HttpClient
   ) {}
 
+  private dataLoaded = false;
+  private viewInitialized = false;
+
   ngOnInit() {
     this.currentUser.set(this.authService.currentUser());
-    // Load data asynchronously to prevent blocking
-    setTimeout(() => {
-      this.loadDebts();
-      this.loadBlocks();
-      this.loadApartments();
-      this.loadPayments();
-      this.loadIncidents();
-      this.loadExpenses();
-      this.loadNotifications();
-      this.calculateMetrics();
-    }, 100);
+    // Load data first, then initialize charts
+    this.loadAllData();
   }
 
   ngAfterViewInit() {
+    console.log('[DASHBOARD] ngAfterViewInit ejecutado');
+    this.viewInitialized = true;
+    console.log('[DASHBOARD] viewInitialized=true, dataLoaded=', this.dataLoaded);
+    
+    // Esperar un poco más para asegurar que todo esté listo
     setTimeout(() => {
-      this.initCharts();
-    }, 100);
+      console.log('[DASHBOARD] Timeout de ngAfterViewInit - intentando inicializar gráficos');
+      if (this.dataLoaded) {
+        console.log('[DASHBOARD] Inicializando gráficos (vista lista)...');
+        this.initCharts();
+      } else {
+        console.log('[DASHBOARD] Datos aún no cargados, esperando...');
+      }
+    }, 500);
+  }
+  
+  private async loadAllData() {
+    console.log('[DASHBOARD] Iniciando carga de datos...');
+    try {
+      // Load all data in parallel
+      await Promise.all([
+        this.loadDebts(),
+        this.loadBlocks(),
+        this.loadApartments(),
+        this.loadPayments(),
+        this.loadIncidents(),
+        this.loadExpenses()
+      ]);
+      
+      console.log('[DASHBOARD] Datos cargados:', {
+        debts: this.debts().length,
+        apartments: this.apartments().length,
+        payments: this.payments().length,
+        expenses: this.expenses().length
+      });
+      
+      // Calculate metrics after data is loaded
+      this.calculateMetrics();
+      
+      // Mark data as loaded
+      this.dataLoaded = true;
+      console.log('[DASHBOARD] dataLoaded=true, viewInitialized=', this.viewInitialized);
+      
+      // Initialize charts only if view is ready
+      if (this.viewInitialized) {
+        console.log('[DASHBOARD] Inicializando gráficos (datos listos)...');
+        setTimeout(() => {
+          this.initCharts();
+        }, 200);
+      } else {
+        console.log('[DASHBOARD] Vista aún no inicializada, esperando...');
+      }
+      
+      // Load notifications (non-blocking)
+      this.loadNotifications();
+    } catch (error) {
+      console.error('[DASHBOARD] Error loading dashboard data:', error);
+      this.dataLoaded = true;
+      // Initialize charts anyway with empty data if view is ready
+      if (this.viewInitialized) {
+        setTimeout(() => {
+          this.initCharts();
+        }, 100);
+      }
+    }
   }
   
   onTabChange(tab: string) {
@@ -93,85 +149,119 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }, 100);
   }
 
-  loadDebts() {
-    this.adminDebtService.getAllDebts().subscribe({
-      next: (response) => {
-        if (response.success) {
-          // Limitar a las primeras 500 deudas para mejor performance
-          const limitedDebts = response.data.slice(0, 500);
-          this.debts.set(limitedDebts);
-          this.updateCharts();
-        }
-      },
-      error: (error) => {
-        console.error('Error cargando deudas:', error);
-        // Set empty array on error to prevent blocking
-        this.debts.set([]);
-        this.updateCharts();
-      }
-    });
-  }
-
-  loadBlocks() {
-    this.http.get(`${environment.apiUrl}/blocks`).subscribe({
-      next: (response: any) => {
-        if (response.success) {
-          this.blocks.set(response.data);
-        }
-      },
-      error: (error) => console.error('Error cargando bloques:', error)
-    });
-  }
-
-  loadApartments() {
-    this.http.get(`${environment.apiUrl}/apartments`).subscribe({
-      next: (response: any) => {
-        if (response.success) {
-          this.apartments.set(response.data);
-        }
-      },
-      error: (error) => console.error('Error cargando apartamentos:', error)
-    });
-  }
-
-  loadPayments() {
-    this.adminPaymentService.getAllPayments().subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.payments.set(response.data);
-          this.updateCharts();
-        }
-      },
-      error: (error) => console.error('Error cargando pagos:', error)
-    });
-  }
-
-  loadExpenses() {
-    this.http.get(`${environment.apiUrl}/expenses`).subscribe({
-      next: (response: any) => {
-        if (response.success) {
-          this.expenses.set(response.data);
-          setTimeout(() => {
+  loadDebts(): Promise<void> {
+    return new Promise((resolve) => {
+      this.adminDebtService.getAllDebts().subscribe({
+        next: (response) => {
+          if (response.success) {
+            // Limitar a las primeras 500 deudas para mejor performance
+            const limitedDebts = response.data.slice(0, 500);
+            this.debts.set(limitedDebts);
             this.updateCharts();
-            if (this.activeTab() === 'monthly') {
-              this.createExpenseChart();
-            }
-          }, 100);
+          }
+          resolve();
+        },
+        error: (error) => {
+          console.error('Error cargando deudas:', error);
+          // Set empty array on error to prevent blocking
+          this.debts.set([]);
+          this.updateCharts();
+          resolve();
         }
-      },
-      error: (error) => {
-        console.error('Error cargando gastos:', error);
-        this.expenses.set([]);
-      }
+      });
+    });
+  }
+
+  loadBlocks(): Promise<void> {
+    return new Promise((resolve) => {
+      this.http.get(`${environment.apiUrl}/blocks`).subscribe({
+        next: (response: any) => {
+          if (response.success) {
+            this.blocks.set(response.data);
+          }
+          resolve();
+        },
+        error: (error) => {
+          console.error('Error cargando bloques:', error);
+          resolve();
+        }
+      });
+    });
+  }
+
+  loadApartments(): Promise<void> {
+    return new Promise((resolve) => {
+      this.http.get(`${environment.apiUrl}/apartments`).subscribe({
+        next: (response: any) => {
+          if (response.success) {
+            this.apartments.set(response.data);
+          }
+          resolve();
+        },
+        error: (error) => {
+          console.error('Error cargando apartamentos:', error);
+          resolve();
+        }
+      });
+    });
+  }
+
+  loadPayments(): Promise<void> {
+    return new Promise((resolve) => {
+      this.adminPaymentService.getAllPayments().subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.payments.set(response.data);
+            this.updateCharts();
+          }
+          resolve();
+        },
+        error: (error) => {
+          console.error('Error cargando pagos:', error);
+          resolve();
+        }
+      });
+    });
+  }
+
+  loadExpenses(): Promise<void> {
+    return new Promise((resolve) => {
+      this.http.get(`${environment.apiUrl}/expenses`).subscribe({
+        next: (response: any) => {
+          if (response.success) {
+            this.expenses.set(response.data);
+            setTimeout(() => {
+              this.updateCharts();
+              if (this.activeTab() === 'monthly') {
+                this.createExpenseChart();
+              }
+            }, 100);
+          }
+          resolve();
+        },
+        error: (error) => {
+          console.error('Error cargando gastos:', error);
+          this.expenses.set([]);
+          resolve();
+        }
+      });
     });
   }
 
   initCharts() {
+    console.log('[DASHBOARD] initCharts llamado, activeTab=', this.activeTab());
     if (this.activeTab() === 'monthly') {
-      this.createIncomeChart();
-      this.createMorosityChart();
-      this.createPieChart();
-      this.createExpenseChart();
+      // Verificar que los canvas existan antes de crear los gráficos
+      console.log('[DASHBOARD] Canvas refs:', {
+        income: !!this.incomeChartRef?.nativeElement,
+        morosit: !!this.morosityChartRef?.nativeElement,
+        pie: !!this.pieChartRef?.nativeElement,
+        expense: !!this.expenseChartRef?.nativeElement
+      });
+      if (this.incomeChartRef?.nativeElement) this.createIncomeChart();
+      if (this.morosityChartRef?.nativeElement) this.createMorosityChart();
+      if (this.pieChartRef?.nativeElement) this.createPieChart();
+      if (this.expenseChartRef?.nativeElement) this.createExpenseChart();
     } else {
       this.createYearlyCharts();
     }

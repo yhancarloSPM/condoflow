@@ -14,8 +14,8 @@ public class AuthControllerUnitTests
             "John",
             "Doe",
             "123456789",
-            "A",
-            "101",
+            1, // BlockId
+            1, // ApartmentId
             "Admin"
         );
 
@@ -33,8 +33,8 @@ public class AuthControllerUnitTests
             "John",
             "Doe",
             "123456789",
-            "A",
-            "101",
+            1, // BlockId
+            1, // ApartmentId
             "Admin"
         );
 

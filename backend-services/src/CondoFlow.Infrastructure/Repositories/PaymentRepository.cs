@@ -1,17 +1,9 @@
 using CondoFlow.Domain.Entities;
 using CondoFlow.Infrastructure.Data;
+using CondoFlow.Application.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace CondoFlow.Infrastructure.Repositories;
-
-public interface IPaymentRepository
-{
-    Task<Payment> AddAsync(Payment payment);
-    Task<List<Payment>> GetByOwnerIdAsync(Guid ownerId);
-    Task<Payment?> GetByIdAsync(Guid paymentId);
-    Task UpdateAsync(Payment payment);
-    Task<List<Payment>> GetAllAsync();
-}
 
 public class PaymentRepository : IPaymentRepository
 {

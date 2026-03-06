@@ -8,11 +8,13 @@ import { NotificationService } from '../../core/services/notification.service';
 import { CatalogService, CatalogItem } from '../../core/services/catalog.service';
 import { ReservationStatus } from '../../shared/enums/reservation-status.enum';
 import { NavbarComponent } from '../../shared/components/navbar.component';
+import { PaginationComponent } from '../../shared/components/pagination.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-reservations',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, PaginationComponent],
   templateUrl: './reservations.component.html',
   styleUrls: ['./reservations.component.scss']
 
@@ -27,7 +29,7 @@ export class ReservationsComponent implements OnInit {
   loading = signal(false);
   reservations = signal<any[]>([]);
   currentPage = signal(1);
-  pageSize = 10;
+  pageSize = environment.pagination.defaultPageSize;
   eventTypeFilter = '';
   statusFilter = '';
   dateFromFilter = '';
@@ -70,7 +72,6 @@ export class ReservationsComponent implements OnInit {
     this.currentUser.set(this.authService.user());
     this.loadCatalogs();
     this.loadReservations();
-    this.addTestData();
     await this.notificationService.startConnection();
   }
   
@@ -125,6 +126,7 @@ export class ReservationsComponent implements OnInit {
   }
 
   loadReservations() {
+    this.loading.set(true);
     this.reservationService.getMyReservations().subscribe({
       next: (response) => {
         if (response.success) {
@@ -134,10 +136,13 @@ export class ReservationsComponent implements OnInit {
           this.allReservations = sorted;
           this.applyFilters();
         }
+        this.loading.set(false);
       },
       error: (error) => {
         console.error('Error cargando reservas:', error);
-        this.reservations.set([]);
+        this.allReservations = [];
+        this.applyFilters();
+        this.loading.set(false);
       }
     });
   }

@@ -1,3 +1,7 @@
+// Import centralized styles
+@import '../../../styles/variables';
+@import '../../../styles/badges';
+
 .management-layout {
   min-height: 100vh;
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
@@ -32,9 +36,9 @@
 }
 
 .header-icon {
+  @include icon-bg-red;
   width: 3rem;
   height: 3rem;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -98,15 +102,15 @@
 }
 
 .summary-icon.pending {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  @include icon-bg-orange;
 }
 
 .summary-icon.overdue {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  @include icon-bg-red;
 }
 
 .summary-icon.total {
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  @include icon-bg-blue;
 }
 
 .summary-info h3 {
@@ -317,12 +321,12 @@
 }
 
 .debt-type.pending .amount {
-  color: #fbbf24;
+  color: $color-orange;
   font-weight: 600;
 }
 
 .debt-type.overdue .amount {
-  color: #f87171;
+  color: $color-red;
   font-weight: 600;
 }
 
@@ -424,23 +428,17 @@
 }
 
 .pending-col {
-  background: rgba(251, 146, 60, 0.2) !important;
-  color: white !important;
-  font-weight: 600;
+  @include amount-cell-orange;
   text-align: right !important;
 }
 
 .overdue-col {
-  background: rgba(239, 68, 68, 0.2) !important;
-  color: white !important;
-  font-weight: 600;
+  @include amount-cell-red;
   text-align: right !important;
 }
 
 .total-col {
-  background: rgba(16, 185, 129, 0.2) !important;
-  color: white !important;
-  font-weight: 600;
+  @include amount-cell-green;
   text-align: right !important;
 }
 
@@ -449,45 +447,33 @@
 }
 
 .status-badge {
+  @include badge-base;
   min-width: 90px !important;
-  text-align: center !important;
-  display: inline-block !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  padding: 0.4rem 0.8rem !important;
-  border-radius: 8px !important;
-  letter-spacing: 0.5px !important;
-  white-space: nowrap !important;
 }
 
 :host ::ng-deep .bg-warning {
-  background-color: rgba(245, 158, 11, 0.8) !important;
-  color: white !important;
+  @include status-badge($status-pending-gradient, 0 2px 4px rgba($color-orange, 0.3));
 }
 
 :host ::ng-deep .bg-danger {
-  background-color: rgba(239, 68, 68, 0.8) !important;
-  color: white !important;
+  @include status-badge($status-rejected-gradient, 0 2px 4px rgba($color-red, 0.3));
 }
 
 :host ::ng-deep .bg-success {
-  background-color: rgba(16, 185, 129, 0.8) !important;
-  color: white !important;
+  @include status-badge($status-approved-gradient, 0 2px 4px rgba($color-green, 0.3));
 }
 
 .total-amount-display {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.3));
-  border: 2px solid rgba(16, 185, 129, 0.6);
+  @include card-status-green;
   border-radius: 12px;
   padding: 0.75rem 1rem;
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
 }
 
 .amount-value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #10b981;
+  color: $color-green;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   letter-spacing: -0.5px;
 }
@@ -495,23 +481,21 @@
 .amount-currency {
   font-size: 0.75rem;
   font-weight: 600;
-  color: rgba(16, 185, 129, 0.8);
+  color: rgba($color-green, 0.8);
   margin-top: -2px;
 }
 
 .active-debts-display {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.3));
-  border: 2px solid rgba(245, 158, 11, 0.6);
+  @include card-status-orange;
   border-radius: 12px;
   padding: 0.75rem 1rem;
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
 }
 
 .debts-value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #f59e0b;
+  color: $color-orange;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   letter-spacing: -0.5px;
 }
@@ -519,7 +503,7 @@
 .debts-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: rgba(245, 158, 11, 0.8);
+  color: rgba($color-orange, 0.8);
   margin-top: -2px;
 }
 
@@ -678,15 +662,15 @@
 }
 
 .debt-item.pending {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid $color-orange;
 }
 
 .debt-item.overdue {
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid $color-red;
 }
 
 .debt-item.paid {
-  border-left: 4px solid #10B981;
+  border-left: 4px solid $color-green;
 }
 
 .status-indicator {
@@ -706,19 +690,19 @@
 }
 
 .status-indicator.pending {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  background: $gradient-orange;
+  box-shadow: 0 2px 8px rgba($color-orange, 0.3);
   animation: pulse 2s infinite;
 }
 
 .status-indicator.approved {
-  background: #10B981;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  background: $color-green;
+  box-shadow: 0 2px 8px rgba($color-green, 0.3);
 }
 
 .status-indicator.rejected {
-  background: #ef4444;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  background: $color-red;
+  box-shadow: 0 2px 8px rgba($color-red, 0.3);
 }
 
 @keyframes pulse {
@@ -952,25 +936,17 @@
 }
 
 .income-amount {
-  background: rgba(16, 185, 129, 0.2) !important;
-  color: white !important;
-  font-weight: 600;
+  @include amount-cell-green;
 }
 
 .expense-amount {
-  background: rgba(239, 68, 68, 0.2) !important;
-  color: white !important;
-  font-weight: 600;
+  @include amount-cell-red;
 }
 
 .positive-balance {
-  background: rgba(59, 130, 246, 0.2) !important;
-  color: white !important;
-  font-weight: 600;
+  @include amount-cell-blue;
 }
 
 .negative-balance {
-  background: rgba(245, 158, 11, 0.2) !important;
-  color: white !important;
-  font-weight: 600;
+  @include amount-cell-orange;
 }

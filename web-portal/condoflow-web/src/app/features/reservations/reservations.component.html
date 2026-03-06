@@ -65,6 +65,12 @@
               </div>
               
               <div class="form-actions">
+                @if (startTime && endTime && !isValidTimeRange()) {
+                  <small class="text-danger">
+                    La hora de fin debe ser posterior a la hora de inicio
+                  </small>
+                }
+                
                 <button 
                   type="submit" 
                   class="btn btn-outline-success modal-btn"
@@ -76,13 +82,6 @@
                     Reservar Gazebo
                   }
                 </button>
-                
-                @if (startTime && endTime && !isValidTimeRange()) {
-                  <div class="validation-error">
-                    <i class="pi pi-exclamation-triangle"></i>
-                    La hora de fin debe ser posterior a la hora de inicio
-                  </div>
-                }
               </div>
             </form>
           </div>
@@ -150,7 +149,12 @@
               </div>
             </div>
             
-            @if (reservations().length === 0) {
+            @if (loading()) {
+              <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="text-white mt-2">Cargando reservas...</p>
+              </div>
+            } @else if (reservations().length === 0) {
               <div class="text-center py-5">
                 <h6 class="text-white mt-3">No tienes reservas registradas</h6>
                 <p class="text-white small">Tus reservas aparecerán aquí cuando las realices</p>
@@ -217,6 +221,15 @@
                   </tbody>
                 </table>
               </div>
+              
+              <!-- Paginación -->
+              <app-pagination
+                [currentPage]="currentPage()"
+                [totalItems]="reservations().length"
+                [pageSize]="pageSize"
+                [itemLabel]="'reservas'"
+                (pageChange)="goToPage($event)">
+              </app-pagination>
             }
           </div>
         </div>

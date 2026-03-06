@@ -1,7 +1,8 @@
 using CondoFlow.Application.Common.Models;
 using CondoFlow.Application.Common.Services;
 using CondoFlow.Application.Common.DTOs.Payment;
-using CondoFlow.Infrastructure.Repositories;
+using CondoFlow.Application.Interfaces.Repositories;
+using CondoFlow.Domain.Enums;
 using CondoFlow.WebApi.Attributes;
 using CondoFlow.WebApi.DTOs;
 using CondoFlow.WebApi.Services;
@@ -56,14 +57,14 @@ public class PaymentsController : ControllerBase
                 return BadRequest(ApiResponse.ErrorResult(_localization.GetMessage("InvalidReceiptFile"), 400));
 
             // Validar concepto
-            var validConcepts = new[] { "maintenance", "advance", "debt_payment" };
+            var validConcepts = new[] { PaymentConceptCodes.Maintenance, PaymentConceptCodes.Advance, PaymentConceptCodes.DebtPayment };
             if (!validConcepts.Contains(request.Concept))
                 return BadRequest(ApiResponse.ErrorResult("Concepto de pago no válido", 400));
 
             Guid? debtId = null;
             
             // Si es pago de mantenimiento, buscar la deuda más antigua pendiente
-            if (request.Concept == "maintenance")
+            if (request.Concept == PaymentConceptCodes.Maintenance)
             {
                 var pendingDebts = await _debtRepository.GetPendingDebtsByOwnerIdAsync(ownerId);
                 var oldestDebt = pendingDebts.OrderBy(d => d.DueDate).FirstOrDefault();
@@ -73,7 +74,7 @@ public class PaymentsController : ControllerBase
                 }
             }
             // Si es abono a deuda específica, validar que la deuda existe y pertenece al owner
-            else if (request.Concept == "debt_payment")
+            else if (request.Concept == PaymentConceptCodes.DebtPayment)
             {
                 if (!request.DebtId.HasValue)
                     return BadRequest(ApiResponse.ErrorResult("DebtId es requerido para abonos a deuda", 400));
@@ -165,14 +166,14 @@ public class PaymentsController : ControllerBase
                 return BadRequest(ApiResponse.ErrorResult(_localization.GetMessage("InvalidReceiptFile"), 400));
 
             // Validar concepto
-            var validConcepts = new[] { "maintenance", "advance", "debt_payment" };
+            var validConcepts = new[] { PaymentConceptCodes.Maintenance, PaymentConceptCodes.Advance, PaymentConceptCodes.DebtPayment };
             if (!validConcepts.Contains(request.Concept))
                 return BadRequest(ApiResponse.ErrorResult("Concepto de pago no válido", 400));
 
             Guid? debtId = null;
             
             // Si es pago de mantenimiento, buscar la deuda más antigua pendiente
-            if (request.Concept == "maintenance")
+            if (request.Concept == PaymentConceptCodes.Maintenance)
             {
                 var pendingDebts = await _debtRepository.GetPendingDebtsByOwnerIdAsync(ownerId);
                 var oldestDebt = pendingDebts.OrderBy(d => d.DueDate).FirstOrDefault();
@@ -182,7 +183,7 @@ public class PaymentsController : ControllerBase
                 }
             }
             // Si es abono a deuda específica, validar que la deuda existe y pertenece al owner
-            else if (request.Concept == "debt_payment")
+            else if (request.Concept == PaymentConceptCodes.DebtPayment)
             {
                 if (!request.DebtId.HasValue)
                     return BadRequest(ApiResponse.ErrorResult("DebtId es requerido para abonos a deuda", 400));

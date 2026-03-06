@@ -1,14 +1,11 @@
 using CondoFlow.Application.Common.DTOs.Reservation;
 using CondoFlow.Application.Common.Models;
 using CondoFlow.Application.Common.Services;
+using CondoFlow.Application.Interfaces.Services;
 using CondoFlow.Domain.Entities;
-using CondoFlow.Infrastructure.Data;
-using CondoFlow.Infrastructure.Repositories;
-using CondoFlow.Infrastructure.Identity;
+using CondoFlow.Application.Interfaces.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace CondoFlow.WebApi.Controllers;
@@ -19,20 +16,17 @@ namespace CondoFlow.WebApi.Controllers;
 public class ReservationsController : ControllerBase
 {
     private readonly IReservationRepository _reservationRepository;
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly INotificationService _notificationService;
-    private readonly ApplicationDbContext _context;
+    private readonly IReservationService _reservationService;
 
     public ReservationsController(
         IReservationRepository reservationRepository, 
-        UserManager<ApplicationUser> userManager, 
         INotificationService notificationService,
-        ApplicationDbContext context)
+        IReservationService reservationService)
     {
         _reservationRepository = reservationRepository;
-        _userManager = userManager;
         _notificationService = notificationService;
-        _context = context;
+        _reservationService = reservationService;
     }
 
     [HttpGet]
@@ -284,39 +278,24 @@ public class ReservationsController : ControllerBase
 
     private async Task<ReservationDto> MapToDtoAsync(Reservation reservation)
     {
-        var user = await _userManager.Users
-            .Include(u => u.ApartmentEntity)
-                .ThenInclude(a => a.Block)
-            .FirstOrDefaultAsync(u => u.Id == reservation.UserId);
-            
-        var userName = "Usuario desconocido";
-        
-        if (user != null)
-        {
-            var fullName = $"{user.FirstName} {user.LastName}".Trim();
-            var apartment = "Sin apartamento";
-            if (user.ApartmentEntity != null)
-            {
-                apartment = $"{user.ApartmentEntity.Block.Name}-{user.ApartmentEntity.Number}";
-            }
-            userName = $"{fullName}\n{apartment}";
-        }
+        var dto = await _reservationService.MapReservationToDtoAsync(reservation);
+        var dtoData = dto as dynamic;
         
         return new ReservationDto
         {
-            Id = reservation.Id,
-            UserId = reservation.UserId,
-            UserName = userName,
-            ReservationDate = reservation.ReservationDate,
-            StartTime = reservation.StartTime,
-            EndTime = reservation.EndTime,
-            Status = reservation.Status.ToString(),
-            Notes = reservation.Notes,
-            RejectionReason = reservation.RejectionReason,
-            CancellationReason = reservation.CancellationReason,
-            EventTypeCode = reservation.EventTypeCode,
-            CreatedAt = reservation.CreatedAt,
-            UpdatedAt = reservation.UpdatedAt
+            Id = dtoData.Id,
+            UserId = dtoData.UserId,
+            UserName = dtoData.UserName,
+            ReservationDate = dtoData.ReservationDate,
+            StartTime = dtoData.StartTime,
+            EndTime = dtoData.EndTime,
+            Status = dtoData.Status,
+            Notes = dtoData.Notes,
+            RejectionReason = dtoData.RejectionReason,
+            CancellationReason = dtoData.CancellationReason,
+            EventTypeCode = dtoData.EventTypeCode,
+            CreatedAt = dtoData.CreatedAt,
+            UpdatedAt = dtoData.UpdatedAt
         };
     }
     
@@ -361,20 +340,12 @@ public class ReservationsController : ControllerBase
     
     private async Task SendCancellationNotificationToAdmin(Reservation reservation, string? cancellationReason)
     {
-        var user = await _userManager.Users
-            .Include(u => u.ApartmentEntity)
-                .ThenInclude(a => a.Block)
-            .FirstOrDefaultAsync(u => u.Id == reservation.UserId);
-            
-        var userName = user != null ? $"{user.FirstName} {user.LastName}" : "Usuario desconocido";
-        var apartment = "Sin apartamento";
-        if (user?.ApartmentEntity != null)
-        {
-            apartment = $"{user.ApartmentEntity.Block.Name}-{user.ApartmentEntity.Number}";
-        }
+        var dto = await _reservationService.MapReservationToDtoAsync(reservation);
+        var dtoData = dto as dynamic;
+        var userName = dtoData.UserName as string;
         
         var title = "Reserva Cancelada por Propietario";
-        var message = $"{userName} ({apartment}) ha cancelado su reserva del gazebo para el {reservation.ReservationDate:dd/MM/yyyy} de {reservation.StartTime.Hours:00}:{reservation.StartTime.Minutes:00} a {reservation.EndTime.Hours:00}:{reservation.EndTime.Minutes:00}.";
+        var message = $"{userName} ha cancelado su reserva del gazebo para el {reservation.ReservationDate:dd/MM/yyyy} de {reservation.StartTime.Hours:00}:{reservation.StartTime.Minutes:00} a {reservation.EndTime.Hours:00}:{reservation.EndTime.Minutes:00}.";
         
         if (!string.IsNullOrEmpty(cancellationReason))
         {
@@ -392,20 +363,12 @@ public class ReservationsController : ControllerBase
     
     private async Task SendNewReservationNotificationToAdmin(Reservation reservation)
     {
-        var user = await _userManager.Users
-            .Include(u => u.ApartmentEntity)
-                .ThenInclude(a => a.Block)
-            .FirstOrDefaultAsync(u => u.Id == reservation.UserId);
-            
-        var userName = user != null ? $"{user.FirstName} {user.LastName}" : "Usuario desconocido";
-        var apartment = "Sin apartamento";
-        if (user?.ApartmentEntity != null)
-        {
-            apartment = $"{user.ApartmentEntity.Block.Name}-{user.ApartmentEntity.Number}";
-        }
+        var dto = await _reservationService.MapReservationToDtoAsync(reservation);
+        var dtoData = dto as dynamic;
+        var userName = dtoData.UserName as string;
         
         var title = "Nueva Reserva de Gazebo";
-        var message = $"{userName} ({apartment}) ha solicitado una reserva del gazebo para el {reservation.ReservationDate:dd/MM/yyyy} de {reservation.StartTime.Hours:00}:{reservation.StartTime.Minutes:00} a {reservation.EndTime.Hours:00}:{reservation.EndTime.Minutes:00}. Requiere aprobación.";
+        var message = $"{userName} ha solicitado una reserva del gazebo para el {reservation.ReservationDate:dd/MM/yyyy} de {reservation.StartTime.Hours:00}:{reservation.StartTime.Minutes:00} a {reservation.EndTime.Hours:00}:{reservation.EndTime.Minutes:00}. Requiere aprobación.";
         
         // Enviar notificación al grupo de administradores
         await _notificationService.SendAdminNotificationAsync(

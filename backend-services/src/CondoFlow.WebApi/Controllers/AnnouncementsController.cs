@@ -2,12 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CondoFlow.Application.Common.Models;
 using CondoFlow.Application.Common.Services;
-using CondoFlow.Infrastructure.Repositories;
-using CondoFlow.Domain.Entities;
+using CondoFlow.Application.Interfaces.Services;
 using CondoFlow.WebApi.DTOs;
 using System.Security.Claims;
-using CondoFlow.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace CondoFlow.WebApi.Controllers;
 
@@ -16,15 +13,13 @@ namespace CondoFlow.WebApi.Controllers;
 [Authorize]
 public class AnnouncementsController : ControllerBase
 {
-    private readonly IAnnouncementRepository _announcementRepository;
+    private readonly IAnnouncementService _announcementService;
     private readonly INotificationService _notificationService;
-    private readonly ApplicationDbContext _context;
 
-    public AnnouncementsController(IAnnouncementRepository announcementRepository, INotificationService notificationService, ApplicationDbContext context)
+    public AnnouncementsController(IAnnouncementService announcementService, INotificationService notificationService)
     {
-        _announcementRepository = announcementRepository;
+        _announcementService = announcementService;
         _notificationService = notificationService;
-        _context = context;
     }
 
     [HttpGet]
@@ -32,22 +27,8 @@ public class AnnouncementsController : ControllerBase
     {
         try
         {
-            var announcements = await _announcementRepository.GetAllAsync();
-            var response = announcements.Select(a => new AnnouncementResponse
-            {
-                Id = a.Id,
-                Title = a.Title,
-                Content = a.Content,
-                IsUrgent = a.IsUrgent,
-                EventDate = a.EventDate,
-                CreatedAt = a.CreatedAt,
-                CreatedBy = a.CreatedBy,
-                IsActive = a.IsActive,
-                AnnouncementTypeId = a.AnnouncementTypeId,
-                AnnouncementTypeName = a.AnnouncementType.Name
-            }).ToList();
-
-            return Ok(ApiResponse<List<AnnouncementResponse>>.SuccessResult(response, "Anuncios obtenidos exitosamente", 200));
+            var response = await _announcementService.GetAllAnnouncementsAsync();
+            return Ok(ApiResponse<object>.SuccessResult(response, "Anuncios obtenidos exitosamente", 200));
         }
         catch (Exception)
         {
@@ -65,9 +46,8 @@ public class AnnouncementsController : ControllerBase
                 return BadRequest(ApiResponse.ErrorResult("Datos inválidos", 400));
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "System";
-            var announcement = new Announcement(request.Title, request.Content, request.IsUrgent, userId, 1, request.EventDate); // Default to General type
-            
-            await _announcementRepository.AddAsync(announcement);
+            var announcement = await _announcementService.CreateAnnouncementAsync(
+                request.Title, request.Content, request.IsUrgent, userId, request.EventDate);
             
             // Enviar notificación a todos los usuarios
             await _notificationService.SendAnnouncementNotificationAsync(announcement.Id, announcement.Title, announcement.IsUrgent);
@@ -99,12 +79,7 @@ public class AnnouncementsController : ControllerBase
     {
         try
         {
-            var types = await _context.AnnouncementTypes
-                .Where(t => t.IsActive)
-                .OrderBy(t => t.Name)
-                .Select(t => new { t.Id, t.Name, t.Code })
-                .ToListAsync();
-
+            var types = await _announcementService.GetAnnouncementTypesAsync();
             return Ok(ApiResponse<object>.SuccessResult(types, "Tipos de anuncio obtenidos exitosamente", 200));
         }
         catch (Exception)
@@ -119,18 +94,9 @@ public class AnnouncementsController : ControllerBase
     {
         try
         {
-            var announcement = await _announcementRepository.GetByIdAsync(id);
-            if (announcement == null)
-                return NotFound(ApiResponse.ErrorResult("Anuncio no encontrado", 404));
-
-            var typeExists = await _context.AnnouncementTypes
-                .AnyAsync(t => t.Id == request.AnnouncementTypeId && t.IsActive);
-            
-            if (!typeExists)
-                return BadRequest(ApiResponse.ErrorResult("Tipo de anuncio no válido", 400));
-
-            announcement.Update(announcement.Title, announcement.Content, announcement.IsUrgent, request.AnnouncementTypeId, announcement.EventDate);
-            await _announcementRepository.UpdateAsync(announcement);
+            var success = await _announcementService.UpdateAnnouncementTypeAsync(id, request.AnnouncementTypeId);
+            if (!success)
+                return NotFound(ApiResponse.ErrorResult("Anuncio no encontrado o tipo inválido", 404));
 
             return Ok(ApiResponse<object?>.SuccessResult(null, "Tipo de anuncio actualizado exitosamente", 200));
         }
@@ -147,11 +113,11 @@ public class AnnouncementsController : ControllerBase
         try
         {
             // Obtener el anuncio antes de eliminarlo para la notificación
-            var announcement = await _announcementRepository.GetByIdAsync(id);
+            var announcement = await _announcementService.GetAnnouncementByIdAsync(id);
             if (announcement == null)
                 return NotFound(ApiResponse.ErrorResult("Anuncio no encontrado", 404));
 
-            await _announcementRepository.DeleteAsync(id);
+            await _announcementService.DeleteAnnouncementAsync(id);
             
             // Notificar a todos los propietarios sobre la eliminación
             await _notificationService.SendAnnouncementDeletionNotificationAsync(announcement.Title);

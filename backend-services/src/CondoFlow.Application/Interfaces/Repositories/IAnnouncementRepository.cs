@@ -1,6 +1,6 @@
 using CondoFlow.Domain.Entities;
 
-namespace CondoFlow.Infrastructure.Repositories;
+namespace CondoFlow.Application.Interfaces.Repositories;
 
 public interface IAnnouncementRepository
 {

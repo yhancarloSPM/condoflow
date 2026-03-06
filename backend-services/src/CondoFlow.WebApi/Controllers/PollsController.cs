@@ -1,5 +1,5 @@
 using CondoFlow.Application.DTOs;
-using CondoFlow.Infrastructure.Services;
+using CondoFlow.Application.Interfaces.Services;
 using CondoFlow.Application.Common.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

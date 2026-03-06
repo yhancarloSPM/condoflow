@@ -273,6 +273,45 @@
                 </tbody>
               </table>
             </div>
+            
+            <!-- Paginación -->
+            @if (totalPages() > 1) {
+              <div class="pagination-container">
+                <div class="pagination-info">
+                  <small class="text-white">
+                    Mostrando {{ (currentPage() - 1) * pageSize + 1 }} - {{ Math.min(currentPage() * pageSize, filteredPayments().length) }} de {{ filteredPayments().length }} pagos
+                  </small>
+                </div>
+                <div class="pagination">
+                  <button 
+                    class="pagination-btn"
+                    (click)="goToPage(currentPage() - 1)"
+                    [disabled]="currentPage() === 1">
+                    <i class="pi pi-chevron-left"></i>
+                  </button>
+                  
+                  @for (page of getPageNumbers(); track page) {
+                    @if (page === '...') {
+                      <span class="pagination-dots">...</span>
+                    } @else if (isPageNumber(page)) {
+                      <button 
+                        class="pagination-btn"
+                        [class.active]="page === currentPage()"
+                        (click)="goToPage(page)">
+                        {{ page }}
+                      </button>
+                    }
+                  }
+                  
+                  <button 
+                    class="pagination-btn"
+                    (click)="goToPage(currentPage() + 1)"
+                    [disabled]="currentPage() === totalPages()">
+                    <i class="pi pi-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
+            }
             }
           </div>
         </div>

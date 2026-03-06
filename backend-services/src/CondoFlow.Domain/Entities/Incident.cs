@@ -1,4 +1,5 @@
 using CondoFlow.Domain.Common;
+using CondoFlow.Domain.Enums;
 
 namespace CondoFlow.Domain.Entities;
 
@@ -23,7 +24,7 @@ public class Incident : BaseEntity
         OwnerId = ownerId;
         Title = title ?? throw new ArgumentNullException(nameof(title));
         Description = description ?? throw new ArgumentNullException(nameof(description));
-        Status = "reported";
+        Status = StatusCodes.Reported;
         Priority = priority;
         Category = category ?? throw new ArgumentNullException(nameof(category));
         ImageData = imageData;

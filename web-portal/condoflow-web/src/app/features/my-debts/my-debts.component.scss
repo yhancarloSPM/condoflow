@@ -1,3 +1,7 @@
+// Import centralized styles
+@import '../../../styles/variables';
+@import '../../../styles/badges';
+
 .dashboard-layout { min-height: 100vh; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); display: flex; flex-direction: column; }
 .top-nav { background: white; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
 .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 4rem; }
@@ -147,19 +151,57 @@
     gap: 0.5rem !important;
   }
 }
-.month-card { background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08)); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); border: 1px solid rgba(255,255,255,0.2); min-height: 100px; transition: all 0.2s ease; }
-.month-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); }
-.month-card.paid { border-left: 4px solid #10B981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(255,255,255,0.08)); }
-.month-card.pending { border-left: 4px solid #F59E0B; background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(255,255,255,0.08)); }
-.month-card.overdue { border-left: 4px solid #EF4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(255,255,255,0.08)); }
-.month-card.payment-submitted { border-left: 4px solid #f97316; background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(255,255,255,0.08)); }
-.month-card.no-debt { border-left: 4px solid rgba(255,255,255,0.3); }
+// Using centralized badge system
+.month-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08)); 
+  backdrop-filter: blur(10px); 
+  border-radius: 12px; 
+  padding: 0.75rem; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
+  border: 1px solid rgba(255,255,255,0.2); 
+  min-height: 220px; 
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  &.paid {
+    @include card-status-paid;
+  }
+  
+  &.pending {
+    @include card-status-pending;
+  }
+  
+  &.overdue {
+    @include card-status-overdue;
+  }
+  
+  &.payment-submitted {
+    @include card-status-in-review;
+  }
+  
+  &.no-debt {
+    border-left: 4px solid rgba(255,255,255,0.3);
+  }
+}
 
 .month-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.2); }
 .month-header h4 { font-size: 1.125rem; font-weight: 600; color: #ffffff; margin: 0; }
 .month-number { font-size: 0.75rem; color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.15); padding: 0.25rem 0.5rem; border-radius: 4px; }
 
-.month-content { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 60px; }
+.month-content { 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: center; 
+  flex: 1;
+  min-height: 120px; 
+}
 .debt-info { text-align: center; width: 100%; }
 .debt-info .amount { font-size: 1.5rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem; }
 .debt-info .status { font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; }
@@ -189,6 +231,10 @@
   
   .month-card {
     padding: 0.4rem;
+    min-height: 180px;
+  }
+  
+  .month-content {
     min-height: 100px;
   }
   

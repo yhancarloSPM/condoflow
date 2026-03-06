@@ -26,8 +26,7 @@ public class CreateExpenseDto
     public decimal Amount { get; set; }
     public DateTime Date { get; set; }
     public int CategoryId { get; set; }
-    public int StatusId { get; set; }
-    public int? ProviderId { get; set; }
+    public int ProviderId { get; set; }
     public string? Notes { get; set; }
 }
 
@@ -38,7 +37,7 @@ public class UpdateExpenseDto
     public DateTime Date { get; set; }
     public int CategoryId { get; set; }
     public int StatusId { get; set; }
-    public int? ProviderId { get; set; }
+    public int ProviderId { get; set; }
     public string? Notes { get; set; }
 }
 

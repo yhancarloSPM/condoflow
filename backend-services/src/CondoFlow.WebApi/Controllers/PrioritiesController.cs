@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CondoFlow.Infrastructure.Data;
+using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Application.Common.Models;
 
 namespace CondoFlow.WebApi.Controllers;
@@ -9,11 +8,11 @@ namespace CondoFlow.WebApi.Controllers;
 [Route("api/[controller]")]
 public class PrioritiesController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ICatalogRepository _catalogRepository;
 
-    public PrioritiesController(ApplicationDbContext context)
+    public PrioritiesController(ICatalogRepository catalogRepository)
     {
-        _context = context;
+        _catalogRepository = catalogRepository;
     }
 
     [HttpGet]
@@ -21,19 +20,7 @@ public class PrioritiesController : ControllerBase
     {
         try
         {
-            var priorities = await _context.Priorities
-                .Where(p => p.IsActive)
-                .OrderBy(p => p.Name)
-                .Select(p => new
-                {
-                    p.Id,
-                    p.Code,
-                    p.Name,
-                    p.Description,
-                    IsActive = p.IsActive
-                })
-                .ToListAsync();
-
+            var priorities = await _catalogRepository.GetPrioritiesAsync();
             return Ok(ApiResponse<object>.SuccessResult(priorities, "Prioridades obtenidas exitosamente"));
         }
         catch (Exception ex)

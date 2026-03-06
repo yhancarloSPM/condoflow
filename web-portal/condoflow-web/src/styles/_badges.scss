@@ -1,0 +1,306 @@
+// ============================================
+// CondoFlow - Sistema de Badges
+// ============================================
+// Este archivo define mixins para badges
+// Usa las variables de _variables.scss
+
+@use 'sass:color';
+@import 'variables';
+
+// ============================================
+// GRADIENTES DE ESTADO (para badges)
+// ============================================
+$status-pending-gradient: linear-gradient(135deg, $color-orange, color.scale($color-orange, $lightness: -15%));
+$status-approved-gradient: linear-gradient(135deg, $color-green, color.scale($color-green, $lightness: -15%));
+$status-rejected-gradient: linear-gradient(135deg, $color-red, color.scale($color-red, $lightness: -15%));
+
+// Gradientes de prioridad
+$priority-low-gradient: linear-gradient(135deg, $color-green, color.scale($color-green, $lightness: -15%));
+$priority-medium-gradient: linear-gradient(135deg, $color-orange, color.scale($color-orange, $lightness: -15%));
+$priority-high-gradient: linear-gradient(135deg, $color-orange, color.scale($color-orange, $lightness: -15%));
+$priority-critical-gradient: linear-gradient(135deg, $color-red, color.scale($color-red, $lightness: -15%));
+
+// Gradientes de métodos de pago
+$method-transfer-gradient: linear-gradient(135deg, $color-blue, color.scale($color-blue, $lightness: -15%));
+$method-cash-gradient: linear-gradient(135deg, $color-green, color.scale($color-green, $lightness: -15%));
+$method-check-gradient: linear-gradient(135deg, $color-purple, color.scale($color-purple, $lightness: -15%));
+$method-card-gradient: linear-gradient(135deg, $color-teal, color.scale($color-teal, $lightness: -15%));
+
+// Sombras de prioridad
+$priority-low-shadow: 0 2px 4px rgba($color-green, 0.3);
+$priority-medium-shadow: 0 2px 4px rgba($color-orange, 0.3);
+$priority-high-shadow: 0 2px 4px rgba($color-orange, 0.3);
+$priority-critical-shadow: 0 2px 4px rgba($color-red, 0.3);
+
+// Sombras de métodos de pago
+$method-transfer-shadow: 0 2px 4px rgba($color-blue, 0.3);
+$method-cash-shadow: 0 2px 4px rgba($color-green, 0.3);
+$method-check-shadow: 0 2px 4px rgba($color-purple, 0.3);
+$method-card-shadow: 0 2px 4px rgba($color-teal, 0.3);
+
+// ============================================
+// MAPEO DE ESTADOS A COLORES
+// ============================================
+
+// Estados de pagos
+$payment-status-colors: (
+  'pending': $color-orange,
+  'confirmed': $color-green,
+  'rejected': $color-red,
+  'paid': $color-green,
+  'overdue': $color-red,
+  'partially_paid': $color-yellow
+);
+
+// Estados de incidentes
+$incident-status-colors: (
+  'reported': $color-orange,
+  'in_progress': $color-blue,
+  'resolved': $color-green,
+  'cancelled_admin': $color-red,
+  'cancelled_owner': $color-gray
+);
+
+// Estados de reservaciones
+$reservation-status-colors: (
+  'pending': $color-orange,
+  'confirmed': $color-green,
+  'rejected': $color-red,
+  'cancelled': $color-gray
+);
+
+// Métodos de pago
+$payment-method-colors: (
+  'cash': $color-green,
+  'transfer': $color-blue,
+  'check': $color-purple,
+  'card': $color-teal
+);
+
+// Prioridades
+$priority-colors: (
+  'low': $color-green,
+  'medium': $color-orange,
+  'high': $color-orange,
+  'critical': $color-red
+);
+
+// ============================================
+// MIXINS BASE
+// ============================================
+
+// Mixin base para todos los badges
+@mixin badge-base {
+  text-align: center !important;
+  display: inline-block !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  padding: 0.4rem 0.8rem !important;
+  border-radius: 8px !important;
+  letter-spacing: 0.5px !important;
+  white-space: nowrap !important;
+}
+
+// ============================================
+// MIXINS PARA BADGES DE ESTADO
+// ============================================
+
+// Mixin para badge de estado con gradiente personalizado
+@mixin status-badge($gradient, $shadow) {
+  @include badge-base;
+  background: $gradient !important;
+  color: $color-white !important;
+  box-shadow: $shadow !important;
+}
+
+// Mixin para badge de prioridad con gradiente personalizado
+@mixin priority-badge($gradient, $shadow) {
+  @include badge-base;
+  background: $gradient !important;
+  color: $color-white !important;
+  box-shadow: $shadow !important;
+}
+
+// Mixin legacy para compatibilidad (usando mapas)
+@mixin status-badge-legacy($status) {
+  @include badge-base;
+  
+  @if map-has-key($payment-status-colors, $status) {
+    background-color: rgba(map-get($payment-status-colors, $status), 0.8) !important;
+  } @else if map-has-key($incident-status-colors, $status) {
+    background-color: rgba(map-get($incident-status-colors, $status), 0.8) !important;
+  } @else if map-has-key($reservation-status-colors, $status) {
+    background-color: rgba(map-get($reservation-status-colors, $status), 0.8) !important;
+  }
+  
+  color: $color-white !important;
+}
+
+@mixin method-badge($method) {
+  @include badge-base;
+  background-color: rgba(map-get($payment-method-colors, $method), 0.8) !important;
+  color: $color-white !important;
+}
+
+// Mixin para badge de método de pago con gradiente personalizado
+@mixin method-badge-gradient($gradient, $shadow) {
+  @include badge-base;
+  background: $gradient !important;
+  color: $color-white !important;
+  box-shadow: $shadow !important;
+}
+
+@mixin priority-badge-legacy($priority) {
+  @include badge-base;
+  background-color: rgba(map-get($priority-colors, $priority), 0.8) !important;
+  color: $color-white !important;
+}
+
+// ============================================
+// MIXINS PARA CARDS CON ESTADO
+// ============================================
+
+@mixin card-status-green {
+  background: linear-gradient(135deg, rgba($color-green, 0.2), rgba($color-green, 0.3));
+  border: 2px solid rgba($color-green, 0.6);
+  box-shadow: 0 4px 15px rgba($color-green, 0.2);
+}
+
+@mixin card-status-orange {
+  background: linear-gradient(135deg, rgba($color-orange, 0.2), rgba($color-orange, 0.3));
+  border: 2px solid rgba($color-orange, 0.6);
+  box-shadow: 0 4px 15px rgba($color-orange, 0.2);
+}
+
+@mixin card-status-red {
+  background: linear-gradient(135deg, rgba($color-red, 0.2), rgba($color-red, 0.3));
+  border: 2px solid rgba($color-red, 0.6);
+  box-shadow: 0 4px 15px rgba($color-red, 0.2);
+}
+
+@mixin card-status-blue {
+  background: linear-gradient(135deg, rgba($color-blue, 0.2), rgba($color-blue, 0.3));
+  border: 2px solid rgba($color-blue, 0.6);
+  box-shadow: 0 4px 15px rgba($color-blue, 0.2);
+}
+
+// Status-specific card styles
+@mixin card-status-paid {
+  background: linear-gradient(135deg, rgba($color-green, 0.2), rgba($color-green, 0.3));
+  border-left: 4px solid $color-green;
+  box-shadow: 0 4px 15px rgba($color-green, 0.2);
+}
+
+@mixin card-status-pending {
+  background: linear-gradient(135deg, rgba($color-orange, 0.2), rgba($color-orange, 0.3));
+  border-left: 4px solid $color-orange;
+  box-shadow: 0 4px 15px rgba($color-orange, 0.2);
+}
+
+@mixin card-status-overdue {
+  background: linear-gradient(135deg, rgba($color-red, 0.2), rgba($color-red, 0.3));
+  border-left: 4px solid $color-red;
+  box-shadow: 0 4px 15px rgba($color-red, 0.2);
+}
+
+@mixin card-status-in-review {
+  background: linear-gradient(135deg, rgba(#f97316, 0.2), rgba(#f97316, 0.3));
+  border-left: 4px solid #f97316;
+  box-shadow: 0 4px 15px rgba(#f97316, 0.2);
+}
+
+// ============================================
+// MIXINS PARA ICONOS CON BACKGROUND
+// ============================================
+
+@mixin icon-bg-green {
+  background: $gradient-green;
+}
+
+@mixin icon-bg-orange {
+  background: $gradient-orange;
+}
+
+@mixin icon-bg-red {
+  background: $gradient-red;
+}
+
+@mixin icon-bg-blue {
+  background: $gradient-blue;
+}
+
+@mixin icon-bg-purple {
+  background: $gradient-purple;
+}
+
+@mixin icon-bg-yellow {
+  background: $gradient-yellow;
+}
+
+@mixin icon-bg-teal {
+  background: $gradient-teal;
+}
+
+// Status-specific icon backgrounds
+@mixin icon-bg-paid {
+  background: $gradient-green;
+}
+
+@mixin icon-bg-pending {
+  background: $gradient-orange;
+}
+
+@mixin icon-bg-overdue {
+  background: $gradient-red;
+}
+
+@mixin icon-bg-in-review {
+  background: $gradient-orange;
+}
+
+// ============================================
+// MIXINS PARA CELDAS DE MONTOS
+// ============================================
+
+@mixin amount-cell-green {
+  background: rgba($color-green, 0.2) !important;
+  color: $color-white !important;
+  font-weight: 600;
+}
+
+@mixin amount-cell-orange {
+  background: rgba($color-orange, 0.2) !important;
+  color: $color-white !important;
+  font-weight: 600;
+}
+
+@mixin amount-cell-red {
+  background: rgba($color-red, 0.2) !important;
+  color: $color-white !important;
+  font-weight: 600;
+}
+
+@mixin amount-cell-blue {
+  background: rgba($color-blue, 0.2) !important;
+  color: $color-white !important;
+  font-weight: 600;
+}
+
+// Amount cells for payment statuses
+@mixin amount-cell-approved {
+  background: rgba($color-green, 0.2) !important;
+  color: $color-white !important;
+  font-weight: 600;
+}
+
+@mixin amount-cell-pending {
+  background: rgba($color-orange, 0.2) !important;
+  color: $color-white !important;
+  font-weight: 600;
+}
+
+@mixin amount-cell-rejected {
+  background: rgba($color-red, 0.2) !important;
+  color: $color-white !important;
+  font-weight: 600;
+}

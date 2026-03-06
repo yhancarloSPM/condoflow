@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, signal, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,7 +18,7 @@ Chart.register(...registerables);
   templateUrl: './owner-dashboard.component.html',
   styleUrls: ['./owner-dashboard.component.scss']
 })
-export class OwnerDashboardComponent implements OnInit, AfterViewInit {
+export class OwnerDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('pieChart') pieChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('lineChart') lineChartRef!: ElementRef<HTMLCanvasElement>;
   currentUser = signal<any>(null);
@@ -48,19 +48,29 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.currentUser.set(this.authService.currentUser());
-    this.initializeYears(); // Inicializar años antes de cargar datos
+    this.initializeYears();
     this.loadDashboardData();
-    
-    // Escuchar cambios de ruta para recargar datos
-    this.router.events.subscribe(event => {
-      if (event.constructor.name === 'NavigationEnd') {
-        this.loadDashboardData();
-      }
-    });
   }
 
   ngAfterViewInit() {
-    // Las gráficas se inicializarán después de cargar los datos
+    // Si los datos ya están cargados cuando la vista se inicializa, crear los gráficos
+    setTimeout(() => {
+      if (this.allDebts().length > 0 && !this.pieChart && !this.lineChart) {
+        this.initCharts();
+      }
+    }, 100);
+  }
+  
+  ngOnDestroy() {
+    // Destruir gráficos al salir del componente
+    if (this.pieChart) {
+      this.pieChart.destroy();
+      this.pieChart = null;
+    }
+    if (this.lineChart) {
+      this.lineChart.destroy();
+      this.lineChart = null;
+    }
   }
 
   async loadDashboardData() {
@@ -113,14 +123,20 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
     this.totalInReview.set(paymentSubmittedDebts.length);
     this.totalPaid.set(paidDebts.length);
     
-    // Inicializar o actualizar gráficas después de procesar datos
-    if (!this.pieChart || !this.lineChart) {
-      // Primera vez - crear las gráficas
-      setTimeout(() => this.initCharts(), 100);
-    } else {
-      // Ya existen - solo actualizar
-      this.updateCharts();
+    // Destruir gráficos existentes antes de crear nuevos
+    if (this.pieChart) {
+      this.pieChart.destroy();
+      this.pieChart = null;
     }
+    if (this.lineChart) {
+      this.lineChart.destroy();
+      this.lineChart = null;
+    }
+    
+    // Crear las gráficas después de que el DOM esté listo
+    setTimeout(() => {
+      this.initCharts();
+    }, 500);
   }
 
   calculateAvailableYears(debts: any[]) {
@@ -228,8 +244,13 @@ export class OwnerDashboardComponent implements OnInit, AfterViewInit {
   }
 
   initCharts() {
-    this.createPieChart();
-    this.createLineChart();
+    if (this.pieChartRef?.nativeElement) {
+      this.createPieChart();
+    }
+    
+    if (this.lineChartRef?.nativeElement) {
+      this.createLineChart();
+    }
   }
 
   createPieChart() {

@@ -1,5 +1,6 @@
 using CondoFlow.Domain.Entities;
 using CondoFlow.Infrastructure.Data;
+using CondoFlow.Application.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace CondoFlow.Infrastructure.Repositories;

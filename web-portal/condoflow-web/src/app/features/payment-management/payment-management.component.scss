@@ -1,3 +1,7 @@
+// Import centralized styles
+@import '../../../styles/variables';
+@import '../../../styles/badges';
+
 .management-layout {
   min-height: 100vh;
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
@@ -32,9 +36,9 @@
 }
 
 .header-icon {
+  @include icon-bg-green;
   width: 3rem;
   height: 3rem;
-  background: linear-gradient(135deg, #10b981, #059669);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -156,18 +160,15 @@
 }
 
 .card-header .badge.bg-warning {
-  background-color: rgba(245, 158, 11, 0.9) !important;
-  color: white !important;
+  @include status-badge-legacy('pending');
 }
 
 .card-header .badge.bg-success {
-  background-color: rgba(16, 185, 129, 0.9) !important;
-  color: white !important;
+  @include status-badge-legacy('confirmed');
 }
 
 .card-header .badge.bg-danger {
-  background-color: rgba(239, 68, 68, 0.9) !important;
-  color: white !important;
+  @include status-badge-legacy('rejected');
 }
 
 .card-body {
@@ -231,26 +232,20 @@
 }
 
 .rejection-reason {
-  color: rgba(255, 107, 107, 0.8) !important;
+  color: rgba($color-red, 0.8) !important;
   font-style: italic;
   font-size: 0.75rem;
   margin-top: 0.25rem;
 }
 
 .status-badge {
+  @include badge-base;
   min-width: 85px !important;
-  text-align: center !important;
-  display: inline-block !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  padding: 0.4rem 0.8rem !important;
-  border-radius: 8px !important;
-  letter-spacing: 0.5px !important;
 }
 
 .btn-receipt-compact {
   background: transparent;
-  color: #10b981;
+  color: $color-green;
   border: none;
   width: 2.5rem;
   height: 2.5rem;
@@ -262,14 +257,14 @@
   font-size: 1.1rem;
 
   &:hover {
-    color: #059669;
+    color: darken($color-green, 10%);
     transform: translateY(-1px);
   }
 }
 
 .btn-edit-reported {
   background: transparent;
-  color: #10b981;
+  color: $color-green;
   border: none;
   width: 2.5rem;
   height: 2.5rem;
@@ -281,7 +276,7 @@
   font-size: 1.1rem;
 
   &:hover:not(:disabled) {
-    color: #059669;
+    color: darken($color-green, 10%);
     transform: translateY(-1px);
   }
 
@@ -294,7 +289,7 @@
 
 .btn-edit-progress {
   background: transparent;
-  color: #ff6b6b;
+  color: $color-red;
   border: none;
   width: 2.5rem;
   height: 2.5rem;
@@ -306,7 +301,7 @@
   font-size: 1.1rem;
 
   &:hover:not(:disabled) {
-    color: #ff4444;
+    color: darken($color-red, 10%);
     transform: translateY(-1px);
   }
 
@@ -332,18 +327,15 @@
 }
 
 :host ::ng-deep .bg-warning {
-  background-color: rgba(245, 158, 11, 0.8) !important;
-  color: white !important;
+  @include status-badge-legacy('pending');
 }
 
 :host ::ng-deep .bg-success {
-  background-color: rgba(16, 185, 129, 0.8) !important;
-  color: white !important;
+  @include status-badge-legacy('confirmed');
 }
 
 :host ::ng-deep .bg-danger {
-  background-color: rgba(255, 107, 107, 0.8) !important;
-  color: white !important;
+  @include status-badge-legacy('rejected');
 }
 
 .pagination {
@@ -530,47 +522,47 @@
 }
 
 .btn-outline-secondary {
-  border-color: #6b7280;
-  color: #6b7280;
+  border-color: $color-gray;
+  color: $color-gray;
 }
 
 .btn-outline-secondary:hover:not(:disabled) {
-  background: #6b7280;
+  background: $color-gray;
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
+  box-shadow: 0 2px 8px rgba($color-gray, 0.2);
 }
 
 .btn-outline-success {
-  border-color: #10b981;
-  color: #10b981;
+  border-color: $color-green;
+  color: $color-green;
 }
 
 .btn-outline-success:hover:not(:disabled) {
-  background: #10b981;
+  background: $color-green;
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 2px 8px rgba($color-green, 0.2);
 }
 
 .btn-outline-danger {
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: $color-red;
+  color: $color-red;
 }
 
 .btn-outline-danger:hover:not(:disabled) {
-  background: #ef4444;
+  background: $color-red;
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 2px 8px rgba($color-red, 0.2);
 }
 
 .text-success {
-  color: #10b981 !important;
+  color: $color-green !important;
 }
 
 .text-danger {
-  color: #ef4444 !important;
+  color: $color-red !important;
 }
 
 .fw-semibold {
@@ -615,9 +607,7 @@
 }
 
 .amount {
-  background: rgba(16, 185, 129, 0.2) !important;
-  color: white !important;
-  font-weight: 600;
+  @include amount-cell-green;
 }
 
 
