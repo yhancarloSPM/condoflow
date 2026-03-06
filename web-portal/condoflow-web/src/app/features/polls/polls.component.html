@@ -129,18 +129,32 @@
               
               <!-- Opción "Otro" para votación simple -->
               <div class="custom-option-container" *ngIf="poll.allowOther">
-                <div class="custom-option-input">
+                <button class="btn btn-outline-success vote-btn custom-option-trigger" 
+                        *ngIf="!customOptionSelected"
+                        (click)="customOptionSelected = true">
+                  <i class="pi pi-plus-circle"></i>
+                  Otra opción (personalizada)
+                </button>
+                
+                <div class="custom-option-input" *ngIf="customOptionSelected">
                   <input type="text" 
                          class="form-control" 
                          [(ngModel)]="customOptionText"
                          placeholder="Escribe tu opción personalizada..."
-                         [disabled]="!customOptionSelected">
-                  <button class="btn btn-primary" 
-                          (click)="voteCustom(poll)"
-                          [disabled]="!customOptionText?.trim()">
-                    <i class="pi pi-check"></i>
-                    Votar con opción personalizada
-                  </button>
+                         (keyup.enter)="voteCustom(poll)">
+                  <div class="custom-option-actions">
+                    <button class="btn btn-primary" 
+                            (click)="voteCustom(poll)"
+                            [disabled]="!customOptionText?.trim()">
+                      <i class="pi pi-check"></i>
+                      Votar
+                    </button>
+                    <button class="btn btn-secondary" 
+                            (click)="customOptionSelected = false; customOptionText = ''">
+                      <i class="pi pi-times"></i>
+                      Cancelar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
