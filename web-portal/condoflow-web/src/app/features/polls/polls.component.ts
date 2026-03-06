@@ -389,17 +389,8 @@ export class PollsComponent implements OnInit {
   submitMultipleVote(poll: Poll) {
     const isChangingVote = poll.hasUserVoted;
     
-    // Combinar opciones seleccionadas con las ya votadas
+    // Usar solo las opciones actualmente seleccionadas
     let optionsToVote = [...this.selectedOptions];
-    
-    // Si hay opciones ya votadas que no están en selectedOptions, mantenerlas
-    if (poll.userVoteOptionIds) {
-      poll.userVoteOptionIds.forEach(id => {
-        if (!optionsToVote.includes(id)) {
-          optionsToVote.push(id);
-        }
-      });
-    }
     
     // Si hay opción personalizada seleccionada, usar endpoint especial
     if (this.customOptionSelected && this.customOptionText?.trim()) {
@@ -448,6 +439,24 @@ export class PollsComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.selectedOptions = [];
+          this.loadPolls();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: isChangingVote ? 'Voto cambiado correctamente' : 'Votos registrados correctamente'
+          });
+        }
+      },
+      error: (error) => {
+        const errorMsg = error.error?.message || 'Error al votar. Inténtalo de nuevo.';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: errorMsg
+        });
+      }
+    });
+  }
           this.loadPolls();
           this.messageService.add({
             severity: 'success',
