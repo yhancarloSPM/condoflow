@@ -1,52 +1,33 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { tap, shareReplay } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { CacheService } from './cache.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReservationService {
   private apiUrl = `${environment.apiUrl}/reservations`;
-  
-  // Cache
-  private reservationsCache$ = new BehaviorSubject<any>(null);
-  private lastFetchTime = 0;
-  private cacheDuration = 30000; // 30 segundos
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cacheService: CacheService
+  ) {}
 
-  getMyReservations(forceRefresh = false): Observable<any> {
-    const now = Date.now();
-    const cache = this.reservationsCache$.value;
-    
-    // Si hay cache válido y no se fuerza refresh, retornar cache
-    if (!forceRefresh && cache && (now - this.lastFetchTime) < this.cacheDuration) {
-      return of(cache);
-    }
-    
-    // Hacer petición al backend
-    return this.http.get(`${this.apiUrl}/my-reservations`).pipe(
-      tap(response => {
-        this.reservationsCache$.next(response);
-        this.lastFetchTime = now;
-      }),
-      shareReplay(1)
-    );
+  getMyReservations(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/my-reservations`);
   }
 
   createReservation(reservation: any): Observable<any> {
-    return this.http.post(this.apiUrl, reservation).pipe(
-      tap(() => this.clearCache())
-    );
+    this.cacheService.clearByPattern('/reservations');
+    return this.http.post(this.apiUrl, reservation);
   }
 
   cancelReservation(id: string, reason?: string): Observable<any> {
     const body = reason ? { reason } : {};
-    return this.http.request('delete', `${this.apiUrl}/${id}`, { body }).pipe(
-      tap(() => this.clearCache())
-    );
+    this.cacheService.clearByPattern('/reservations');
+    return this.http.request('delete', `${this.apiUrl}/${id}`, { body });
   }
 
   getAvailableSlots(): Observable<any> {
@@ -63,13 +44,7 @@ export class ReservationService {
 
   updateReservationStatus(id: string, status: string, reason?: string): Observable<any> {
     const body = reason ? { status, reason } : { status };
-    return this.http.put(`${this.apiUrl}/${id}/status`, body).pipe(
-      tap(() => this.clearCache())
-    );
-  }
-  
-  clearCache() {
-    this.reservationsCache$.next(null);
-    this.lastFetchTime = 0;
+    this.cacheService.clearByPattern('/reservations');
+    return this.http.put(`${this.apiUrl}/${id}/status`, body);
   }
 }

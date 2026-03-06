@@ -1,24 +1,20 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { tap, shareReplay } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
+import { CacheService } from './cache.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class IncidentService {
   private apiUrl = `${environment.apiUrl}/incidents`;
-  
-  // Cache
-  private incidentsCache$ = new BehaviorSubject<any>(null);
-  private lastFetchTime = 0;
-  private cacheDuration = 30000; // 30 segundos
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private cacheService: CacheService
   ) {}
 
   private getHeaders(): HttpHeaders {
@@ -30,39 +26,21 @@ export class IncidentService {
   }
 
   createIncident(incident: any): Observable<any> {
-    return this.http.post(this.apiUrl, incident, { headers: this.getHeaders() }).pipe(
-      tap(() => this.clearCache())
-    );
+    this.cacheService.clearByPattern('/incidents/my-incidents');
+    return this.http.post(this.apiUrl, incident, { headers: this.getHeaders() });
   }
 
   createIncidentWithImage(formData: FormData): Observable<any> {
     const token = this.authService.getToken();
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
-      // No agregar Content-Type para FormData
     });
-    return this.http.post(this.apiUrl, formData, { headers }).pipe(
-      tap(() => this.clearCache())
-    );
+    this.cacheService.clearByPattern('/incidents/my-incidents');
+    return this.http.post(this.apiUrl, formData, { headers });
   }
 
-  getMyIncidents(forceRefresh = false): Observable<any> {
-    const now = Date.now();
-    const cache = this.incidentsCache$.value;
-    
-    // Si hay cache válido y no se fuerza refresh, retornar cache
-    if (!forceRefresh && cache && (now - this.lastFetchTime) < this.cacheDuration) {
-      return of(cache);
-    }
-    
-    // Hacer petición al backend
-    return this.http.get(`${this.apiUrl}/my-incidents`, { headers: this.getHeaders() }).pipe(
-      tap(response => {
-        this.incidentsCache$.next(response);
-        this.lastFetchTime = now;
-      }),
-      shareReplay(1)
-    );
+  getMyIncidents(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/my-incidents`, { headers: this.getHeaders() });
   }
 
   getAllIncidents(): Observable<any> {
@@ -70,25 +48,17 @@ export class IncidentService {
   }
 
   updateIncidentStatus(id: string, status: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/status`, { status }, { headers: this.getHeaders() }).pipe(
-      tap(() => this.clearCache())
-    );
+    this.cacheService.clearByPattern('/incidents');
+    return this.http.put(`${this.apiUrl}/${id}/status`, { status }, { headers: this.getHeaders() });
   }
 
   updateIncidentStatusWithComment(id: string, updateData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/status`, updateData, { headers: this.getHeaders() }).pipe(
-      tap(() => this.clearCache())
-    );
+    this.cacheService.clearByPattern('/incidents');
+    return this.http.put(`${this.apiUrl}/${id}/status`, updateData, { headers: this.getHeaders() });
   }
 
   cancelIncident(id: string, comment: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/cancel`, { comment }, { headers: this.getHeaders() }).pipe(
-      tap(() => this.clearCache())
-    );
-  }
-  
-  clearCache() {
-    this.incidentsCache$.next(null);
-    this.lastFetchTime = 0;
+    this.cacheService.clearByPattern('/incidents');
+    return this.http.put(`${this.apiUrl}/${id}/cancel`, { comment }, { headers: this.getHeaders() });
   }
 }
