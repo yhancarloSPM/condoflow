@@ -28,6 +28,17 @@
 - ✅ Configured for Production and Development environments
 - ✅ Structured logging with parameters
 
+**Files Modified:**
+- `JwtService`: Token operations (LogInformation, LogDebug, LogError)
+- `TelegramService`: Notification operations (LogInformation, LogError, LogDebug)
+- `GmailService`: Email operations (LogInformation, LogError, LogDebug)
+- `ExpensesController`: File operations (LogWarning)
+- `ReservationService`: Business logic (LogInformation, LogWarning)
+
+**Logging Configuration:**
+- Production: Information level (optimized performance)
+- Development: Debug level (detailed diagnostics)
+
 **Impact**: Production Readiness +100%, Debugging +80%
 
 ---
