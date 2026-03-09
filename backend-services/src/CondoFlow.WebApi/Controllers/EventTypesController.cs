@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using CondoFlow.Application.Interfaces.Repositories;
-using CondoFlow.Application.Common.Models;
 
 namespace CondoFlow.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class EventTypesController : ControllerBase
+public class EventTypesController : BaseApiController
 {
     private readonly ICatalogRepository _catalogRepository;
 
@@ -16,16 +15,9 @@ public class EventTypesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<object>>> GetEventTypes()
+    public async Task<IActionResult> GetEventTypes()
     {
-        try
-        {
-            var eventTypes = await _catalogRepository.GetEventTypesAsync();
-            return Ok(ApiResponse<object>.SuccessResult(eventTypes, "Tipos de evento obtenidos exitosamente"));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ApiResponse<object>.ErrorResult("Error interno del servidor", 500));
-        }
+        var eventTypes = await _catalogRepository.GetEventTypesAsync();
+        return Success(eventTypes, "Tipos de evento obtenidos exitosamente");
     }
 }

@@ -1,0 +1,13 @@
+{
+  "name": "Check API Response Standards",
+  "version": "1.0.0",
+  "description": "Verifica que los controllers sigan los estándares de ApiResponse: heredar de BaseApiController, usar métodos helper, evitar try-catch innecesarios, y no usar códigos hardcodeados",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["backend-services/src/CondoFlow.WebApi/Controllers/*.cs"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Revisa el archivo editado y verifica:\n\n1. ¿El controller hereda de BaseApiController (no ControllerBase)?\n2. ¿Usa métodos helper (Success, NotFoundError, Created, etc.) en lugar de Ok(), NotFound(), StatusCode()?\n3. ¿NO construye ApiResponse manualmente con 'new ApiResponse' o 'ApiResponse.SuccessResult'?\n4. ¿NO tiene try-catch innecesarios? (Solo debe tener try-catch si hay lógica específica de manejo de errores, como notificaciones no críticas)\n5. ¿NO usa códigos de estado hardcodeados (200, 404, 500)? Debe usar HttpStatusCodes o métodos helper\n\nSi encuentras violaciones, explica qué está mal y cómo corregirlo según api-response-standards.md"
+  }
+}

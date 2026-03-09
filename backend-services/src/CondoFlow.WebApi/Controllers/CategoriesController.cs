@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using CondoFlow.Application.Interfaces.Repositories;
-using CondoFlow.Application.Common.Models;
 
 namespace CondoFlow.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CategoriesController : ControllerBase
+public class CategoriesController : BaseApiController
 {
     private readonly ICatalogRepository _catalogRepository;
 
@@ -16,16 +15,9 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<object>>> GetCategories()
+    public async Task<IActionResult> GetCategories()
     {
-        try
-        {
-            var categories = await _catalogRepository.GetCategoriesAsync();
-            return Ok(ApiResponse<object>.SuccessResult(categories, "Categorías obtenidas exitosamente"));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ApiResponse<object>.ErrorResult("Error interno del servidor", 500));
-        }
+        var categories = await _catalogRepository.GetCategoriesAsync();
+        return Success(categories, "Categorías obtenidas exitosamente");
     }
 }

@@ -3,6 +3,7 @@ using CondoFlow.Application.Common.DTOs.User;
 using CondoFlow.Application.DTOs;
 using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Application.Interfaces.Services;
+using CondoFlow.Domain.Enums;
 
 namespace CondoFlow.Application.Services;
 
@@ -27,9 +28,9 @@ public class UserService : IUserService
         return _mapper.Map<UserDto>(user);
     }
 
-    public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    public async Task<bool> ChangePasswordAsync(string userId, ChangePasswordRequest request)
     {
-        return await _identityService.ChangePasswordAsync(userId, currentPassword, newPassword);
+        return await _identityService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
     }
 
     public async Task<bool> UpdateProfileAsync(string userId, UpdateProfileRequest request)
@@ -47,10 +48,10 @@ public class UserService : IUserService
         return true;
     }
 
-    public async Task<bool> ChangeUserStatusAsync(string userId, string status, string adminUserId)
+    public async Task<bool> ChangeUserStatusAsync(string userId, ChangeUserStatusRequest request, string adminUserId)
     {
-        bool isApproved = status == "Approved";
-        bool isRejected = status == "Rejected";
+        bool isApproved = request.Status == UserStatusCodes.Approved;
+        bool isRejected = request.Status == UserStatusCodes.Rejected;
         
         if (!isApproved && !isRejected)
             return false;

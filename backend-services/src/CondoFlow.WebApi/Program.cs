@@ -9,6 +9,7 @@ using CondoFlow.WebApi.Services;
 using CondoFlow.WebApi.Hubs;
 using CondoFlow.Application.Common.Services;
 using CondoFlow.Domain.Configuration;
+using CondoFlow.Domain.Enums;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -200,16 +201,16 @@ try
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     
-    if (!await roleManager.RoleExistsAsync("Admin"))
+    if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
     {
-        var result = await roleManager.CreateAsync(new IdentityRole("Admin"));
+        var result = await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
         if (!result.Succeeded)
             throw new InvalidOperationException("Failed to create Admin role");
     }
     
-    if (!await roleManager.RoleExistsAsync("Owner"))
+    if (!await roleManager.RoleExistsAsync(UserRoles.Owner))
     {
-        var result = await roleManager.CreateAsync(new IdentityRole("Owner"));
+        var result = await roleManager.CreateAsync(new IdentityRole(UserRoles.Owner));
         if (!result.Succeeded)
             throw new InvalidOperationException("Failed to create Owner role");
     }

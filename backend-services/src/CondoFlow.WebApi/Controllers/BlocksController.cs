@@ -6,7 +6,7 @@ namespace CondoFlow.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class BlocksController : ControllerBase
+public class BlocksController : BaseApiController
 {
     private readonly IBlockRepository _blockRepository;
 
@@ -18,15 +18,8 @@ public class BlocksController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetBlocks()
     {
-        try
-        {
-            var blocks = await _blockRepository.GetAllBlocksAsync();
-            var blocksDto = blocks.Select(b => new { b.Id, b.Name, b.Description });
-            return Ok(ApiResponse<object>.SuccessResult(blocksDto, "Bloques obtenidos exitosamente", 200));
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, ApiResponse.ErrorResult("Error al obtener los bloques", 500));
-        }
+        var blocks = await _blockRepository.GetAllBlocksAsync();
+        var blocksDto = blocks.Select(b => new { b.Id, b.Name, b.Description });
+        return Success(blocksDto, "Bloques obtenidos exitosamente");
     }
 }

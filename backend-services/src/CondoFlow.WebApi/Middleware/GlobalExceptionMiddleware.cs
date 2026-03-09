@@ -33,7 +33,7 @@ public class GlobalExceptionMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-        var response = ApiResponse.ErrorResult("An internal server error occurred", 500);
+        var response = ApiResponse<object>.ErrorResult("An internal server error occurred", 500);
 
         var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
         {

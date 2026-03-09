@@ -1,5 +1,6 @@
 using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Domain.Entities;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -57,7 +58,7 @@ public class PollRepository : IPollRepository
         return await _context.Users
             .Where(u => _context.UserRoles
                 .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, r.Name })
-                .Any(ur => ur.UserId == u.Id && ur.Name == "Owner"))
+                .Any(ur => ur.UserId == u.Id && ur.Name == UserRoles.Owner))
             .CountAsync();
     }
 }

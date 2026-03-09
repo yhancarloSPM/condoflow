@@ -1,6 +1,7 @@
 using CondoFlow.Application.DTOs;
 using CondoFlow.Application.Interfaces.Services;
 using CondoFlow.Application.Common.Models;
+using CondoFlow.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -44,7 +45,7 @@ public class ProvidersController : BaseApiController
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> CreateProvider(CreateProviderDto createDto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -56,7 +57,7 @@ public class ProvidersController : BaseApiController
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> UpdateProvider(int id, UpdateProviderDto updateDto)
     {
         var provider = await _providerService.UpdateProviderAsync(id, updateDto);
@@ -67,7 +68,7 @@ public class ProvidersController : BaseApiController
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> DeleteProvider(int id)
     {
         var deleted = await _providerService.DeleteProviderAsync(id);

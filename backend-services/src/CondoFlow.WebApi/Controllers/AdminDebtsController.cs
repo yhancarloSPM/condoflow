@@ -1,5 +1,5 @@
-using CondoFlow.Application.Common.Models;
 using CondoFlow.Application.Interfaces.Services;
+using CondoFlow.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,8 +7,8 @@ namespace CondoFlow.WebApi.Controllers;
 
 [ApiController]
 [Route("api/admin/debts")]
-[Authorize(Roles = "Admin")]
-public class AdminDebtsController : ControllerBase
+[Authorize(Roles = UserRoles.Admin)]
+public class AdminDebtsController : BaseApiController
 {
     private readonly IDebtService _debtService;
 
@@ -20,29 +20,14 @@ public class AdminDebtsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllDebts()
     {
-        try
-        {
-            var debtResponses = await _debtService.GetAllDebtsAsync();
-            return Ok(ApiResponse<object>.SuccessResult(debtResponses, "Deudas obtenidas exitosamente", 200));
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, ApiResponse.ErrorResult("Error al obtener las deudas", 500));
-        }
+        var debtResponses = await _debtService.GetAllDebtsAsync();
+        return Success(debtResponses, "Deudas obtenidas exitosamente");
     }
 
     [HttpPost("generate-year/{year}")]
     public async Task<IActionResult> GenerateYearDebts(int year)
     {
-        try
-        {
-            var result = await _debtService.GenerateYearDebtsAsync(year);
-            return Ok(ApiResponse<object>.SuccessResult(result, $"Deudas generadas para el año {year}", 200));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ApiResponse.ErrorResult($"Error: {ex.Message}", 500));
-        }
+        var result = await _debtService.GenerateYearDebtsAsync(year);
+        return Success(result, $"Deudas generadas para el año {year}");
     }
 }
-

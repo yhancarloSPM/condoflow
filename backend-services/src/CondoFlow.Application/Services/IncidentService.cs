@@ -1,4 +1,5 @@
 using AutoMapper;
+using CondoFlow.Application.Common.DTOs.Incident;
 using CondoFlow.Application.DTOs;
 using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Application.Interfaces.Services;
@@ -29,9 +30,9 @@ public class IncidentService : IIncidentService
         _mapper = mapper;
     }
 
-    public async Task<IncidentDto> CreateIncidentAsync(Guid ownerId, string title, string description, string category, string priority, string? imageData)
+    public async Task<IncidentDto> CreateIncidentAsync(CreateIncidentDto dto, Guid ownerId, string? imageData = null)
     {
-        var incident = new Incident(ownerId, title, description, category, priority, imageData);
+        var incident = new Incident(ownerId, dto.Title, dto.Description, dto.Category, dto.Priority, imageData);
         await _incidentRepository.AddAsync(incident);
         
         // Crear notificación para admin
@@ -39,7 +40,7 @@ public class IncidentService : IIncidentService
             "Nueva Incidencia Reportada",
             $"Se ha reportado una nueva incidencia: {incident.Title}",
             "IncidentReported",
-            "Admin",
+            UserRoles.Admin,
             null,
             incident.Id.ToString()
         );
@@ -84,13 +85,13 @@ public class IncidentService : IIncidentService
         return incident != null ? _mapper.Map<IncidentDto>(incident) : null;
     }
 
-    public async Task UpdateIncidentStatusAsync(Guid id, string status, string? adminComment)
+    public async Task UpdateIncidentStatusAsync(Guid incidentId, UpdateIncidentStatusDto dto)
     {
-        var incident = await _incidentRepository.GetByIdAsync(id);
+        var incident = await _incidentRepository.GetByIdAsync(incidentId);
         if (incident == null)
             throw new KeyNotFoundException("Incidencia no encontrada");
 
-        incident.ChangeStatus(status, adminComment);
+        incident.ChangeStatus(dto.Status, dto.AdminComment);
         await _incidentRepository.UpdateAsync(incident);
 
         // Enviar notificación al propietario
@@ -98,11 +99,11 @@ public class IncidentService : IIncidentService
         if (owner != null)
         {
             dynamic ownerData = owner;
-            var statusMessage = status switch
+            var statusMessage = dto.Status switch
             {
                 StatusCodes.InProgress => "Tu incidencia está siendo procesada",
                 StatusCodes.Resolved => "Tu incidencia ha sido resuelta",
-                StatusCodes.Cancelled => $"Tu incidencia ha sido cancelada. {adminComment}",
+                StatusCodes.Cancelled => $"Tu incidencia ha sido cancelada. {dto.AdminComment}",
                 _ => "El estado de tu incidencia ha cambiado"
             };
 
@@ -110,7 +111,7 @@ public class IncidentService : IIncidentService
                 "Estado de Incidencia Actualizado",
                 statusMessage,
                 "IncidentStatusUpdate",
-                "Owner",
+                UserRoles.Owner,
                 ownerData.Id,
                 incident.Id.ToString()
             );
@@ -119,9 +120,9 @@ public class IncidentService : IIncidentService
         }
     }
 
-    public async Task CancelIncidentAsync(Guid id, Guid ownerId, string comment)
+    public async Task CancelIncidentAsync(Guid incidentId, Guid ownerId, CancelIncidentDto dto)
     {
-        var incident = await _incidentRepository.GetByIdAsync(id);
+        var incident = await _incidentRepository.GetByIdAsync(incidentId);
         if (incident == null)
             throw new KeyNotFoundException("Incidencia no encontrada");
 
@@ -131,15 +132,15 @@ public class IncidentService : IIncidentService
         if (incident.Status != StatusCodes.Reported)
             throw new InvalidOperationException("Solo se pueden cancelar incidencias reportadas");
 
-        incident.ChangeStatus(StatusCodes.Cancelled, comment);
+        incident.ChangeStatus(StatusCodes.Cancelled, dto.Comment);
         await _incidentRepository.UpdateAsync(incident);
 
         // Enviar notificación al admin
         var notification = new Notification(
             "Incidencia Cancelada por Propietario",
-            $"El propietario ha cancelado la incidencia: {incident.Title}. Motivo: {comment}",
+            $"El propietario ha cancelado la incidencia: {incident.Title}. Motivo: {dto.Comment}",
             "IncidentCancelledByOwner",
-            "Admin",
+            UserRoles.Admin,
             null,
             incident.Id.ToString()
         );
@@ -147,14 +148,14 @@ public class IncidentService : IIncidentService
         await _notificationRepository.AddAsync(notification);
     }
 
-    public async Task<(byte[] fileBytes, string mimeType)?> GetIncidentImageAsync(Guid id, Guid userId, bool isAdmin)
+    public async Task<(byte[] fileBytes, string mimeType)?> GetIncidentImageAsync(GetIncidentImageDto dto)
     {
-        var incident = await _incidentRepository.GetByIdAsync(id);
+        var incident = await _incidentRepository.GetByIdAsync(dto.IncidentId);
         if (incident == null)
             return null;
 
         // Verificar permisos
-        if (!isAdmin && incident.OwnerId != userId)
+        if (!dto.IsAdmin && incident.OwnerId != dto.UserId)
             throw new UnauthorizedAccessException("No tienes permiso para ver esta imagen");
 
         if (string.IsNullOrEmpty(incident.ImageData))

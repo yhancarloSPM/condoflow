@@ -38,7 +38,7 @@ public class ExpenseService : IExpenseService
         return expense != null ? _mapper.Map<ExpenseDto>(expense) : null;
     }
 
-    public async Task<ExpenseDto> CreateExpenseAsync(CreateExpenseDto createDto, string userId, string? invoiceUrl = null)
+    public async Task<ExpenseDto> CreateExpenseAsync(CreateExpenseDto createDto, string createdBy, string? invoiceUrl = null)
     {
         // Obtener el estado "pending"
         var pendingStatus = await _statusRepository.GetStatusByCodeAsync(StatusCodes.Pending);
@@ -50,7 +50,7 @@ public class ExpenseService : IExpenseService
         var expense = _mapper.Map<Expense>(createDto);
         expense.StatusId = statusData.Id;
         expense.InvoiceUrl = invoiceUrl;
-        expense.CreatedBy = userId;
+        expense.CreatedBy = createdBy;
         expense.CreatedAt = DateTime.UtcNow;
 
         await _expenseRepository.AddAsync(expense);

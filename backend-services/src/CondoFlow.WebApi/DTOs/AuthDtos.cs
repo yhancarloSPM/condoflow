@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using CondoFlow.Domain.Enums;
 
 namespace CondoFlow.WebApi.DTOs;
 
@@ -14,7 +15,7 @@ public record RegisterRequest(
     [Required, Phone, StringLength(20)] string PhoneNumber,
     [Required] int BlockId,
     [Required] int ApartmentId,
-    [Required, RegularExpression("^(Owner|Admin)$")] string Role = "Owner");
+    [Required, RegularExpression("^(Owner|Admin)$")] string Role = UserRoles.Owner);
 
 public record AuthResponse(
     string Token, 

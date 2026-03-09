@@ -3,6 +3,7 @@ using CondoFlow.Application.Common.Models;
 using CondoFlow.Application.Common.Services;
 using CondoFlow.Application.Interfaces.Services;
 using CondoFlow.Domain.Entities;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Application.Interfaces.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +31,7 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     public async Task<ActionResult<ApiResponse<IEnumerable<ReservationDto>>>> GetAll()
     {
         var reservations = await _reservationRepository.GetAllAsync();
@@ -74,7 +75,7 @@ public class ReservationsController : ControllerBase
             return NotFound(ApiResponse<ReservationDto>.ErrorResult("Reserva no encontrada"));
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var isAdmin = User.IsInRole("Admin");
+        var isAdmin = User.IsInRole(UserRoles.Admin);
         
         if (!isAdmin && reservation.UserId != userId)
             return Forbid();
@@ -146,7 +147,7 @@ public class ReservationsController : ControllerBase
     }
 
     [HttpPut("{id}/status")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     public async Task<ActionResult<ApiResponse<ReservationDto>>> UpdateStatus(Guid id, [FromBody] object request)
     {
         var reservation = await _reservationRepository.GetByIdAsync(id);
@@ -214,7 +215,7 @@ public class ReservationsController : ControllerBase
             return NotFound(ApiResponse<object>.ErrorResult("Reserva no encontrada"));
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var isAdmin = User.IsInRole("Admin");
+        var isAdmin = User.IsInRole(UserRoles.Admin);
         
         if (!isAdmin && reservation.UserId != userId)
             return Forbid();

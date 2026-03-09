@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
+using CondoFlow.Domain.Enums;
 
 namespace CondoFlow.WebApi.Hubs;
 
@@ -13,7 +14,7 @@ public class NotificationHub : Hub
 
     public async Task JoinAdminGroup()
     {
-        if (Context.User?.IsInRole("Admin") == true)
+        if (Context.User?.IsInRole(UserRoles.Admin) == true)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, "Admins");
         }
@@ -21,7 +22,7 @@ public class NotificationHub : Hub
 
     public override async Task OnConnectedAsync()
     {
-        if (Context.User?.IsInRole("Admin") == true)
+        if (Context.User?.IsInRole(UserRoles.Admin) == true)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, "Admins");
         }

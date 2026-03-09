@@ -1,4 +1,5 @@
 using CondoFlow.Domain.Entities;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Infrastructure.Data;
 using CondoFlow.Application.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,7 @@ public class NotificationRepository : INotificationRepository
         
         if (isAdmin)
         {
-            query = query.Where(n => n.TargetRole == "Admin");
+            query = query.Where(n => n.TargetRole == UserRoles.Admin);
         }
         else if (!string.IsNullOrEmpty(userId))
         {

@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CondoFlow.Application.Interfaces.Repositories;
-using CondoFlow.Application.Common.Models;
+using CondoFlow.Domain.Enums;
 
 namespace CondoFlow.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class NotificationsController : ControllerBase
+public class NotificationsController : BaseApiController
 {
     private readonly INotificationRepository _notificationRepository;
 
@@ -18,7 +18,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<object>>> GetNotifications()
+    public async Task<IActionResult> GetNotifications()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? 
                      User.FindFirst("sub")?.Value ?? 
@@ -30,28 +30,28 @@ public class NotificationsController : ControllerBase
             userRoles = User.FindAll("role").Select(c => c.Value).ToList();
         }
 
-        var isAdmin = userRoles.Contains("Admin");
+        var isAdmin = userRoles.Contains(UserRoles.Admin);
         var notifications = await _notificationRepository.GetUserNotificationsAsync(userId, isAdmin);
 
-        return Ok(ApiResponse<object>.SuccessResult(notifications, "Notificaciones obtenidas exitosamente", 200));
+        return Success(notifications, "Notificaciones obtenidas exitosamente");
     }
 
     [HttpPut("{id}/mark-read")]
-    public async Task<ActionResult> MarkAsRead(Guid id)
+    public async Task<IActionResult> MarkAsRead(Guid id)
     {
         try
         {
             await _notificationRepository.MarkAsReadAsync(id);
-            return Ok(ApiResponse<object>.SuccessResult(null, "Notificación marcada como leída", 200));
+            return Success<object>(null, "Notificación marcada como leída");
         }
         catch (KeyNotFoundException)
         {
-            return NotFound();
+            return NotFoundError("Notificación no encontrada");
         }
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteNotification(Guid id)
+    public async Task<IActionResult> DeleteNotification(Guid id)
     {
         try
         {
@@ -65,18 +65,18 @@ public class NotificationsController : ControllerBase
                 userRoles = User.FindAll("role").Select(c => c.Value).ToList();
             }
 
-            var isAdmin = userRoles.Contains("Admin");
+            var isAdmin = userRoles.Contains(UserRoles.Admin);
             await _notificationRepository.DeleteNotificationAsync(id, userId, isAdmin);
 
-            return Ok(ApiResponse<object>.SuccessResult(null, "Notificación eliminada exitosamente", 200));
+            return Success<object>(null, "Notificación eliminada exitosamente");
         }
         catch (KeyNotFoundException)
         {
-            return NotFound(ApiResponse<object>.ErrorResult("Notificación no encontrada", 404));
+            return NotFoundError("Notificación no encontrada");
         }
         catch (UnauthorizedAccessException)
         {
-            return Forbid();
+            return ForbiddenError("No tienes permiso para eliminar esta notificación");
         }
     }
 }

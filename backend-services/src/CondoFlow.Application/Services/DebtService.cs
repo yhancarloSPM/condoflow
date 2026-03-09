@@ -1,4 +1,5 @@
 using AutoMapper;
+using CondoFlow.Application.Common.DTOs.Debt;
 using CondoFlow.Application.DTOs;
 using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Application.Interfaces.Services;
@@ -92,7 +93,7 @@ public class DebtService : IDebtService
         return debtDtos;
     }
 
-    public async Task<Guid> CreateDebtAsync(Guid ownerId, int month, int year, string concept)
+    public async Task<Guid> CreateDebtAsync(CreateDebtRequest dto, Guid ownerId)
     {
         var maintenanceConcept = await _paymentConceptRepository.GetByCodeAsync(PaymentConceptCodes.Maintenance);
         
@@ -112,16 +113,16 @@ public class DebtService : IDebtService
 
         var isRoofApartment = _debtConfig.RoofApartmentNumbers.Contains(apartment.Number);
         var amount = isRoofApartment ? maintenanceConcept.RoofAmount!.Value : maintenanceConcept.DefaultAmount!.Value;
-        var dueDate = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+        var dueDate = new DateTime(dto.Year, dto.Month, DateTime.DaysInMonth(dto.Year, dto.Month));
         
         // Usar el constructor de Debt que encapsula la lógica de dominio
         var debt = new Debt(
             ownerId,
             new Money(amount, "DOP"),
             dueDate,
-            concept,
-            month,
-            year
+            dto.Concept,
+            dto.Month,
+            dto.Year
         );
 
         await _debtRepository.AddAsync(debt);

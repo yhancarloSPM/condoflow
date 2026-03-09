@@ -1,5 +1,6 @@
 using CondoFlow.Application.Common.Services;
 using CondoFlow.Domain.Entities;
+using CondoFlow.Domain.Enums;
 using CondoFlow.Infrastructure.Data;
 using CondoFlow.WebApi.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -24,7 +25,7 @@ public class NotificationService : INotificationService
             "Nuevo registro de usuario",
             $"{firstName} {lastName} se ha registrado para el apartamento {apartment}-{block}",
             "UserRegistration",
-            "Admin"
+            UserRoles.Admin
         );
 
         _context.Notifications.Add(notification);
@@ -48,7 +49,7 @@ public class NotificationService : INotificationService
             "Nuevo pago recibido",
             $"{ownerName} ha enviado un pago de ${amount:N2}",
             "PaymentReceived",
-            "Admin",
+            UserRoles.Admin,
             relatedEntityId: paymentId.ToString()
         );
 
@@ -67,12 +68,12 @@ public class NotificationService : INotificationService
 
     public async Task SendPaymentStatusNotificationAsync(string userId, Guid paymentId, string status, string ownerName, decimal amount, string? rejectionReason = null)
     {
-        var title = status == "Approved" ? "Pago aprobado" : "Pago rechazado";
-        var message = status == "Approved" 
+        var title = status == UserStatusCodes.Approved ? "Pago aprobado" : "Pago rechazado";
+        var message = status == UserStatusCodes.Approved 
             ? $"Tu pago de ${amount:N2} ha sido aprobado"
             : $"Tu pago de ${amount:N2} ha sido rechazado";
             
-        if (status == "Rejected" && !string.IsNullOrEmpty(rejectionReason))
+        if (status == UserStatusCodes.Rejected && !string.IsNullOrEmpty(rejectionReason))
         {
             message += $"\nRazón: {rejectionReason}";
         }
@@ -80,7 +81,7 @@ public class NotificationService : INotificationService
         var notification = new Notification(
             title,
             message,
-            status == "Approved" ? "PaymentApproved" : "PaymentRejected",
+            status == UserStatusCodes.Approved ? "PaymentApproved" : "PaymentRejected",
             "User",
             userId,
             paymentId.ToString()
@@ -101,15 +102,15 @@ public class NotificationService : INotificationService
 
     public async Task SendUserStatusNotificationAsync(string userId, string status, string firstName, string lastName)
     {
-        var title = status == "Approved" ? "Registro aprobado" : "Registro rechazado";
-        var message = status == "Approved" 
+        var title = status == UserStatusCodes.Approved ? "Registro aprobado" : "Registro rechazado";
+        var message = status == UserStatusCodes.Approved 
             ? $"¡Felicidades {firstName}! Tu registro ha sido aprobado"
             : $"Lo sentimos {firstName}, tu registro ha sido rechazado";
 
         var notification = new Notification(
             title,
             message,
-            status == "Approved" ? "UserApproved" : "UserRejected",
+            status == UserStatusCodes.Approved ? "UserApproved" : "UserRejected",
             "User",
             userId
         );
@@ -340,7 +341,7 @@ public class NotificationService : INotificationService
             title,
             message,
             type,
-            "Admin",
+            UserRoles.Admin,
             relatedEntityId: relatedEntityId
         );
 

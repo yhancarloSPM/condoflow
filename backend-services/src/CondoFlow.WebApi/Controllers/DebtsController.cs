@@ -1,6 +1,6 @@
 using CondoFlow.Application.Common.DTOs.Debt;
-using CondoFlow.Application.Common.Models;
 using CondoFlow.Application.Interfaces.Services;
+using CondoFlow.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +9,7 @@ namespace CondoFlow.WebApi.Controllers;
 [ApiController]
 [Route("api/owners/{ownerId}/[controller]")]
 [Authorize]
-public class DebtsController : ControllerBase
+public class DebtsController : BaseApiController
 {
     private readonly IDebtService _debtService;
 
@@ -24,37 +24,29 @@ public class DebtsController : ControllerBase
         var userOwnerId = User.FindFirst("OwnerId")?.Value;
         
         if (string.IsNullOrEmpty(userOwnerId))
-            return BadRequest(ApiResponse.ErrorResult("Usuario no aprobado o sin OwnerId asignado", 400));
+            return BadRequestError("Usuario no aprobado o sin OwnerId asignado");
         
         if (!string.Equals(userOwnerId, ownerId, StringComparison.OrdinalIgnoreCase))
-            return Forbid();
+            return ForbiddenError("No tiene permisos para acceder a estas deudas");
 
         if (!Guid.TryParse(ownerId, out var ownerGuid))
-            return BadRequest(ApiResponse.ErrorResult("OwnerId inválido", 400));
+            return BadRequestError("OwnerId inválido");
 
         var debtData = await _debtService.GetOwnerDebtsAsync(ownerGuid);
-        return Ok(ApiResponse<object>.SuccessResult(debtData, "Deudas obtenidas exitosamente", 200));
+        return Success(debtData, "Deudas obtenidas exitosamente");
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> CreateDebt(string ownerId, [FromBody] CreateDebtRequest request)
     {
-        try
-        {
-            if (!Guid.TryParse(ownerId, out var ownerGuid))
-                return BadRequest(ApiResponse.ErrorResult("OwnerId inválido", 400));
+        if (!ModelState.IsValid)
+            return BadRequestError("Datos inválidos");
 
-            var debtId = await _debtService.CreateDebtAsync(ownerGuid, request.Month, request.Year, request.Concept);
-            return Ok(ApiResponse<object>.SuccessResult(new { debtId }, "Deuda creada exitosamente", 201));
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ApiResponse.ErrorResult(ex.Message, 400));
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, ApiResponse.ErrorResult("Error al crear la deuda", 500));
-        }
+        if (!Guid.TryParse(ownerId, out var ownerGuid))
+            return BadRequestError("OwnerId inválido");
+
+        var debtId = await _debtService.CreateDebtAsync(request, ownerGuid);
+        return Created(new { debtId }, "Deuda creada exitosamente");
     }
 }

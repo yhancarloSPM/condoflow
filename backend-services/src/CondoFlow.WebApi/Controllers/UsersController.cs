@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using CondoFlow.Application.Common.Models;
 using CondoFlow.Application.Common.DTOs.User;
 using CondoFlow.Application.Interfaces.Services;
+using CondoFlow.Domain.Enums;
 using System.Security.Claims;
 
 namespace CondoFlow.WebApi.Controllers;
@@ -10,7 +10,7 @@ namespace CondoFlow.WebApi.Controllers;
 [ApiController]
 [Route("api/users")]
 [Authorize]
-public class UsersController : ControllerBase
+public class UsersController : BaseApiController
 {
     private readonly IUserService _userService;
 
@@ -22,92 +22,61 @@ public class UsersController : ControllerBase
     [HttpGet("profile")]
     public async Task<IActionResult> GetProfile()
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return BadRequest(ApiResponse.ErrorResult("Usuario no encontrado", 400));
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            var userProfile = await _userService.GetUserProfileAsync(userId);
-            if (userProfile == null)
-                return NotFound(ApiResponse.ErrorResult("Usuario no encontrado", 404));
+        var userProfile = await _userService.GetUserProfileAsync(userId);
+        if (userProfile == null)
+            return NotFoundError("Usuario no encontrado");
 
-            return Ok(ApiResponse<object>.SuccessResult(userProfile, "Perfil obtenido exitosamente", 200));
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, ApiResponse.ErrorResult("Error al obtener el perfil", 500));
-        }
+        return Success(userProfile, "Perfil obtenido exitosamente");
     }
 
     [HttpPut("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return BadRequest(ApiResponse.ErrorResult("Usuario no encontrado", 400));
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            var success = await _userService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
-            if (!success)
-                return BadRequest(ApiResponse.ErrorResult("Error al cambiar contraseña", 400));
+        var success = await _userService.ChangePasswordAsync(userId, request);
+        if (!success)
+            return BadRequestError("Contraseña actual incorrecta o error al cambiar contraseña");
 
-            return Ok(ApiResponse<object>.SuccessResult(new { message = "Contraseña actualizada" }, "Contraseña cambiada exitosamente", 200));
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, ApiResponse.ErrorResult("Error al cambiar la contraseña", 500));
-        }
+        return Success<string>("Contraseña cambiada exitosamente");
     }
 
     [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return BadRequest(ApiResponse.ErrorResult("Usuario no encontrado", 400));
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            var success = await _userService.UpdateProfileAsync(userId, request);
-            if (!success)
-                return BadRequest(ApiResponse.ErrorResult("Error al actualizar usuario", 400));
+        var success = await _userService.UpdateProfileAsync(userId, request);
+        if (!success)
+            return BadRequestError("Error al actualizar perfil");
 
-            return Ok(ApiResponse<object>.SuccessResult(new { message = "Perfil actualizado" }, "Perfil actualizado exitosamente", 200));
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, ApiResponse.ErrorResult("Error al actualizar el perfil", 500));
-        }
+        return Success<string>("Perfil actualizado exitosamente");
     }
 
     [HttpPut("{userId}/status")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> ChangeUserStatus(string userId, [FromBody] ChangeUserStatusRequest request)
     {
-        try
-        {
-            if (request.Status != "Approved" && request.Status != "Rejected")
-                return BadRequest(ApiResponse.ErrorResult("Estado inválido. Use 'Approved' o 'Rejected'", 400));
+        if (request.Status != UserStatusCodes.Approved && request.Status != UserStatusCodes.Rejected)
+            return BadRequestError($"Estado inválido. Use '{UserStatusCodes.Approved}' o '{UserStatusCodes.Rejected}'");
 
-            var adminUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(adminUserId))
-                return BadRequest(ApiResponse.ErrorResult("Admin no identificado", 400));
+        var adminUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(adminUserId))
+            return UnauthorizedError("Admin no identificado");
 
-            var success = await _userService.ChangeUserStatusAsync(userId, request.Status, adminUserId);
-            if (!success)
-                return NotFound(ApiResponse.ErrorResult("Usuario no encontrado o error al actualizar", 404));
+        var success = await _userService.ChangeUserStatusAsync(userId, request, adminUserId);
+        if (!success)
+            return NotFoundError("Usuario no encontrado o error al actualizar");
 
-            var statusText = request.Status == "Approved" ? "aprobado" : "rechazado";
-            return Ok(ApiResponse<object>.SuccessResult(
-                new { userId, status = request.Status }, 
-                $"Usuario {statusText} exitosamente", 
-                200));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ApiResponse.ErrorResult($"Error al cambiar estado: {ex.Message}", 500));
-        }
+        var statusText = request.Status == UserStatusCodes.Approved ? "aprobado" : "rechazado";
+        return Success(new { userId, status = request.Status }, $"Usuario {statusText} exitosamente");
     }
 }

@@ -6,7 +6,7 @@ namespace CondoFlow.Application.Interfaces.Services;
 public interface IUserService
 {
     Task<UserDto?> GetUserProfileAsync(string userId);
-    Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword);
+    Task<bool> ChangePasswordAsync(string userId, ChangePasswordRequest request);
     Task<bool> UpdateProfileAsync(string userId, UpdateProfileRequest request);
-    Task<bool> ChangeUserStatusAsync(string userId, string status, string adminUserId);
+    Task<bool> ChangeUserStatusAsync(string userId, ChangeUserStatusRequest request, string adminUserId);
 }

@@ -1,4 +1,5 @@
 using AutoMapper;
+using CondoFlow.Application.Common.DTOs.Announcement;
 using CondoFlow.Application.DTOs;
 using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Application.Interfaces.Services;
@@ -28,10 +29,34 @@ public class AnnouncementService : IAnnouncementService
         return _mapper.Map<IEnumerable<AnnouncementDto>>(announcements);
     }
 
-    public async Task<AnnouncementDto> CreateAnnouncementAsync(string title, string content, bool isUrgent, string createdBy, DateTime? eventDate)
+    public async Task<AnnouncementDto> CreateAnnouncementAsync(CreateAnnouncementDto dto, string createdBy)
     {
-        var announcement = new Announcement(title, content, isUrgent, createdBy, 1, eventDate);
+        var announcement = new Announcement(
+            dto.Title, 
+            dto.Content, 
+            dto.IsUrgent, 
+            createdBy, 
+            dto.TypeId ?? 1, 
+            dto.EventDate);
+            
         await _announcementRepository.AddAsync(announcement);
+        return _mapper.Map<AnnouncementDto>(announcement);
+    }
+
+    public async Task<AnnouncementDto?> UpdateAnnouncementAsync(Guid id, UpdateAnnouncementDto dto)
+    {
+        var announcement = await _announcementRepository.GetByIdAsync(id);
+        if (announcement == null)
+            return null;
+
+        announcement.Update(
+            dto.Title, 
+            dto.Content, 
+            dto.IsUrgent, 
+            dto.TypeId ?? announcement.AnnouncementTypeId, 
+            dto.EventDate);
+            
+        await _announcementRepository.UpdateAsync(announcement);
         return _mapper.Map<AnnouncementDto>(announcement);
     }
 

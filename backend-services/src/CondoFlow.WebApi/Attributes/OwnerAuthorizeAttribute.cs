@@ -1,3 +1,4 @@
+using CondoFlow.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Security.Claims;
@@ -18,13 +19,13 @@ public class OwnerAuthorizeAttribute : Attribute, IAuthorizationFilter
         }
 
         // Los Admin pueden acceder a todo
-        if (user.IsInRole("Admin"))
+        if (user.IsInRole(UserRoles.Admin))
         {
             return;
         }
 
         // Para Owners, validar que solo accedan a sus propios datos
-        if (user.IsInRole("Owner"))
+        if (user.IsInRole(UserRoles.Owner))
         {
             var userOwnerId = user.FindFirst("OwnerId")?.Value;
             

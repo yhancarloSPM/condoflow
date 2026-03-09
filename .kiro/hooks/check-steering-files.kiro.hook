@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Check Steering Files",
+  "description": "Recuerda revisar los steering files relevantes antes de modificar código para asegurar que se sigan las convenciones y mejores prácticas del proyecto",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.cs",
+      "*.ts",
+      "*.scss"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "IMPORTANTE: Antes de continuar con cambios en este archivo, verifica que hayas revisado los steering files relevantes:\n\n**Para archivos .cs (Backend):**\n- api-response-standards.md (si es un Controller)\n- backend-architecture.md (para arquitectura y capas)\n- automapper-conventions.md (para servicios y mapeos)\n- clean-architecture.md (reglas generales)\n\n**Para archivos .ts (Frontend):**\n- frontend-styles.md (si trabajas con estilos)\n- clean-architecture.md (reglas generales)\n\n**Para archivos .scss (Estilos):**\n- frontend-styles.md (OBLIGATORIO)\n\n**Workflow:**\n1. Lee el steering file completo relevante\n2. Identifica las reglas aplicables\n3. Revisa los ejemplos ✅ BIEN y ❌ MAL\n4. Verifica el checklist al final\n5. Implementa siguiendo las convenciones\n\n¿Ya revisaste los steering files relevantes para este cambio?"
+  }
+}

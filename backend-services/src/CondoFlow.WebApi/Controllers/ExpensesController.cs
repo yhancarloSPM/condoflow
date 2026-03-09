@@ -1,6 +1,7 @@
 using CondoFlow.Application.DTOs;
 using CondoFlow.Application.Interfaces.Services;
 using CondoFlow.Application.Common.Models;
+using CondoFlow.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -10,7 +11,7 @@ namespace CondoFlow.WebApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ExpensesController : ControllerBase
+public class ExpensesController : BaseApiController
 {
     private readonly IExpenseService _expenseService;
     private readonly IWebHostEnvironment _environment;
@@ -22,115 +23,72 @@ public class ExpensesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ExpenseDto>>>> GetExpenses()
+    public async Task<IActionResult> GetExpenses()
     {
-        try
-        {
-            var expenses = await _expenseService.GetAllExpensesAsync();
-            return Ok(ApiResponse<IEnumerable<ExpenseDto>>.SuccessResult(expenses, "Gastos obtenidos exitosamente", 200));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ApiResponse<IEnumerable<ExpenseDto>>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
-        }
+        var expenses = await _expenseService.GetAllExpensesAsync();
+        return Success(expenses, "Gastos obtenidos exitosamente");
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ApiResponse<ExpenseDto>>> GetExpense(int id)
+    public async Task<IActionResult> GetExpense(int id)
     {
-        try
-        {
-            var expense = await _expenseService.GetExpenseByIdAsync(id);
-            if (expense == null)
-            {
-                return NotFound(ApiResponse<ExpenseDto>.ErrorResult("Gasto no encontrado", 404));
-            }
+        var expense = await _expenseService.GetExpenseByIdAsync(id);
+        if (expense == null)
+            return NotFoundError<ExpenseDto>("Gasto no encontrado");
 
-            return Ok(ApiResponse<ExpenseDto>.SuccessResult(expense, "Gasto obtenido exitosamente", 200));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ApiResponse<ExpenseDto>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
-        }
+        return Success(expense, "Gasto obtenido exitosamente");
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<ExpenseDto>>> CreateExpense([FromForm] CreateExpenseDto createDto, [FromForm] IFormFile? invoice)
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> CreateExpense([FromForm] CreateExpenseDto createDto, [FromForm] IFormFile? invoice)
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(ApiResponse<ExpenseDto>.ErrorResult("Usuario no autenticado", 401));
-            }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            string? invoiceUrl = null;
-            if (invoice != null)
-            {
-                invoiceUrl = await SaveInvoiceFileAsync(invoice);
-            }
-
-            var expense = await _expenseService.CreateExpenseAsync(createDto, userId, invoiceUrl);
-            return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, ApiResponse<ExpenseDto>.SuccessResult(expense, "Gasto creado exitosamente", 201));
-        }
-        catch (Exception ex)
+        string? invoiceUrl = null;
+        if (invoice != null)
         {
-            return StatusCode(500, ApiResponse<ExpenseDto>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
+            invoiceUrl = await SaveInvoiceFileAsync(invoice);
         }
+
+        var expense = await _expenseService.CreateExpenseAsync(createDto, userId, invoiceUrl);
+        return Created(expense, "Gasto creado exitosamente");
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<ExpenseDto>>> UpdateExpense(int id, [FromForm] UpdateExpenseDto updateDto, [FromForm] IFormFile? invoice)
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> UpdateExpense(int id, [FromForm] UpdateExpenseDto updateDto, [FromForm] IFormFile? invoice)
     {
-        try
+        string? invoiceUrl = null;
+        if (invoice != null)
         {
-            string? invoiceUrl = null;
-            if (invoice != null)
+            // Obtener el gasto actual para eliminar la factura anterior si existe
+            var currentExpense = await _expenseService.GetExpenseByIdAsync(id);
+            if (currentExpense != null && !string.IsNullOrEmpty(currentExpense.InvoiceUrl))
             {
-                // Obtener el gasto actual para eliminar la factura anterior si existe
-                var currentExpense = await _expenseService.GetExpenseByIdAsync(id);
-                if (currentExpense != null && !string.IsNullOrEmpty(currentExpense.InvoiceUrl))
-                {
-                    DeleteInvoiceFile(currentExpense.InvoiceUrl);
-                }
-                invoiceUrl = await SaveInvoiceFileAsync(invoice);
+                DeleteInvoiceFile(currentExpense.InvoiceUrl);
             }
-
-            var expense = await _expenseService.UpdateExpenseAsync(id, updateDto, invoiceUrl);
-            if (expense == null)
-            {
-                return NotFound(ApiResponse<ExpenseDto>.ErrorResult("Gasto no encontrado", 404));
-            }
-
-            return Ok(ApiResponse<ExpenseDto>.SuccessResult(expense, "Gasto actualizado exitosamente", 200));
+            invoiceUrl = await SaveInvoiceFileAsync(invoice);
         }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ApiResponse<ExpenseDto>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
-        }
+
+        var expense = await _expenseService.UpdateExpenseAsync(id, updateDto, invoiceUrl);
+        if (expense == null)
+            return NotFoundError<ExpenseDto>("Gasto no encontrado");
+
+        return Success(expense, "Gasto actualizado exitosamente");
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<object>>> DeleteExpense(int id)
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> DeleteExpense(int id)
     {
-        try
-        {
-            var deleted = await _expenseService.DeleteExpenseAsync(id);
-            if (!deleted)
-            {
-                return NotFound(ApiResponse<object>.ErrorResult("Gasto no encontrado", 404));
-            }
+        var deleted = await _expenseService.DeleteExpenseAsync(id);
+        if (!deleted)
+            return NotFoundError("Gasto no encontrado");
 
-            return Ok(ApiResponse<object>.SuccessResult(null, "Gasto eliminado exitosamente", 200));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ApiResponse<object>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
-        }
+        return Success<object>(null, "Gasto eliminado exitosamente");
     }
     
     private async Task<string> SaveInvoiceFileAsync(IFormFile file)
@@ -170,7 +128,7 @@ public class ExpensesController : ControllerBase
 [ApiController]
 [Route("api/expense-categories")]
 [Authorize]
-public class ExpenseCategoriesController : ControllerBase
+public class ExpenseCategoriesController : BaseApiController
 {
     private readonly IExpenseService _expenseService;
 
@@ -180,17 +138,10 @@ public class ExpenseCategoriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ExpenseCategoryDto>>>> GetCategories()
+    public async Task<IActionResult> GetCategories()
     {
-        try
-        {
-            var categories = await _expenseService.GetCategoriesAsync();
-            return Ok(ApiResponse<IEnumerable<ExpenseCategoryDto>>.SuccessResult(categories, "Categorías obtenidas exitosamente", 200));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ApiResponse<IEnumerable<ExpenseCategoryDto>>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
-        }
+        var categories = await _expenseService.GetCategoriesAsync();
+        return Success(categories, "Categorías obtenidas exitosamente");
     }
 }
 

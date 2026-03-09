@@ -125,10 +125,30 @@ public class ExpensesController : BaseApiController
 
 ## ❌ Anti-Patterns a Evitar
 
-### NO HACER - Construcción Manual
+### 1. NO usar BaseApiController
 
 ```csharp
-// ❌ MAL - Construcción manual de ApiResponse
+// ❌ MAL - Heredar de ControllerBase
+[ApiController]
+[Route("api/[controller]")]
+public class ExpensesController : ControllerBase  // ❌ MAL
+{
+    // ...
+}
+
+// ✅ BIEN - Heredar de BaseApiController
+[ApiController]
+[Route("api/[controller]")]
+public class ExpensesController : BaseApiController  // ✅ BIEN
+{
+    // ...
+}
+```
+
+### 2. Construcción Manual de ApiResponse
+
+```csharp
+// ❌ MAL - Construcción manual con new
 return Ok(new ApiResponse<ExpenseDto>
 {
     Success = true,
@@ -137,34 +157,144 @@ return Ok(new ApiResponse<ExpenseDto>
     StatusCode = 200
 });
 
-// ❌ MAL - No usar BaseApiController
-public class ExpensesController : ControllerBase
-{
-    // ...
-}
-
-// ❌ MAL - Retornar datos sin ApiResponse
-return Ok(expense);
-
 // ❌ MAL - Usar métodos estáticos directamente
 return Ok(ApiResponse<ExpenseDto>.SuccessResult(expense, "...", 200));
-```
 
-### ✅ HACER - Usar BaseApiController
+// ❌ MAL - Usar StatusCode() con construcción manual
+return StatusCode(200, ApiResponse<object>.SuccessResult(data, "...", 200));
 
-```csharp
 // ✅ BIEN - Usar métodos helper de BaseApiController
 return Success(expense, "Gasto obtenido exitosamente");
+```
 
-// ✅ BIEN - Heredar de BaseApiController
-public class ExpensesController : BaseApiController
+### 3. Retornar datos sin ApiResponse
+
+```csharp
+// ❌ MAL - Retornar datos directamente
+[HttpGet]
+public async Task<IActionResult> GetExpenses()
 {
-    // ...
+    var expenses = await _expenseService.GetAllExpensesAsync();
+    return Ok(expenses);  // ❌ Sin ApiResponse
 }
 
-// ✅ BIEN - Usar métodos específicos
-return NotFoundError<ExpenseDto>("Gasto no encontrado");
-return Created(expense, "Gasto creado exitosamente");
+// ✅ BIEN - Usar Success() que envuelve en ApiResponse
+[HttpGet]
+public async Task<IActionResult> GetExpenses()
+{
+    var expenses = await _expenseService.GetAllExpensesAsync();
+    return Success(expenses, "Gastos obtenidos exitosamente");
+}
+```
+
+### 4. Usar Ok(), BadRequest(), NotFound() directamente
+
+```csharp
+// ❌ MAL - Usar métodos de ControllerBase directamente
+[HttpGet("{id}")]
+public async Task<IActionResult> GetExpense(int id)
+{
+    var expense = await _expenseService.GetExpenseByIdAsync(id);
+    if (expense == null)
+        return NotFound();  // ❌ Sin ApiResponse
+
+    return Ok(expense);  // ❌ Sin ApiResponse
+}
+
+// ✅ BIEN - Usar métodos helper de BaseApiController
+[HttpGet("{id}")]
+public async Task<IActionResult> GetExpense(int id)
+{
+    var expense = await _expenseService.GetExpenseByIdAsync(id);
+    if (expense == null)
+        return NotFoundError<ExpenseDto>("Gasto no encontrado");
+
+    return Success(expense, "Gasto obtenido exitosamente");
+}
+```
+
+### 5. Códigos de estado hardcodeados
+
+```csharp
+// ❌ MAL - Números hardcodeados
+return StatusCode(200, ApiResponse<object>.SuccessResult(data, "...", 200));
+return StatusCode(404, ApiResponse.ErrorResult("...", 404));
+return StatusCode(500, ApiResponse.ErrorResult("...", 500));
+
+// ✅ BIEN - Usar constantes de HttpStatusCodes
+return Success(data);  // Usa HttpStatusCodes.Ok internamente
+return NotFoundError("...");  // Usa HttpStatusCodes.NotFound internamente
+return InternalServerError("...");  // Usa HttpStatusCodes.InternalServerError
+```
+
+### 6. Try-catch innecesarios
+
+```csharp
+// ❌ MAL - Try-catch sin lógica específica
+[HttpGet]
+public async Task<IActionResult> GetApartments()
+{
+    try
+    {
+        var apartments = await _apartmentRepository.GetAllApartmentsAsync();
+        return Success(apartments, "Apartamentos obtenidos exitosamente");
+    }
+    catch (Exception)
+    {
+        return StatusCode(500, Error("Error al obtener los apartamentos", 500));
+    }
+}
+
+// ✅ BIEN - Sin try-catch (GlobalExceptionMiddleware lo maneja)
+[HttpGet]
+public async Task<IActionResult> GetApartments()
+{
+    var apartments = await _apartmentRepository.GetAllApartmentsAsync();
+    return Success(apartments, "Apartamentos obtenidos exitosamente");
+}
+```
+
+### 7. Mezclar patrones
+
+```csharp
+// ❌ MAL - Algunos métodos con ApiResponse, otros sin
+public class ExpensesController : BaseApiController
+{
+    [HttpGet]
+    public async Task<IActionResult> GetExpenses()
+    {
+        var expenses = await _expenseService.GetAllExpensesAsync();
+        return Ok(expenses);  // ❌ Sin ApiResponse
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetExpense(int id)
+    {
+        var expense = await _expenseService.GetExpenseByIdAsync(id);
+        return Success(expense, "...");  // ✅ Con ApiResponse
+    }
+}
+
+// ✅ BIEN - Todos los métodos usan el mismo patrón
+public class ExpensesController : BaseApiController
+{
+    [HttpGet]
+    public async Task<IActionResult> GetExpenses()
+    {
+        var expenses = await _expenseService.GetAllExpensesAsync();
+        return Success(expenses, "Gastos obtenidos exitosamente");
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetExpense(int id)
+    {
+        var expense = await _expenseService.GetExpenseByIdAsync(id);
+        if (expense == null)
+            return NotFoundError<ExpenseDto>("Gasto no encontrado");
+
+        return Success(expense, "Gasto obtenido exitosamente");
+    }
+}
 ```
 
 ---
@@ -179,7 +309,7 @@ El middleware global maneja excepciones no capturadas y las convierte en ApiResp
 
 **Beneficio:** No necesitas try-catch en cada método del controller.
 
-### Ejemplo
+### Regla General: NO usar try-catch
 
 ```csharp
 // ✅ BIEN - Sin try-catch (middleware lo maneja)
@@ -193,6 +323,27 @@ public async Task<IActionResult> GetExpense(int id)
     return Success(expense, "Gasto obtenido exitosamente");
 }
 
+[HttpGet]
+public async Task<IActionResult> GetApartments()
+{
+    var apartments = await _apartmentRepository.GetAllApartmentsAsync();
+    return Success(apartments, "Apartamentos obtenidos exitosamente");
+}
+
+[HttpDelete("{id}")]
+public async Task<IActionResult> DeleteExpense(int id)
+{
+    var deleted = await _expenseService.DeleteExpenseAsync(id);
+    if (!deleted)
+        return NotFoundError("Gasto no encontrado");
+
+    return Success("Gasto eliminado exitosamente");
+}
+```
+
+### ❌ Anti-Pattern: Try-catch innecesario
+
+```csharp
 // ❌ MAL - Try-catch innecesario
 [HttpGet("{id}")]
 public async Task<IActionResult> GetExpense(int id)
@@ -207,9 +358,130 @@ public async Task<IActionResult> GetExpense(int id)
         return StatusCode(500, Error($"Error: {ex.Message}", 500));
     }
 }
+
+// ❌ MAL - Try-catch genérico sin lógica específica
+[HttpGet]
+public async Task<IActionResult> GetApartments()
+{
+    try
+    {
+        var apartments = await _apartmentRepository.GetAllApartmentsAsync();
+        return Ok(ApiResponse<object>.SuccessResult(apartments, "...", 200));
+    }
+    catch (Exception)
+    {
+        return StatusCode(500, ApiResponse.ErrorResult("Error al obtener...", 500));
+    }
+}
 ```
 
-**Nota:** Solo usa try-catch si necesitas lógica específica de manejo de errores.
+### ✅ Cuándo SÍ usar try-catch
+
+Solo usa try-catch cuando necesitas:
+
+1. **Lógica específica de manejo de errores** (no solo retornar error genérico)
+2. **Continuar la ejecución** después de un error no crítico
+3. **Logging específico** antes de propagar la excepción
+
+**Ejemplo válido - Notificación no crítica:**
+```csharp
+[HttpPut("{paymentId}/approve")]
+public async Task<IActionResult> ApprovePayment(Guid paymentId)
+{
+    var payment = await _paymentRepository.GetByIdAsync(paymentId);
+    if (payment == null)
+        return NotFoundError("Pago no encontrado");
+
+    payment.Approve();
+    await _paymentRepository.UpdateAsync(payment);
+
+    // Try-catch VÁLIDO: La notificación no debe romper la operación principal
+    try
+    {
+        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.OwnerId == payment.OwnerId);
+        if (user != null)
+        {
+            await _notificationService.SendPaymentStatusNotificationAsync(
+                user.Id, payment.Id, UserStatusCodes.Approved, $"{user.FirstName} {user.LastName}", payment.Amount.Amount);
+        }
+    }
+    catch (Exception ex)
+    {
+        // Log error but continue - notification failure shouldn't break the operation
+        _logger.LogError(ex, "Failed to send notification for payment {PaymentId}", paymentId);
+    }
+
+    return Success(new { paymentId }, "Pago aprobado exitosamente");
+}
+```
+
+**Ejemplo válido - Cleanup de recursos:**
+```csharp
+[HttpPut("{id}")]
+public async Task<IActionResult> UpdateExpense(int id, [FromForm] UpdateExpenseDto updateDto, [FromForm] IFormFile? invoice)
+{
+    string? invoiceUrl = null;
+    if (invoice != null)
+    {
+        var currentExpense = await _expenseService.GetExpenseByIdAsync(id);
+        if (currentExpense != null && !string.IsNullOrEmpty(currentExpense.InvoiceUrl))
+        {
+            // Try-catch VÁLIDO: Eliminar archivo no debe romper la actualización
+            try
+            {
+                DeleteInvoiceFile(currentExpense.InvoiceUrl);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to delete old invoice file");
+            }
+        }
+        invoiceUrl = await SaveInvoiceFileAsync(invoice);
+    }
+
+    var expense = await _expenseService.UpdateExpenseAsync(id, updateDto, invoiceUrl);
+    if (expense == null)
+        return NotFoundError<ExpenseDto>("Gasto no encontrado");
+
+    return Success(expense, "Gasto actualizado exitosamente");
+}
+```
+
+### 🚫 Cuándo NO usar try-catch
+
+```csharp
+// ❌ MAL - Solo para retornar error genérico
+try
+{
+    var data = await _service.GetDataAsync();
+    return Success(data);
+}
+catch (Exception ex)
+{
+    return StatusCode(500, Error("Error al obtener datos", 500));
+}
+
+// ❌ MAL - Sin lógica específica de manejo
+try
+{
+    await _repository.DeleteAsync(id);
+    return Success("Eliminado");
+}
+catch
+{
+    return StatusCode(500, Error("Error", 500));
+}
+
+// ❌ MAL - Catch vacío
+try
+{
+    await _service.DoSomethingAsync();
+}
+catch (Exception ex)
+{
+    // Catch vacío - nunca hagas esto
+}
+```
 
 ---
 
@@ -283,3 +555,57 @@ this.expenseService.getExpenses().subscribe({
 3. **NUNCA** construyas `ApiResponse` manualmente
 4. **NUNCA** retornes datos sin `ApiResponse`
 5. **EVITA** try-catch innecesarios (usa GlobalExceptionMiddleware)
+6. **NUNCA** hardcodees status codes HTTP (usa los métodos helper que ya los incluyen)
+
+---
+
+## 🚫 Anti-Pattern: Status Codes Hardcodeados
+
+### ❌ MAL - Status codes hardcodeados
+
+```csharp
+// ❌ MAL - Try-catch innecesario + status codes hardcodeados
+[HttpGet]
+public async Task<IActionResult> GetStatuses()
+{
+    try
+    {
+        var statuses = await _catalogRepository.GetStatusesAsync();
+        return StatusCode(200, ApiResponse<object>.SuccessResult(statuses, "...", 200));
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, ApiResponse<object>.ErrorResult("Error interno del servidor", 500));
+    }
+}
+
+// ❌ MAL - Duplicación de status codes
+return StatusCode(404, ApiResponse<object>.ErrorResult("No encontrado", 404));
+return StatusCode(400, ApiResponse<object>.ErrorResult("Datos inválidos", 400));
+```
+
+### ✅ BIEN - Usar métodos helper de BaseApiController
+
+```csharp
+// ✅ BIEN - Sin try-catch, sin status codes hardcodeados
+[HttpGet]
+public async Task<IActionResult> GetStatuses()
+{
+    var statuses = await _catalogRepository.GetStatusesAsync();
+    return Success(statuses, "Estados obtenidos exitosamente");
+}
+
+// ✅ BIEN - Métodos helper ya incluyen el status code correcto
+return NotFoundError("No encontrado");        // 404 automático
+return BadRequestError("Datos inválidos");    // 400 automático
+return UnauthorizedError("No autorizado");    // 401 automático
+return Success(data, "Éxito");                // 200 automático
+return Created(data, "Creado");               // 201 automático
+```
+
+**Beneficios**:
+- No duplicas el status code (una vez en `StatusCode()` y otra en `ApiResponse`)
+- Código más limpio y legible
+- Menos propenso a errores (status code inconsistente)
+- GlobalExceptionMiddleware maneja errores 500 automáticamente
+

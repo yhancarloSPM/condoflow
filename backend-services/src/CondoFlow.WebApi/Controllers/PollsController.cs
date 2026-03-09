@@ -1,6 +1,7 @@
 using CondoFlow.Application.DTOs;
 using CondoFlow.Application.Interfaces.Services;
 using CondoFlow.Application.Common.Models;
+using CondoFlow.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -45,7 +46,7 @@ public class PollsController : BaseApiController
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> CreatePoll([FromBody] CreatePollDto createDto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -63,7 +64,7 @@ public class PollsController : BaseApiController
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> UpdatePoll(int id, [FromBody] CreatePollDto updateDto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -161,7 +162,7 @@ public class PollsController : BaseApiController
     }
 
     [HttpPut("{id}/close")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> ClosePoll(int id)
     {
         var success = await _pollService.ClosePollAsync(id);
@@ -172,7 +173,7 @@ public class PollsController : BaseApiController
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> DeletePoll(int id)
     {
         var success = await _pollService.DeletePollAsync(id);

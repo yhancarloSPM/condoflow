@@ -1,4 +1,5 @@
 using CondoFlow.Application.Common.Models;
+using CondoFlow.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CondoFlow.WebApi.Controllers;
@@ -12,7 +13,7 @@ public abstract class BaseApiController : ControllerBase
     /// <summary>
     /// Retorna una respuesta exitosa con datos.
     /// </summary>
-    protected IActionResult Success<T>(T data, string message = "Operation completed successfully", int statusCode = 200)
+    protected IActionResult Success<T>(T data, string message = "Operation completed successfully", int statusCode = HttpStatusCodes.Ok)
     {
         return StatusCode(statusCode, ApiResponse<T>.SuccessResult(data, message, statusCode));
     }
@@ -20,23 +21,23 @@ public abstract class BaseApiController : ControllerBase
     /// <summary>
     /// Retorna una respuesta exitosa sin datos.
     /// </summary>
-    protected IActionResult Success(string message = "Operation completed successfully", int statusCode = 200)
+    protected IActionResult Success(string message = "Operation completed successfully", int statusCode = HttpStatusCodes.Ok)
     {
-        return StatusCode(statusCode, ApiResponse.SuccessResult(message, statusCode));
+        return StatusCode(statusCode, ApiResponse<object>.SuccessResult(message, statusCode));
     }
 
     /// <summary>
     /// Retorna una respuesta de error.
     /// </summary>
-    protected IActionResult Error(string message, int statusCode = 400, List<string>? errors = null)
+    protected IActionResult Error(string message, int statusCode = HttpStatusCodes.BadRequest, List<string>? errors = null)
     {
-        return StatusCode(statusCode, ApiResponse.ErrorResult(message, statusCode, errors));
+        return StatusCode(statusCode, ApiResponse<object>.ErrorResult(message, statusCode, errors));
     }
 
     /// <summary>
     /// Retorna una respuesta de error con tipo genérico.
     /// </summary>
-    protected IActionResult Error<T>(string message, int statusCode = 400, List<string>? errors = null)
+    protected IActionResult Error<T>(string message, int statusCode = HttpStatusCodes.BadRequest, List<string>? errors = null)
     {
         return StatusCode(statusCode, ApiResponse<T>.ErrorResult(message, statusCode, errors));
     }
@@ -46,7 +47,7 @@ public abstract class BaseApiController : ControllerBase
     /// </summary>
     protected IActionResult NotFoundError(string message = "Resource not found")
     {
-        return NotFound(ApiResponse.ErrorResult(message, 404));
+        return NotFound(ApiResponse<object>.ErrorResult(message, HttpStatusCodes.NotFound));
     }
 
     /// <summary>
@@ -54,7 +55,7 @@ public abstract class BaseApiController : ControllerBase
     /// </summary>
     protected IActionResult NotFoundError<T>(string message = "Resource not found")
     {
-        return NotFound(ApiResponse<T>.ErrorResult(message, 404));
+        return NotFound(ApiResponse<T>.ErrorResult(message, HttpStatusCodes.NotFound));
     }
 
     /// <summary>
@@ -62,7 +63,7 @@ public abstract class BaseApiController : ControllerBase
     /// </summary>
     protected IActionResult UnauthorizedError(string message = "Unauthorized access")
     {
-        return Unauthorized(ApiResponse.ErrorResult(message, 401));
+        return Unauthorized(ApiResponse<object>.ErrorResult(message, HttpStatusCodes.Unauthorized));
     }
 
     /// <summary>
@@ -70,7 +71,7 @@ public abstract class BaseApiController : ControllerBase
     /// </summary>
     protected IActionResult ForbiddenError(string message = "Access forbidden")
     {
-        return StatusCode(403, ApiResponse.ErrorResult(message, 403));
+        return StatusCode(HttpStatusCodes.Forbidden, ApiResponse<object>.ErrorResult(message, HttpStatusCodes.Forbidden));
     }
 
     /// <summary>
@@ -78,7 +79,7 @@ public abstract class BaseApiController : ControllerBase
     /// </summary>
     protected IActionResult BadRequestError(string message = "Invalid request", List<string>? errors = null)
     {
-        return BadRequest(ApiResponse.ErrorResult(message, 400, errors));
+        return BadRequest(ApiResponse<object>.ErrorResult(message, HttpStatusCodes.BadRequest, errors));
     }
 
     /// <summary>
@@ -86,7 +87,7 @@ public abstract class BaseApiController : ControllerBase
     /// </summary>
     protected IActionResult Created<T>(T data, string message = "Resource created successfully")
     {
-        return StatusCode(201, ApiResponse<T>.SuccessResult(data, message, 201));
+        return StatusCode(HttpStatusCodes.Created, ApiResponse<T>.SuccessResult(data, message, HttpStatusCodes.Created));
     }
 
     /// <summary>
@@ -95,5 +96,21 @@ public abstract class BaseApiController : ControllerBase
     protected IActionResult NoContentSuccess()
     {
         return NoContent();
+    }
+
+    /// <summary>
+    /// Retorna una respuesta 500 Internal Server Error.
+    /// </summary>
+    protected IActionResult InternalServerError(string message = "Internal server error")
+    {
+        return StatusCode(HttpStatusCodes.InternalServerError, ApiResponse<object>.ErrorResult(message, HttpStatusCodes.InternalServerError));
+    }
+
+    /// <summary>
+    /// Retorna una respuesta 500 Internal Server Error con tipo genérico.
+    /// </summary>
+    protected IActionResult InternalServerError<T>(string message = "Internal server error")
+    {
+        return StatusCode(HttpStatusCodes.InternalServerError, ApiResponse<T>.ErrorResult(message, HttpStatusCodes.InternalServerError));
     }
 }
