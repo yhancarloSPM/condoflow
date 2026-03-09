@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
-interface CacheEntry {
-  response: any;
+interface CacheEntry<T> {
+  response: T;
   timestamp: number;
 }
 
@@ -9,10 +9,10 @@ interface CacheEntry {
   providedIn: 'root'
 })
 export class CacheService {
-  private cache = new Map<string, CacheEntry>();
+  private cache = new Map<string, CacheEntry<unknown>>();
   private readonly defaultCacheDuration = 30000; // 30 segundos
 
-  get(url: string, cacheDuration: number = this.defaultCacheDuration): any | null {
+  get<T>(url: string, cacheDuration: number = this.defaultCacheDuration): T | null {
     const entry = this.cache.get(url);
     
     if (!entry) {
@@ -27,10 +27,10 @@ export class CacheService {
       return null;
     }
 
-    return entry.response;
+    return entry.response as T;
   }
 
-  set(url: string, response: any): void {
+  set<T>(url: string, response: T): void {
     this.cache.set(url, {
       response,
       timestamp: Date.now()
