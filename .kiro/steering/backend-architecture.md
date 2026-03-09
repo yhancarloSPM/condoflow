@@ -755,3 +755,72 @@ builder.Services.AddScoped<IXService, Application.Services.XService>();
 - [ ] ¿Se evitan valores hardcodeados? → ✅ Aprobar
 - [ ] ¿Se usan enums/constantes en lugar de strings? → ✅ Aprobar
 - [ ] ¿Se usa configuración para valores variables? → ✅ Aprobar
+
+
+---
+
+## 🚫 Anti-Pattern #5: Uso de `dynamic`
+
+### ❌ MAL - Usar `dynamic`
+
+El uso de `dynamic` elimina el tipado estático de C# y puede causar errores en tiempo de ejecución.
+
+```csharp
+// ❌ MAL - dynamic en mapeo
+private async Task<ReservationDto> MapToDtoAsync(Reservation reservation)
+{
+    var dto = await _reservationService.MapReservationToDtoAsync(reservation);
+    var dtoData = dto as dynamic;  // ❌ Pérdida de type safety
+    
+    return new ReservationDto
+    {
+        Id = dtoData.Id,  // ❌ No hay validación en compile time
+        UserName = dtoData.UserName,
+        // ...
+    };
+}
+
+// ❌ MAL - dynamic en servicios
+public async Task<dynamic> GetUserData(string userId)
+{
+    var user = await _userRepository.GetByIdAsync(userId);
+    return user;  // ❌ Retorna dynamic
+}
+```
+
+**Problemas:**
+- No hay type safety
+- Errores en runtime en lugar de compile time
+- No hay autocompletado en el IDE
+- Difícil de refactorizar
+- Similar al anti-patrón de `any` en TypeScript
+
+### ✅ BIEN - Usar tipos específicos
+
+```csharp
+// ✅ BIEN - Retornar tipo específico
+private async Task<ReservationDto> MapToDtoAsync(Reservation reservation)
+{
+    var dto = await _reservationService.MapReservationToDtoAsync(reservation);
+    return dto;  // ✅ Tipo específico
+}
+
+// ✅ BIEN - Si el servicio ya retorna el tipo correcto, usarlo directamente
+public async Task<ReservationDto> GetReservationAsync(Guid id)
+{
+    var reservation = await _reservationRepository.GetByIdAsync(id);
+    return await _reservationService.MapReservationToDtoAsync(reservation);
+}
+
+// ✅ BIEN - Usar AutoMapper para mapeo
+public async Task<UserDto> GetUserData(string userId)
+{
+    var user = await _userRepository.GetByIdAsync(userId);
+    return _mapper.Map<UserDto>(user);
+}
+```
+
+### Regla de Oro
+
+**NUNCA uses `dynamic` a menos que sea absolutamente necesario (ej: interoperabilidad con COM, reflection avanzada). En el 99% de los casos, hay una alternativa mejor con tipos específicos.**
+

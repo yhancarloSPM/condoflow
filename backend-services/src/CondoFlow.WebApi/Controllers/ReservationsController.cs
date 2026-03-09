@@ -1,10 +1,6 @@
 using CondoFlow.Application.Common.DTOs.Reservation;
-using CondoFlow.Application.Common.Models;
-using CondoFlow.Application.Common.Services;
 using CondoFlow.Application.Interfaces.Services;
-using CondoFlow.Domain.Entities;
 using CondoFlow.Domain.Enums;
-using CondoFlow.Application.Interfaces.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -14,146 +10,76 @@ namespace CondoFlow.WebApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ReservationsController : ControllerBase
+public class ReservationsController : BaseApiController
 {
-    private readonly IReservationRepository _reservationRepository;
-    private readonly INotificationService _notificationService;
     private readonly IReservationService _reservationService;
 
-    public ReservationsController(
-        IReservationRepository reservationRepository, 
-        INotificationService notificationService,
-        IReservationService reservationService)
+    public ReservationsController(IReservationService reservationService)
     {
-        _reservationRepository = reservationRepository;
-        _notificationService = notificationService;
         _reservationService = reservationService;
     }
 
     [HttpGet]
     [Authorize(Roles = UserRoles.Admin)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ReservationDto>>>> GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        var reservations = await _reservationRepository.GetAllAsync();
-        var reservationDtos = new List<ReservationDto>();
-        
-        foreach (var reservation in reservations)
-        {
-            reservationDtos.Add(await MapToDtoAsync(reservation));
-        }
-        
-        return Ok(ApiResponse<IEnumerable<ReservationDto>>.SuccessResult(
-            reservationDtos, 
-            "Reservas obtenidas exitosamente"));
+        var reservations = await _reservationService.GetAllReservationsAsync();
+        return Success(reservations, "Reservas obtenidas exitosamente");
     }
 
     [HttpGet("my-reservations")]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ReservationDto>>>> GetMyReservations()
+    public async Task<IActionResult> GetMyReservations()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
+            return UnauthorizedError();
 
-        var reservations = await _reservationRepository.GetByUserIdAsync(userId);
-        var reservationDtos = new List<ReservationDto>();
-        
-        foreach (var reservation in reservations)
-        {
-            reservationDtos.Add(await MapToDtoAsync(reservation));
-        }
-        
-        return Ok(ApiResponse<IEnumerable<ReservationDto>>.SuccessResult(
-            reservationDtos, 
-            "Mis reservas obtenidas exitosamente"));
+        var reservations = await _reservationService.GetUserReservationsAsync(userId);
+        return Success(reservations, "Mis reservas obtenidas exitosamente");
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ApiResponse<ReservationDto>>> GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id)
     {
-        var reservation = await _reservationRepository.GetByIdAsync(id);
-        if (reservation == null)
-            return NotFound(ApiResponse<ReservationDto>.ErrorResult("Reserva no encontrada"));
-
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
         var isAdmin = User.IsInRole(UserRoles.Admin);
         
-        if (!isAdmin && reservation.UserId != userId)
-            return Forbid();
+        try
+        {
+            var reservation = await _reservationService.GetReservationByIdAsync(id, userId, isAdmin);
+            if (reservation == null)
+                return NotFoundError<ReservationDto>("Reserva no encontrada");
 
-        return Ok(ApiResponse<ReservationDto>.SuccessResult(
-            await MapToDtoAsync(reservation), 
-            "Reserva obtenida exitosamente"));
+            return Success(reservation, "Reserva obtenida exitosamente");
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return ForbiddenError("No tienes permiso para ver esta reserva");
+        }
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<ReservationDto>>> Create(CreateReservationDto dto)
+    public async Task<IActionResult> Create(CreateReservationDto dto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
+            return UnauthorizedError();
 
-        // Debug: Log received data
-
-
-        // Validaciones de negocio
-        if (dto.ReservationDate.Date <= DateTime.Now.Date)
-            return BadRequest(ApiResponse<ReservationDto>.ErrorResult("La fecha de reserva debe ser futura"));
-
-        if (!TimeSpan.TryParse(dto.StartTime, out var startTime) || !TimeSpan.TryParse(dto.EndTime, out var endTime))
-            return BadRequest(ApiResponse<ReservationDto>.ErrorResult("Formato de hora inválido"));
-
-        // Validar que no sean la misma hora
-        if (startTime == endTime)
-            return BadRequest(ApiResponse<ReservationDto>.ErrorResult("La hora de inicio debe ser diferente a la hora de fin"));
-
-        // Verificar disponibilidad
-        var isAvailable = await _reservationRepository.IsSlotAvailableAsync(
-            dto.ReservationDate, startTime, endTime);
-        
-        if (!isAvailable)
-            return BadRequest(ApiResponse<ReservationDto>.ErrorResult("El horario seleccionado no está disponible"));
-
-        // Verificar límite de reservas por mes (máximo 5 reservas por mes)
-        var userReservations = await _reservationRepository.GetByUserIdAsync(userId);
-        var monthlyReservations = userReservations.Count(r => 
-            (r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Confirmed) &&
-            r.ReservationDate.Month == dto.ReservationDate.Month &&
-            r.ReservationDate.Year == dto.ReservationDate.Year);
-        
-        if (monthlyReservations >= 5)
-            return BadRequest(ApiResponse<ReservationDto>.ErrorResult("Has alcanzado el límite de 5 reservas para este mes. Puedes crear nuevas reservas el próximo mes o cancelar una reserva existente."));
-
-        var reservation = new Reservation
+        try
         {
-            UserId = userId,
-            ReservationDate = dto.ReservationDate,
-            StartTime = startTime,
-            EndTime = endTime,
-            Notes = dto.Notes,
-            EventTypeCode = dto.EventTypeCode,
-            Status = ReservationStatus.Pending
-        };
-
-        var created = await _reservationRepository.CreateAsync(reservation);
-        var createdReservation = await _reservationRepository.GetByIdAsync(created.Id);
-        
-        // Enviar notificación al admin cuando se crea una nueva reserva
-        await SendNewReservationNotificationToAdmin(createdReservation!);
-        
-        return CreatedAtAction(nameof(GetById), new { id = created.Id },
-            ApiResponse<ReservationDto>.SuccessResult(
-                await MapToDtoAsync(createdReservation!), 
-                "Reserva creada exitosamente"));
+            var reservation = await _reservationService.CreateReservationAsync(dto, userId);
+            return Created(reservation, "Reserva creada exitosamente");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequestError(ex.Message);
+        }
     }
 
     [HttpPut("{id}/status")]
     [Authorize(Roles = UserRoles.Admin)]
-    public async Task<ActionResult<ApiResponse<ReservationDto>>> UpdateStatus(Guid id, [FromBody] object request)
+    public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] object request)
     {
-        var reservation = await _reservationRepository.GetByIdAsync(id);
-        if (reservation == null)
-            return NotFound(ApiResponse<ReservationDto>.ErrorResult("Reserva no encontrada"));
-
         string status;
         string? reason = null;
 
@@ -171,59 +97,29 @@ public class ReservationsController : ControllerBase
         }
         else
         {
-            return BadRequest(ApiResponse<ReservationDto>.ErrorResult("Formato de solicitud inválido"));
+            return BadRequestError("Formato de solicitud inválido");
         }
 
-        if (!Enum.TryParse<ReservationStatus>(status, out var newStatus))
-            return BadRequest(ApiResponse<ReservationDto>.ErrorResult("Estado inválido"));
-
-        // Validar que el motivo sea obligatorio para rechazos
-        if (newStatus == ReservationStatus.Rejected)
+        try
         {
-            if (string.IsNullOrWhiteSpace(reason))
-                return BadRequest(ApiResponse<ReservationDto>.ErrorResult("El motivo de rechazo es obligatorio"));
-            
-            if (reason.Length < 10)
-                return BadRequest(ApiResponse<ReservationDto>.ErrorResult("El motivo de rechazo debe tener al menos 10 caracteres"));
-                
-            reservation.Reject(reason);
+            var reservation = await _reservationService.UpdateReservationStatusAsync(id, status, reason);
+            return Success(reservation, "Estado de reserva actualizado exitosamente");
         }
-        else if (newStatus == ReservationStatus.Confirmed)
+        catch (KeyNotFoundException ex)
         {
-            reservation.Confirm();
+            return NotFoundError<ReservationDto>(ex.Message);
         }
-        else
+        catch (InvalidOperationException ex)
         {
-            reservation.Status = newStatus;
+            return BadRequestError(ex.Message);
         }
-        
-        var updated = await _reservationRepository.UpdateAsync(reservation);
-        
-        // Enviar notificación al propietario
-        await SendReservationStatusNotification(updated, reason);
-        
-        return Ok(ApiResponse<ReservationDto>.SuccessResult(
-            await MapToDtoAsync(updated), 
-            "Estado de reserva actualizado exitosamente"));
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<ApiResponse<object>>> Cancel(Guid id, [FromBody] object? request = null)
+    public async Task<IActionResult> Cancel(Guid id, [FromBody] object? request = null)
     {
-        var reservation = await _reservationRepository.GetByIdAsync(id);
-        if (reservation == null)
-            return NotFound(ApiResponse<object>.ErrorResult("Reserva no encontrada"));
-
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
         var isAdmin = User.IsInRole(UserRoles.Admin);
-        
-        if (!isAdmin && reservation.UserId != userId)
-            return Forbid();
-
-        // Solo permitir cancelar reservas pendientes o confirmadas
-        if (reservation.Status != ReservationStatus.Pending && 
-            reservation.Status != ReservationStatus.Confirmed)
-            return BadRequest(ApiResponse<object>.ErrorResult("No se puede cancelar esta reserva"));
 
         string? reason = null;
         if (request != null && request is System.Text.Json.JsonElement jsonElement)
@@ -234,149 +130,39 @@ public class ReservationsController : ControllerBase
             }
         }
 
-        reservation.Cancel(reason);
-        await _reservationRepository.UpdateAsync(reservation);
-        
-        // Enviar notificación al admin cuando el owner cancela
-        if (!isAdmin)
+        try
         {
-            await SendCancellationNotificationToAdmin(reservation, reason);
+            await _reservationService.CancelReservationAsync(id, userId, isAdmin, reason);
+            return Success<object>(null, "Reserva cancelada exitosamente");
         }
-        
-        return Ok(ApiResponse<object>.SuccessResult("Reserva cancelada exitosamente"));
+        catch (KeyNotFoundException ex)
+        {
+            return NotFoundError(ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ForbiddenError(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequestError(ex.Message);
+        }
     }
 
     [HttpGet("slots")]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ReservationSlotDto>>>> GetAvailableSlots()
+    public async Task<IActionResult> GetAvailableSlots()
     {
-        var slots = await _reservationRepository.GetAvailableSlotsAsync();
-        var slotDtos = slots.Select(s => new ReservationSlotDto
-        {
-            Id = s.Id,
-            Name = s.Name,
-            StartTime = s.StartTime,
-            EndTime = s.EndTime,
-            IsAvailable = s.IsAvailable
-        });
-        
-        return Ok(ApiResponse<IEnumerable<ReservationSlotDto>>.SuccessResult(
-            slotDtos, 
-            "Horarios disponibles obtenidos exitosamente"));
+        var slots = await _reservationService.GetAvailableSlotsAsync();
+        return Success(slots, "Horarios disponibles obtenidos exitosamente");
     }
 
     [HttpGet("availability")]
-    public async Task<ActionResult<ApiResponse<bool>>> CheckAvailability(
+    public async Task<IActionResult> CheckAvailability(
         [FromQuery] DateTime date, 
         [FromQuery] TimeSpan startTime, 
         [FromQuery] TimeSpan endTime)
     {
-        var isAvailable = await _reservationRepository.IsSlotAvailableAsync(date, startTime, endTime);
-        
-        return Ok(ApiResponse<bool>.SuccessResult(
-            isAvailable, 
-            isAvailable ? "Horario disponible" : "Horario no disponible"));
-    }
-
-    private async Task<ReservationDto> MapToDtoAsync(Reservation reservation)
-    {
-        var dto = await _reservationService.MapReservationToDtoAsync(reservation);
-        var dtoData = dto as dynamic;
-        
-        return new ReservationDto
-        {
-            Id = dtoData.Id,
-            UserId = dtoData.UserId,
-            UserName = dtoData.UserName,
-            ReservationDate = dtoData.ReservationDate,
-            StartTime = dtoData.StartTime,
-            EndTime = dtoData.EndTime,
-            Status = dtoData.Status,
-            Notes = dtoData.Notes,
-            RejectionReason = dtoData.RejectionReason,
-            CancellationReason = dtoData.CancellationReason,
-            EventTypeCode = dtoData.EventTypeCode,
-            CreatedAt = dtoData.CreatedAt,
-            UpdatedAt = dtoData.UpdatedAt
-        };
-    }
-    
-    private async Task SendReservationStatusNotification(Reservation reservation, string? rejectionReason = null)
-    {
-        Console.WriteLine($"[DEBUG] SendReservationStatusNotification llamado para reserva {reservation.Id}, estado: {reservation.Status}");
-        
-        string title, message;
-        
-        if (reservation.Status == ReservationStatus.Confirmed)
-        {
-            title = "Reserva Confirmada";
-            message = $"Tu reserva del gazebo para el {reservation.ReservationDate:dd/MM/yyyy} de {reservation.StartTime.Hours:00}:{reservation.StartTime.Minutes:00} a {reservation.EndTime.Hours:00}:{reservation.EndTime.Minutes:00} ha sido confirmada.";
-        }
-        else if (reservation.Status == ReservationStatus.Rejected)
-        {
-            title = "Reserva Rechazada";
-            message = $"Tu reserva del gazebo para el {reservation.ReservationDate:dd/MM/yyyy} ha sido rechazada.";
-            if (!string.IsNullOrEmpty(rejectionReason))
-            {
-                message += $" Motivo: {rejectionReason}";
-            }
-        }
-        else
-        {
-            Console.WriteLine($"[DEBUG] No se envía notificación para estado: {reservation.Status}");
-            return; // No enviar notificación para otros estados
-        }
-        
-        Console.WriteLine($"[DEBUG] Enviando notificación: {title}");
-        
-        await _notificationService.CreateNotificationAsync(
-            reservation.UserId,
-            title,
-            message,
-            "Reservation",
-            reservation.Id.ToString()
-        );
-        
-        Console.WriteLine($"[DEBUG] Notificación enviada exitosamente");
-    }
-    
-    private async Task SendCancellationNotificationToAdmin(Reservation reservation, string? cancellationReason)
-    {
-        var dto = await _reservationService.MapReservationToDtoAsync(reservation);
-        var dtoData = dto as dynamic;
-        var userName = dtoData.UserName as string;
-        
-        var title = "Reserva Cancelada por Propietario";
-        var message = $"{userName} ha cancelado su reserva del gazebo para el {reservation.ReservationDate:dd/MM/yyyy} de {reservation.StartTime.Hours:00}:{reservation.StartTime.Minutes:00} a {reservation.EndTime.Hours:00}:{reservation.EndTime.Minutes:00}.";
-        
-        if (!string.IsNullOrEmpty(cancellationReason))
-        {
-            message += $" Motivo: {cancellationReason}";
-        }
-        
-        // Enviar notificación al grupo de administradores
-        await _notificationService.SendAdminNotificationAsync(
-            title,
-            message,
-            "Reservation",
-            reservation.Id.ToString()
-        );
-    }
-    
-    private async Task SendNewReservationNotificationToAdmin(Reservation reservation)
-    {
-        var dto = await _reservationService.MapReservationToDtoAsync(reservation);
-        var dtoData = dto as dynamic;
-        var userName = dtoData.UserName as string;
-        
-        var title = "Nueva Reserva de Gazebo";
-        var message = $"{userName} ha solicitado una reserva del gazebo para el {reservation.ReservationDate:dd/MM/yyyy} de {reservation.StartTime.Hours:00}:{reservation.StartTime.Minutes:00} a {reservation.EndTime.Hours:00}:{reservation.EndTime.Minutes:00}. Requiere aprobación.";
-        
-        // Enviar notificación al grupo de administradores
-        await _notificationService.SendAdminNotificationAsync(
-            title,
-            message,
-            "Reservation",
-            reservation.Id.ToString()
-        );
+        var isAvailable = await _reservationService.CheckAvailabilityAsync(date, startTime, endTime);
+        return Success(isAvailable, isAvailable ? "Horario disponible" : "Horario no disponible");
     }
 }
