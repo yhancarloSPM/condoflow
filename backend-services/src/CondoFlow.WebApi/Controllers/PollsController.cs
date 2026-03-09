@@ -10,7 +10,7 @@ namespace CondoFlow.WebApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class PollsController : ControllerBase
+public class PollsController : BaseApiController
 {
     private readonly IPollService _pollService;
 
@@ -20,452 +20,165 @@ public class PollsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<IEnumerable<PollDto>>>> GetPolls()
+    public async Task<IActionResult> GetPolls()
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new ApiResponse<IEnumerable<PollDto>>
-                {
-                    Success = false,
-                    Message = "Usuario no autenticado"
-                });
-            }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            var polls = await _pollService.GetAllPollsAsync(userId);
-            return Ok(new ApiResponse<IEnumerable<PollDto>>
-            {
-                Success = true,
-                Data = polls,
-                Message = "Encuestas obtenidas exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<IEnumerable<PollDto>>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        var polls = await _pollService.GetAllPollsAsync(userId);
+        return Success(polls, "Encuestas obtenidas exitosamente");
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ApiResponse<PollDto>>> GetPoll(int id)
+    public async Task<IActionResult> GetPoll(int id)
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new ApiResponse<PollDto>
-                {
-                    Success = false,
-                    Message = "Usuario no autenticado"
-                });
-            }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            var poll = await _pollService.GetPollByIdAsync(id, userId);
-            if (poll == null)
-            {
-                return NotFound(new ApiResponse<PollDto>
-                {
-                    Success = false,
-                    Message = "Encuesta no encontrada"
-                });
-            }
+        var poll = await _pollService.GetPollByIdAsync(id, userId);
+        if (poll == null)
+            return NotFoundError<PollDto>("Encuesta no encontrada");
 
-            return Ok(new ApiResponse<PollDto>
-            {
-                Success = true,
-                Data = poll,
-                Message = "Encuesta obtenida exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<PollDto>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        return Success(poll, "Encuesta obtenida exitosamente");
     }
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<PollDto>>> CreatePoll([FromBody] CreatePollDto createDto)
+    public async Task<IActionResult> CreatePoll([FromBody] CreatePollDto createDto)
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new ApiResponse<PollDto>
-                {
-                    Success = false,
-                    Message = "Usuario no autenticado"
-                });
-            }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            if (createDto.Options.Count < 2)
-            {
-                return BadRequest(new ApiResponse<PollDto>
-                {
-                    Success = false,
-                    Message = "La encuesta debe tener al menos 2 opciones"
-                });
-            }
+        if (createDto.Options.Count < 2)
+            return BadRequestError("La encuesta debe tener al menos 2 opciones");
 
-            if (createDto.EndDate <= createDto.StartDate)
-            {
-                return BadRequest(new ApiResponse<PollDto>
-                {
-                    Success = false,
-                    Message = "La fecha de fin debe ser posterior a la fecha de inicio"
-                });
-            }
+        if (createDto.EndDate <= createDto.StartDate)
+            return BadRequestError("La fecha de fin debe ser posterior a la fecha de inicio");
 
-            var poll = await _pollService.CreatePollAsync(createDto, userId);
-            return CreatedAtAction(nameof(GetPoll), new { id = poll.Id }, new ApiResponse<PollDto>
-            {
-                Success = true,
-                Data = poll,
-                Message = "Encuesta creada exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<PollDto>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        var poll = await _pollService.CreatePollAsync(createDto, userId);
+        return Created(poll, "Encuesta creada exitosamente");
     }
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<PollDto>>> UpdatePoll(int id, [FromBody] CreatePollDto updateDto)
+    public async Task<IActionResult> UpdatePoll(int id, [FromBody] CreatePollDto updateDto)
     {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
+
+        if (updateDto.Options.Count < 2)
+            return BadRequestError("La encuesta debe tener al menos 2 opciones");
+
+        if (updateDto.EndDate <= updateDto.StartDate)
+            return BadRequestError("La fecha de fin debe ser posterior a la fecha de inicio");
+
         try
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new ApiResponse<PollDto>
-                {
-                    Success = false,
-                    Message = "Usuario no autenticado"
-                });
-            }
-
-            if (updateDto.Options.Count < 2)
-            {
-                return BadRequest(new ApiResponse<PollDto>
-                {
-                    Success = false,
-                    Message = "La encuesta debe tener al menos 2 opciones"
-                });
-            }
-
-            if (updateDto.EndDate <= updateDto.StartDate)
-            {
-                return BadRequest(new ApiResponse<PollDto>
-                {
-                    Success = false,
-                    Message = "La fecha de fin debe ser posterior a la fecha de inicio"
-                });
-            }
-
             var poll = await _pollService.UpdatePollAsync(id, updateDto, userId);
-            return Ok(new ApiResponse<PollDto>
-            {
-                Success = true,
-                Data = poll,
-                Message = "Encuesta actualizada exitosamente"
-            });
+            return Success(poll, "Encuesta actualizada exitosamente");
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new ApiResponse<PollDto>
-            {
-                Success = false,
-                Message = ex.Message
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<PollDto>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
+            return BadRequestError(ex.Message);
         }
     }
 
     [HttpPost("{id}/vote")]
-    public async Task<ActionResult<ApiResponse<object>>> Vote(int id, [FromBody] VoteDto voteDto)
+    public async Task<IActionResult> Vote(int id, [FromBody] VoteDto voteDto)
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Usuario no autenticado"
-                });
-            }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            voteDto.PollId = id; // Asegurar que el ID coincida
-            var success = await _pollService.VoteAsync(voteDto, userId);
-            
-            if (!success)
-            {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "No se pudo registrar el voto. Verifique que la encuesta esté activa y la opción sea válida."
-                });
-            }
+        voteDto.PollId = id;
+        var success = await _pollService.VoteAsync(voteDto, userId);
+        
+        if (!success)
+            return BadRequestError("No se pudo registrar el voto. Verifique que la encuesta esté activa y la opción sea válida.");
 
-            return Ok(new ApiResponse<object>
-            {
-                Success = true,
-                Message = "Voto registrado exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<object>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        return Success<object>(null!, "Voto registrado exitosamente");
     }
 
     [HttpPost("{id}/vote-multiple")]
-    public async Task<ActionResult<ApiResponse<object>>> VoteMultiple(int id, [FromBody] MultipleVoteDto voteDto)
+    public async Task<IActionResult> VoteMultiple(int id, [FromBody] MultipleVoteDto voteDto)
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Usuario no autenticado"
-                });
-            }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            if (voteDto.OptionIds == null || !voteDto.OptionIds.Any())
-            {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Debe seleccionar al menos una opción"
-                });
-            }
+        if (voteDto.OptionIds == null || !voteDto.OptionIds.Any())
+            return BadRequestError("Debe seleccionar al menos una opción");
 
-            voteDto.PollId = id; // Asegurar que el ID coincida
-            var success = await _pollService.VoteMultipleAsync(voteDto, userId);
-            
-            if (!success)
-            {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "No se pudo registrar el voto. Verifique que la encuesta esté activa y las opciones sean válidas."
-                });
-            }
+        voteDto.PollId = id;
+        var success = await _pollService.VoteMultipleAsync(voteDto, userId);
+        
+        if (!success)
+            return BadRequestError("No se pudo registrar el voto. Verifique que la encuesta esté activa y las opciones sean válidas.");
 
-            return Ok(new ApiResponse<object>
-            {
-                Success = true,
-                Message = "Votos registrados exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<object>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        return Success<object>(null!, "Votos registrados exitosamente");
     }
 
     [HttpPost("{id}/vote-custom")]
-    public async Task<ActionResult<ApiResponse<object>>> VoteCustom(int id, [FromBody] CustomVoteDto voteDto)
+    public async Task<IActionResult> VoteCustom(int id, [FromBody] CustomVoteDto voteDto)
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Usuario no autenticado"
-                });
-            }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            if (string.IsNullOrWhiteSpace(voteDto.CustomText))
-            {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Debe proporcionar un texto personalizado"
-                });
-            }
+        if (string.IsNullOrWhiteSpace(voteDto.CustomText))
+            return BadRequestError("Debe proporcionar un texto personalizado");
 
-            voteDto.PollId = id;
-            var success = await _pollService.VoteCustomAsync(voteDto, userId);
-            
-            if (!success)
-            {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "No se pudo registrar el voto. Verifique que la encuesta permita opciones personalizadas."
-                });
-            }
+        voteDto.PollId = id;
+        var success = await _pollService.VoteCustomAsync(voteDto, userId);
+        
+        if (!success)
+            return BadRequestError("No se pudo registrar el voto. Verifique que la encuesta permita opciones personalizadas.");
 
-            return Ok(new ApiResponse<object>
-            {
-                Success = true,
-                Message = "Voto personalizado registrado exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<object>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        return Success<object>(null!, "Voto personalizado registrado exitosamente");
     }
 
     [HttpPost("{id}/vote-custom-multiple")]
-    public async Task<ActionResult<ApiResponse<object>>> VoteCustomMultiple(int id, [FromBody] CustomMultipleVoteDto voteDto)
+    public async Task<IActionResult> VoteCustomMultiple(int id, [FromBody] CustomMultipleVoteDto voteDto)
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Usuario no autenticado"
-                });
-            }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            if ((voteDto.OptionIds == null || !voteDto.OptionIds.Any()) && string.IsNullOrWhiteSpace(voteDto.CustomText))
-            {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Debe seleccionar al menos una opción o proporcionar texto personalizado"
-                });
-            }
+        if ((voteDto.OptionIds == null || !voteDto.OptionIds.Any()) && string.IsNullOrWhiteSpace(voteDto.CustomText))
+            return BadRequestError("Debe seleccionar al menos una opción o proporcionar texto personalizado");
 
-            voteDto.PollId = id;
-            var success = await _pollService.VoteCustomMultipleAsync(voteDto, userId);
-            
-            if (!success)
-            {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "No se pudo registrar el voto. Verifique que la encuesta esté activa y permita opciones personalizadas."
-                });
-            }
+        voteDto.PollId = id;
+        var success = await _pollService.VoteCustomMultipleAsync(voteDto, userId);
+        
+        if (!success)
+            return BadRequestError("No se pudo registrar el voto. Verifique que la encuesta esté activa y permita opciones personalizadas.");
 
-            return Ok(new ApiResponse<object>
-            {
-                Success = true,
-                Message = "Votos registrados exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<object>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        return Success<object>(null!, "Votos registrados exitosamente");
     }
 
     [HttpPut("{id}/close")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<object>>> ClosePoll(int id)
+    public async Task<IActionResult> ClosePoll(int id)
     {
-        try
-        {
-            var success = await _pollService.ClosePollAsync(id);
-            if (!success)
-            {
-                return NotFound(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Encuesta no encontrada"
-                });
-            }
+        var success = await _pollService.ClosePollAsync(id);
+        if (!success)
+            return NotFoundError("Encuesta no encontrada");
 
-            return Ok(new ApiResponse<object>
-            {
-                Success = true,
-                Message = "Encuesta cerrada exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<object>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        return Success<object>(null!, "Encuesta cerrada exitosamente");
     }
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<object>>> DeletePoll(int id)
+    public async Task<IActionResult> DeletePoll(int id)
     {
-        try
-        {
-            var success = await _pollService.DeletePollAsync(id);
-            if (!success)
-            {
-                return NotFound(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Encuesta no encontrada"
-                });
-            }
+        var success = await _pollService.DeletePollAsync(id);
+        if (!success)
+            return NotFoundError("Encuesta no encontrada");
 
-            return Ok(new ApiResponse<object>
-            {
-                Success = true,
-                Message = "Encuesta eliminada exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<object>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        return Success<object>(null!, "Encuesta eliminada exitosamente");
     }
 }

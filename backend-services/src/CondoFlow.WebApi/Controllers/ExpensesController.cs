@@ -27,20 +27,11 @@ public class ExpensesController : ControllerBase
         try
         {
             var expenses = await _expenseService.GetAllExpensesAsync();
-            return Ok(new ApiResponse<IEnumerable<ExpenseDto>>
-            {
-                Success = true,
-                Data = expenses,
-                Message = "Gastos obtenidos exitosamente"
-            });
+            return Ok(ApiResponse<IEnumerable<ExpenseDto>>.SuccessResult(expenses, "Gastos obtenidos exitosamente", 200));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new ApiResponse<IEnumerable<ExpenseDto>>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
+            return StatusCode(500, ApiResponse<IEnumerable<ExpenseDto>>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
         }
     }
 
@@ -52,27 +43,14 @@ public class ExpensesController : ControllerBase
             var expense = await _expenseService.GetExpenseByIdAsync(id);
             if (expense == null)
             {
-                return NotFound(new ApiResponse<ExpenseDto>
-                {
-                    Success = false,
-                    Message = "Gasto no encontrado"
-                });
+                return NotFound(ApiResponse<ExpenseDto>.ErrorResult("Gasto no encontrado", 404));
             }
 
-            return Ok(new ApiResponse<ExpenseDto>
-            {
-                Success = true,
-                Data = expense,
-                Message = "Gasto obtenido exitosamente"
-            });
+            return Ok(ApiResponse<ExpenseDto>.SuccessResult(expense, "Gasto obtenido exitosamente", 200));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new ApiResponse<ExpenseDto>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
+            return StatusCode(500, ApiResponse<ExpenseDto>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
         }
     }
 
@@ -85,11 +63,7 @@ public class ExpensesController : ControllerBase
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized(new ApiResponse<ExpenseDto>
-                {
-                    Success = false,
-                    Message = "Usuario no autenticado"
-                });
+                return Unauthorized(ApiResponse<ExpenseDto>.ErrorResult("Usuario no autenticado", 401));
             }
 
             string? invoiceUrl = null;
@@ -99,20 +73,11 @@ public class ExpensesController : ControllerBase
             }
 
             var expense = await _expenseService.CreateExpenseAsync(createDto, userId, invoiceUrl);
-            return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, new ApiResponse<ExpenseDto>
-            {
-                Success = true,
-                Data = expense,
-                Message = "Gasto creado exitosamente"
-            });
+            return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, ApiResponse<ExpenseDto>.SuccessResult(expense, "Gasto creado exitosamente", 201));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new ApiResponse<ExpenseDto>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
+            return StatusCode(500, ApiResponse<ExpenseDto>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
         }
     }
 
@@ -137,27 +102,14 @@ public class ExpensesController : ControllerBase
             var expense = await _expenseService.UpdateExpenseAsync(id, updateDto, invoiceUrl);
             if (expense == null)
             {
-                return NotFound(new ApiResponse<ExpenseDto>
-                {
-                    Success = false,
-                    Message = "Gasto no encontrado"
-                });
+                return NotFound(ApiResponse<ExpenseDto>.ErrorResult("Gasto no encontrado", 404));
             }
 
-            return Ok(new ApiResponse<ExpenseDto>
-            {
-                Success = true,
-                Data = expense,
-                Message = "Gasto actualizado exitosamente"
-            });
+            return Ok(ApiResponse<ExpenseDto>.SuccessResult(expense, "Gasto actualizado exitosamente", 200));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new ApiResponse<ExpenseDto>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
+            return StatusCode(500, ApiResponse<ExpenseDto>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
         }
     }
 
@@ -170,26 +122,14 @@ public class ExpensesController : ControllerBase
             var deleted = await _expenseService.DeleteExpenseAsync(id);
             if (!deleted)
             {
-                return NotFound(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Gasto no encontrado"
-                });
+                return NotFound(ApiResponse<object>.ErrorResult("Gasto no encontrado", 404));
             }
 
-            return Ok(new ApiResponse<object>
-            {
-                Success = true,
-                Message = "Gasto eliminado exitosamente"
-            });
+            return Ok(ApiResponse<object>.SuccessResult(null, "Gasto eliminado exitosamente", 200));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new ApiResponse<object>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
+            return StatusCode(500, ApiResponse<object>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
         }
     }
     
@@ -245,20 +185,11 @@ public class ExpenseCategoriesController : ControllerBase
         try
         {
             var categories = await _expenseService.GetCategoriesAsync();
-            return Ok(new ApiResponse<IEnumerable<ExpenseCategoryDto>>
-            {
-                Success = true,
-                Data = categories,
-                Message = "Categorías obtenidas exitosamente"
-            });
+            return Ok(ApiResponse<IEnumerable<ExpenseCategoryDto>>.SuccessResult(categories, "Categorías obtenidas exitosamente", 200));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new ApiResponse<IEnumerable<ExpenseCategoryDto>>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
+            return StatusCode(500, ApiResponse<IEnumerable<ExpenseCategoryDto>>.ErrorResult($"Error interno del servidor: {ex.Message}", 500));
         }
     }
 }

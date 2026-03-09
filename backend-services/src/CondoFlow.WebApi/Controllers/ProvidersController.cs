@@ -10,7 +10,7 @@ namespace CondoFlow.WebApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ProvidersController : ControllerBase
+public class ProvidersController : BaseApiController
 {
     private readonly IProviderService _providerService;
 
@@ -20,179 +20,60 @@ public class ProvidersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ProviderDto>>>> GetProviders()
+    public async Task<IActionResult> GetProviders()
     {
-        try
-        {
-            var providers = await _providerService.GetAllProvidersAsync();
-            return Ok(new ApiResponse<IEnumerable<ProviderDto>>
-            {
-                Success = true,
-                Data = providers,
-                Message = "Proveedores obtenidos exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<IEnumerable<ProviderDto>>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        var providers = await _providerService.GetAllProvidersAsync();
+        return Success(providers, "Proveedores obtenidos exitosamente");
     }
 
     [HttpGet("active")]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ProviderDto>>>> GetActiveProviders()
+    public async Task<IActionResult> GetActiveProviders()
     {
-        try
-        {
-            var providers = await _providerService.GetActiveProvidersAsync();
-            return Ok(new ApiResponse<IEnumerable<ProviderDto>>
-            {
-                Success = true,
-                Data = providers,
-                Message = "Proveedores activos obtenidos exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<IEnumerable<ProviderDto>>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        var providers = await _providerService.GetActiveProvidersAsync();
+        return Success(providers, "Proveedores activos obtenidos exitosamente");
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ApiResponse<ProviderDto>>> GetProvider(int id)
+    public async Task<IActionResult> GetProvider(int id)
     {
-        try
-        {
-            var provider = await _providerService.GetProviderByIdAsync(id);
-            if (provider == null)
-            {
-                return NotFound(new ApiResponse<ProviderDto>
-                {
-                    Success = false,
-                    Message = "Proveedor no encontrado"
-                });
-            }
+        var provider = await _providerService.GetProviderByIdAsync(id);
+        if (provider == null)
+            return NotFoundError<ProviderDto>("Proveedor no encontrado");
 
-            return Ok(new ApiResponse<ProviderDto>
-            {
-                Success = true,
-                Data = provider,
-                Message = "Proveedor obtenido exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<ProviderDto>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        return Success(provider, "Proveedor obtenido exitosamente");
     }
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<ProviderDto>>> CreateProvider(CreateProviderDto createDto)
+    public async Task<IActionResult> CreateProvider(CreateProviderDto createDto)
     {
-        try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new ApiResponse<ProviderDto>
-                {
-                    Success = false,
-                    Message = "Usuario no autenticado"
-                });
-            }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return UnauthorizedError("Usuario no autenticado");
 
-            var provider = await _providerService.CreateProviderAsync(createDto, userId);
-            return CreatedAtAction(nameof(GetProvider), new { id = provider.Id }, new ApiResponse<ProviderDto>
-            {
-                Success = true,
-                Data = provider,
-                Message = "Proveedor creado exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<ProviderDto>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        var provider = await _providerService.CreateProviderAsync(createDto, userId);
+        return Created(provider, "Proveedor creado exitosamente");
     }
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<ProviderDto>>> UpdateProvider(int id, UpdateProviderDto updateDto)
+    public async Task<IActionResult> UpdateProvider(int id, UpdateProviderDto updateDto)
     {
-        try
-        {
-            var provider = await _providerService.UpdateProviderAsync(id, updateDto);
-            if (provider == null)
-            {
-                return NotFound(new ApiResponse<ProviderDto>
-                {
-                    Success = false,
-                    Message = "Proveedor no encontrado"
-                });
-            }
+        var provider = await _providerService.UpdateProviderAsync(id, updateDto);
+        if (provider == null)
+            return NotFoundError<ProviderDto>("Proveedor no encontrado");
 
-            return Ok(new ApiResponse<ProviderDto>
-            {
-                Success = true,
-                Data = provider,
-                Message = "Proveedor actualizado exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<ProviderDto>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        return Success(provider, "Proveedor actualizado exitosamente");
     }
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<ApiResponse<object>>> DeleteProvider(int id)
+    public async Task<IActionResult> DeleteProvider(int id)
     {
-        try
-        {
-            var deleted = await _providerService.DeleteProviderAsync(id);
-            if (!deleted)
-            {
-                return NotFound(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Proveedor no encontrado"
-                });
-            }
+        var deleted = await _providerService.DeleteProviderAsync(id);
+        if (!deleted)
+            return NotFoundError("Proveedor no encontrado");
 
-            return Ok(new ApiResponse<object>
-            {
-                Success = true,
-                Message = "Proveedor eliminado exitosamente"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new ApiResponse<object>
-            {
-                Success = false,
-                Message = $"Error interno del servidor: {ex.Message}"
-            });
-        }
+        return Success<object>(null!, "Proveedor eliminado exitosamente");
     }
 }
