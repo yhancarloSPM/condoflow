@@ -1,7 +1,8 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 import { ReservationService } from '../../core/services/reservation.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -26,8 +27,6 @@ export class ReservationsComponent implements OnInit {
   selectedEventType: string = '';
   notes: string = '';
   minDateStr = new Date().toISOString().split('T')[0];
-  loading = signal(false);
-  reservations = signal<any[]>([]);
   currentPage = signal(1);
   pageSize = environment.pagination.defaultPageSize;
   eventTypeFilter = '';
@@ -36,6 +35,17 @@ export class ReservationsComponent implements OnInit {
   dateToFilter = '';
   allReservations: any[] = [];
   filteredReservations = signal<any[]>([]);
+  reservations = signal<any[]>([]);
+  
+  // rxResource para cargar reservas automáticamente
+  reservationsResource = rxResource({
+    request: () => ({}),
+    loader: () => this.reservationService.getMyReservations()
+  });
+  
+  // Computed values derivados del resource
+  loading = computed(() => this.reservationsResource.isLoading());
+  reservationsError = computed(() => this.reservationsResource.error());
   
   paginatedReservations = computed(() => {
     const start = (this.currentPage() - 1) * this.pageSize;
@@ -66,43 +76,36 @@ export class ReservationsComponent implements OnInit {
     private authService: AuthService,
     public notificationService: NotificationService,
     private catalogService: CatalogService
-  ) {}
+  ) {
+    // Effect para procesar reservas cuando el resource se actualice
+    effect(() => {
+      const response = this.reservationsResource.value();
+      
+      if (response?.success) {
+        const sorted = (response.data || []).sort((a: any, b: any) => {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+        this.allReservations = sorted;
+        this.applyFilters();
+      }
+      
+      // Manejar errores
+      const error = this.reservationsError();
+      if (error) {
+        console.error('Error cargando reservas:', error);
+        this.allReservations = [];
+        this.applyFilters();
+      }
+    });
+  }
 
   async ngOnInit() {
     this.currentUser.set(this.authService.user());
     this.loadCatalogs();
-    this.loadReservations();
+    // rxResource cargará las reservas automáticamente
     await this.notificationService.startConnection();
   }
-  
-  private addTestData() {
-    if (this.allReservations.length === 0) {
-      const testReservations = [
-        {
-          id: '1',
-          reservationDate: '2024-01-15',
-          startTime: '14:00:00',
-          endTime: '18:00:00',
-          eventTypeCode: 'birthday',
-          notes: 'Cumpleaños de mi hijo',
-          status: 'Confirmed',
-          createdAt: '2024-01-10'
-        },
-        {
-          id: '2',
-          reservationDate: '2024-01-20',
-          startTime: '10:00:00',
-          endTime: '14:00:00',
-          eventTypeCode: 'meeting',
-          notes: 'Reunión familiar',
-          status: 'Pending',
-          createdAt: '2024-01-12'
-        }
-      ];
-      this.allReservations = testReservations;
-      this.applyFilters();
-    }
-  }
+
 
   private loadCatalogs() {
     // Cargar tipos de evento
@@ -125,27 +128,7 @@ export class ReservationsComponent implements OnInit {
     });
   }
 
-  loadReservations() {
-    this.loading.set(true);
-    this.reservationService.getMyReservations().subscribe({
-      next: (response) => {
-        if (response.success) {
-          const sorted = (response.data || []).sort((a: any, b: any) => {
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-          });
-          this.allReservations = sorted;
-          this.applyFilters();
-        }
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error cargando reservas:', error);
-        this.allReservations = [];
-        this.applyFilters();
-        this.loading.set(false);
-      }
-    });
-  }
+
 
   applyFilters() {
     let filtered = [...this.allReservations];
@@ -255,8 +238,6 @@ export class ReservationsComponent implements OnInit {
       return;
     }
     
-    this.loading.set(true);
-    
     const reservation = {
       reservationDate: this.selectedDateStr,
       startTime: this.startTime + ':00',
@@ -269,16 +250,14 @@ export class ReservationsComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.showSuccessMessage('Reserva creada exitosamente. Pendiente de aprobación.');
-          this.loadReservations();
+          this.reservationsResource.reload();
           this.resetForm();
         }
-        this.loading.set(false);
       },
       error: (error) => {
         console.error('Error creando reserva:', error);
         const errorMessage = error.error?.message || 'Error al crear la reserva';
         this.showErrorMessage(errorMessage);
-        this.loading.set(false);
       }
     });
   }
@@ -309,7 +288,7 @@ export class ReservationsComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.showSuccessMessage('Reserva cancelada exitosamente');
-          this.loadReservations();
+          this.reservationsResource.reload();
         }
         this.showCancelModal.set(false);
       },
