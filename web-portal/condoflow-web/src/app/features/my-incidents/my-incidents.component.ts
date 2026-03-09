@@ -1,7 +1,8 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 import { IncidentService } from '../../core/services/incident.service';
 import { CatalogService, CatalogItem } from '../../core/services/catalog.service';
@@ -16,8 +17,6 @@ import { NavbarComponent } from '../../shared/components/navbar.component';
 
 })
 export class MyIncidentsComponent implements OnInit {
-  loading = signal(false);
-  incidents = signal<any[]>([]);
   currentPage = signal(1);
   pageSize = 10;
   statusFilter = '';
@@ -27,6 +26,17 @@ export class MyIncidentsComponent implements OnInit {
   dateToFilter = '';
   allIncidents: any[] = [];
   filteredIncidents = signal<any[]>([]);
+  incidents = signal<any[]>([]);
+  
+  // rxResource para cargar incidencias automáticamente
+  incidentsResource = rxResource({
+    request: () => ({}),
+    loader: () => this.incidentService.getMyIncidents()
+  });
+  
+  // Computed values derivados del resource
+  loading = computed(() => this.incidentsResource.isLoading());
+  incidentsError = computed(() => this.incidentsResource.error());
   
   // Exponer Math para el template
   Math = Math;
@@ -68,11 +78,30 @@ export class MyIncidentsComponent implements OnInit {
     private authService: AuthService,
     private incidentService: IncidentService,
     private catalogService: CatalogService
-  ) {}
+  ) {
+    // Effect para procesar incidencias cuando el resource se actualice
+    effect(() => {
+      const response = this.incidentsResource.value();
+      
+      if (response?.success) {
+        this.allIncidents = response.data || [];
+        this.applyFilters();
+        this.updateCounts();
+      }
+      
+      // Manejar errores
+      const error = this.incidentsError();
+      if (error) {
+        console.error('Error cargando incidencias:', error);
+        this.allIncidents = [];
+        this.applyFilters();
+      }
+    });
+  }
 
   ngOnInit() {
     this.loadCatalogs();
-    this.loadIncidents();
+    // rxResource cargará las incidencias automáticamente
   }
 
   private loadCatalogs() {
@@ -101,28 +130,7 @@ export class MyIncidentsComponent implements OnInit {
     });
   }
 
-  loadIncidents() {
-    const user = this.authService.currentUser();
-    if (!user?.ownerId) return;
-    
-    this.loading.set(true);
-    this.incidentService.getMyIncidents().subscribe({
-      next: (response: any) => {
-        if (response.success) {
-          this.allIncidents = response.data || [];
-          this.applyFilters();
-          this.updateCounts();
-        }
-        this.loading.set(false);
-      },
-      error: (error: any) => {
-        console.error('Error cargando incidencias:', error);
-        this.allIncidents = [];
-        this.applyFilters();
-        this.loading.set(false);
-      }
-    });
-  }
+
 
   applyFilters() {
     let filtered = [...this.allIncidents];
@@ -239,8 +247,6 @@ export class MyIncidentsComponent implements OnInit {
   createIncident() {
     if (!this.selectedCategory || !this.selectedPriority || !this.title || !this.description) return;
     
-    this.loading.set(true);
-    
     const formData = new FormData();
     formData.append('category', this.selectedCategory);
     formData.append('priority', this.selectedPriority);
@@ -256,15 +262,13 @@ export class MyIncidentsComponent implements OnInit {
         if (response.success) {
           this.showSuccessMessage('Incidencia reportada exitosamente');
           this.resetForm();
-          this.loadIncidents();
+          this.incidentsResource.reload();
         }
-        this.loading.set(false);
       },
       error: (error) => {
         console.error('Error creando incidencia:', error);
         const errorMessage = error.error?.message || 'Error al reportar la incidencia';
         this.showErrorMessage(errorMessage);
-        this.loading.set(false);
       }
     });
   }
@@ -446,7 +450,7 @@ export class MyIncidentsComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.showSuccessMessage('Incidencia cancelada exitosamente');
-          this.loadIncidents();
+          this.incidentsResource.reload();
         }
         this.showCancelModal.set(false);
         this.cancelling.set(false);
