@@ -1,5 +1,6 @@
 using CondoFlow.Application.Common.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Mail;
 
@@ -10,9 +11,12 @@ public class GmailService : IEmailService
     private readonly SmtpClient _smtpClient;
     private readonly string _fromEmail;
     private readonly string _fromName;
+    private readonly ILogger<GmailService> _logger;
 
-    public GmailService(IConfiguration configuration)
+    public GmailService(IConfiguration configuration, ILogger<GmailService> logger)
     {
+        _logger = logger;
+        
         var host = configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
         var port = int.Parse(configuration["Email:SmtpPort"] ?? "587");
         var username = configuration["Email:Username"] ?? throw new ArgumentNullException("Email:Username");
@@ -27,16 +31,16 @@ public class GmailService : IEmailService
             EnableSsl = true
         };
 
-        Console.WriteLine($"[GMAIL] Servicio inicializado - Email: {_fromEmail}");
-        Console.WriteLine($"[GMAIL] Host: {host}:{port}, SSL: true");
+        _logger.LogInformation("Gmail service initialized - From: {FromEmail}, Host: {Host}:{Port}, SSL: true", 
+            _fromEmail, host, port);
     }
 
     public async Task SendUserApprovedEmailAsync(string toEmail, string firstName, string lastName, string block, string apartment)
     {
         try
         {
-            Console.WriteLine($"[GMAIL] Iniciando envío de email a: {toEmail}");
-            Console.WriteLine($"[GMAIL] Usuario: {firstName} {lastName}, Apt: {block}-{apartment}");
+            _logger.LogInformation("Sending approval email to {Email} for user {FirstName} {LastName}, Apartment: {Block}-{Apartment}", 
+                toEmail, firstName, lastName, block, apartment);
             
             var subject = "¡Tu cuenta en CondoFlow ha sido aprobada!";
             var body = $@"
@@ -59,13 +63,11 @@ public class GmailService : IEmailService
 </div>";
 
             await SendEmailAsync(toEmail, subject, body);
-            Console.WriteLine($"[GMAIL] ✅ Email de aprobación enviado a: {toEmail}");
+            _logger.LogInformation("Approval email sent successfully to {Email}", toEmail);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[GMAIL] ❌ Error enviando aprobación: {ex.Message}");
-            if (ex.InnerException != null)
-                Console.WriteLine($"[GMAIL] ❌ Inner Exception: {ex.InnerException.Message}");
+            _logger.LogError(ex, "Failed to send approval email to {Email}", toEmail);
             throw;
         }
     }
@@ -74,6 +76,9 @@ public class GmailService : IEmailService
     {
         try
         {
+            _logger.LogInformation("Sending rejection email to {Email} for user {FirstName} {LastName}", 
+                toEmail, firstName, lastName);
+            
             var subject = "Actualización sobre tu solicitud en CondoFlow";
             var body = $@"
 <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
@@ -92,19 +97,19 @@ public class GmailService : IEmailService
 </div>";
 
             await SendEmailAsync(toEmail, subject, body);
-            Console.WriteLine($"[GMAIL] ✅ Email de rechazo enviado a: {toEmail}");
+            _logger.LogInformation("Rejection email sent successfully to {Email}", toEmail);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[GMAIL] ❌ Error enviando rechazo: {ex.Message}");
+            _logger.LogError(ex, "Failed to send rejection email to {Email}", toEmail);
             throw;
         }
     }
 
     private async Task SendEmailAsync(string toEmail, string subject, string body)
     {
-        Console.WriteLine($"[GMAIL] Creando mensaje - De: {_fromEmail} -> Para: {toEmail}");
-        Console.WriteLine($"[GMAIL] Asunto: {subject}");
+        _logger.LogDebug("Creating email message - From: {FromEmail} To: {ToEmail}, Subject: {Subject}", 
+            _fromEmail, toEmail, subject);
         
         var mailMessage = new MailMessage
         {
@@ -116,9 +121,9 @@ public class GmailService : IEmailService
         
         mailMessage.To.Add(toEmail);
         
-        Console.WriteLine($"[GMAIL] Enviando email vía SMTP...");
+        _logger.LogDebug("Sending email via SMTP...");
         await _smtpClient.SendMailAsync(mailMessage);
-        Console.WriteLine($"[GMAIL] Email enviado exitosamente");
+        _logger.LogDebug("Email sent successfully via SMTP");
     }
 
     public void Dispose()

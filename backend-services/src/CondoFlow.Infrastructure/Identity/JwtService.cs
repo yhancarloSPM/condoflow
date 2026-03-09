@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -12,11 +13,13 @@ public class JwtService
 {
     private readonly IConfiguration _configuration;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ILogger<JwtService> _logger;
 
-    public JwtService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
+    public JwtService(IConfiguration configuration, UserManager<ApplicationUser> userManager, ILogger<JwtService> logger)
     {
         _configuration = configuration;
         _userManager = userManager;
+        _logger = logger;
     }
 
     public string GenerateToken(ApplicationUser user, IList<string> roles)
@@ -80,18 +83,19 @@ public class JwtService
 
     public async Task<string> StoreRefreshTokenAsync(ApplicationUser user, string refreshToken)
     {
-        Console.WriteLine($"[JWT] Almacenando refresh token para {user.Email}");
-        Console.WriteLine($"[JWT] Token: {refreshToken[..20]}...");
+        _logger.LogInformation("Storing refresh token for user {Email}", user.Email);
+        _logger.LogDebug("Token preview: {TokenPreview}...", refreshToken[..20]);
         
         var result = await _userManager.SetAuthenticationTokenAsync(user, "CondoFlow", "RefreshToken", refreshToken);
         
         if (result.Succeeded)
         {
-            Console.WriteLine($"[JWT] Token almacenado exitosamente");
+            _logger.LogInformation("Refresh token stored successfully for user {Email}", user.Email);
         }
         else
         {
-            Console.WriteLine($"[JWT] ERROR al almacenar token: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            _logger.LogError("Failed to store refresh token for user {Email}. Errors: {Errors}", user.Email, errors);
         }
         
         return refreshToken;
@@ -99,18 +103,20 @@ public class JwtService
 
     public async Task<bool> ValidateRefreshTokenAsync(ApplicationUser user, string refreshToken)
     {
-        Console.WriteLine($"[JWT] Validando refresh token para {user.Email}");
+        _logger.LogInformation("Validating refresh token for user {Email}", user.Email);
         var storedToken = await _userManager.GetAuthenticationTokenAsync(user, "CondoFlow", "RefreshToken");
         
-        Console.WriteLine($"[JWT] Token almacenado existe: {!string.IsNullOrEmpty(storedToken)}");
-        if (!string.IsNullOrEmpty(storedToken))
+        var tokenExists = !string.IsNullOrEmpty(storedToken);
+        _logger.LogDebug("Stored token exists: {TokenExists}", tokenExists);
+        
+        if (tokenExists)
         {
-            Console.WriteLine($"[JWT] Stored: {storedToken[..20]}...");
-            Console.WriteLine($"[JWT] Request: {refreshToken[..20]}...");
+            _logger.LogDebug("Stored token preview: {StoredPreview}...", storedToken![..20]);
+            _logger.LogDebug("Request token preview: {RequestPreview}...", refreshToken[..20]);
         }
         
         var isValid = storedToken == refreshToken;
-        Console.WriteLine($"[JWT] Token válido: {isValid}");
+        _logger.LogInformation("Refresh token validation result for user {Email}: {IsValid}", user.Email, isValid);
         
         return isValid;
     }

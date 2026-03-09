@@ -5,6 +5,7 @@ using CondoFlow.Application.Interfaces.Repositories;
 using CondoFlow.Application.Interfaces.Services;
 using CondoFlow.Domain.Entities;
 using CondoFlow.Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace CondoFlow.Application.Services;
 
@@ -14,17 +15,20 @@ public class ReservationService : IReservationService
     private readonly IUserRepository _userRepository;
     private readonly INotificationService _notificationService;
     private readonly IMapper _mapper;
+    private readonly ILogger<ReservationService> _logger;
 
     public ReservationService(
         IReservationRepository reservationRepository,
         IUserRepository userRepository,
         INotificationService notificationService,
-        IMapper mapper)
+        IMapper mapper,
+        ILogger<ReservationService> logger)
     {
         _reservationRepository = reservationRepository;
         _userRepository = userRepository;
         _notificationService = notificationService;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<ReservationDto> MapReservationToDtoAsync(Reservation reservation)
@@ -49,20 +53,34 @@ public class ReservationService : IReservationService
 
     public async Task<ReservationDto> CreateReservationAsync(CreateReservationDto dto, string userId)
     {
+        _logger.LogInformation("Creating reservation for user {UserId} on {Date}", userId, dto.ReservationDate);
+        
         // Validaciones de negocio
         if (dto.ReservationDate.Date <= DateTime.Now.Date)
+        {
+            _logger.LogWarning("Reservation date validation failed for user {UserId}: date must be in the future", userId);
             throw new InvalidOperationException("La fecha de reserva debe ser futura");
+        }
 
         if (!TimeSpan.TryParse(dto.StartTime, out var startTime) || !TimeSpan.TryParse(dto.EndTime, out var endTime))
+        {
+            _logger.LogWarning("Invalid time format for user {UserId}: StartTime={StartTime}, EndTime={EndTime}", userId, dto.StartTime, dto.EndTime);
             throw new InvalidOperationException("Formato de hora inválido");
+        }
 
         if (startTime == endTime)
+        {
+            _logger.LogWarning("Start time equals end time for user {UserId}", userId);
             throw new InvalidOperationException("La hora de inicio debe ser diferente a la hora de fin");
+        }
 
         // Verificar disponibilidad
         var isAvailable = await _reservationRepository.IsSlotAvailableAsync(dto.ReservationDate, startTime, endTime);
         if (!isAvailable)
+        {
+            _logger.LogWarning("Time slot not available for user {UserId} on {Date} from {StartTime} to {EndTime}", userId, dto.ReservationDate, startTime, endTime);
             throw new InvalidOperationException("El horario seleccionado no está disponible");
+        }
 
         // Verificar límite de reservas por mes (máximo 5)
         var userReservations = await _reservationRepository.GetByUserIdAsync(userId);
@@ -72,7 +90,10 @@ public class ReservationService : IReservationService
             r.ReservationDate.Year == dto.ReservationDate.Year);
         
         if (monthlyReservations >= 5)
+        {
+            _logger.LogWarning("User {UserId} has reached monthly reservation limit: {Count}/5", userId, monthlyReservations);
             throw new InvalidOperationException("Has alcanzado el límite de 5 reservas para este mes. Puedes crear nuevas reservas el próximo mes o cancelar una reserva existente.");
+        }
 
         // Crear reserva
         var reservation = new Reservation
@@ -89,6 +110,8 @@ public class ReservationService : IReservationService
         var created = await _reservationRepository.CreateAsync(reservation);
         var createdReservation = await _reservationRepository.GetByIdAsync(created.Id);
         
+        _logger.LogInformation("Reservation {ReservationId} created successfully for user {UserId}", created.Id, userId);
+        
         // Enviar notificación al admin
         await SendNewReservationNotificationToAdmin(createdReservation!);
         
@@ -97,31 +120,48 @@ public class ReservationService : IReservationService
 
     public async Task<ReservationDto> UpdateReservationStatusAsync(Guid id, string status, string? reason = null)
     {
+        _logger.LogInformation("Updating reservation {ReservationId} status to {Status}", id, status);
+        
         var reservation = await _reservationRepository.GetByIdAsync(id);
         if (reservation == null)
+        {
+            _logger.LogWarning("Reservation {ReservationId} not found", id);
             throw new KeyNotFoundException("Reserva no encontrada");
+        }
 
         if (!Enum.TryParse<ReservationStatus>(status, out var newStatus))
+        {
+            _logger.LogWarning("Invalid status {Status} for reservation {ReservationId}", status, id);
             throw new InvalidOperationException("Estado inválido");
+        }
 
         // Validar motivo para rechazos
         if (newStatus == ReservationStatus.Rejected)
         {
             if (string.IsNullOrWhiteSpace(reason))
+            {
+                _logger.LogWarning("Rejection reason missing for reservation {ReservationId}", id);
                 throw new InvalidOperationException("El motivo de rechazo es obligatorio");
+            }
             
             if (reason.Length < 10)
+            {
+                _logger.LogWarning("Rejection reason too short for reservation {ReservationId}: {Length} characters", id, reason.Length);
                 throw new InvalidOperationException("El motivo de rechazo debe tener al menos 10 caracteres");
+            }
                 
             reservation.Reject(reason);
+            _logger.LogInformation("Reservation {ReservationId} rejected with reason: {Reason}", id, reason);
         }
         else if (newStatus == ReservationStatus.Confirmed)
         {
             reservation.Confirm();
+            _logger.LogInformation("Reservation {ReservationId} confirmed", id);
         }
         else
         {
             reservation.Status = newStatus;
+            _logger.LogInformation("Reservation {ReservationId} status updated to {Status}", id, newStatus);
         }
         
         var updated = await _reservationRepository.UpdateAsync(reservation);
@@ -134,19 +174,32 @@ public class ReservationService : IReservationService
 
     public async Task CancelReservationAsync(Guid id, string userId, bool isAdmin, string? reason = null)
     {
+        _logger.LogInformation("Cancelling reservation {ReservationId} by user {UserId} (IsAdmin: {IsAdmin})", id, userId, isAdmin);
+        
         var reservation = await _reservationRepository.GetByIdAsync(id);
         if (reservation == null)
+        {
+            _logger.LogWarning("Reservation {ReservationId} not found for cancellation", id);
             throw new KeyNotFoundException("Reserva no encontrada");
+        }
 
         if (!isAdmin && reservation.UserId != userId)
+        {
+            _logger.LogWarning("User {UserId} attempted to cancel reservation {ReservationId} without permission", userId, id);
             throw new UnauthorizedAccessException("No tienes permiso para cancelar esta reserva");
+        }
 
         if (reservation.Status != ReservationStatus.Pending && 
             reservation.Status != ReservationStatus.Confirmed)
+        {
+            _logger.LogWarning("Cannot cancel reservation {ReservationId} with status {Status}", id, reservation.Status);
             throw new InvalidOperationException("No se puede cancelar esta reserva");
+        }
 
         reservation.Cancel(reason);
         await _reservationRepository.UpdateAsync(reservation);
+        
+        _logger.LogInformation("Reservation {ReservationId} cancelled successfully", id);
         
         // Enviar notificación al admin si el owner cancela
         if (!isAdmin)

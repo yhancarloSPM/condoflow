@@ -15,11 +15,16 @@ public class ExpensesController : BaseApiController
 {
     private readonly IExpenseService _expenseService;
     private readonly IWebHostEnvironment _environment;
+    private readonly ILogger<ExpensesController> _logger;
 
-    public ExpensesController(IExpenseService expenseService, IWebHostEnvironment environment)
+    public ExpensesController(
+        IExpenseService expenseService, 
+        IWebHostEnvironment environment,
+        ILogger<ExpensesController> logger)
     {
         _expenseService = expenseService;
         _environment = environment;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -115,12 +120,13 @@ public class ExpensesController : BaseApiController
             if (System.IO.File.Exists(filePath))
             {
                 System.IO.File.Delete(filePath);
+                _logger.LogInformation("Invoice file deleted successfully: {FilePath}", filePath);
             }
         }
         catch (Exception ex)
         {
             // Log error but don't throw - file deletion shouldn't break the operation
-            Console.WriteLine($"Error deleting invoice file: {ex.Message}");
+            _logger.LogWarning(ex, "Failed to delete invoice file: {InvoiceUrl}", invoiceUrl);
         }
     }
 }

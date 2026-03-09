@@ -1,5 +1,6 @@
 using CondoFlow.Application.Common.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace CondoFlow.Infrastructure.Services;
@@ -9,14 +10,20 @@ public class TelegramService : IEmailService
     private readonly HttpClient _httpClient;
     private readonly string _botToken;
     private readonly string _chatId;
+    private readonly ILogger<TelegramService> _logger;
 
-    public TelegramService(IConfiguration configuration, HttpClient httpClient)
+    public TelegramService(
+        IConfiguration configuration, 
+        HttpClient httpClient,
+        ILogger<TelegramService> logger)
     {
         _httpClient = httpClient;
         _botToken = configuration["Telegram:BotToken"] ?? "";
         _chatId = configuration["Telegram:ChatId"] ?? "";
+        _logger = logger;
         
-        Console.WriteLine($"[TELEGRAM] Servicio inicializado - Token: {_botToken.Substring(0, 8)}***");
+        _logger.LogInformation("Telegram service initialized - Token: {TokenPrefix}***", 
+            _botToken.Length > 8 ? _botToken.Substring(0, 8) : "INVALID");
     }
 
     public async Task SendUserApprovedEmailAsync(string toEmail, string firstName, string lastName, string block, string apartment)
@@ -46,7 +53,7 @@ public class TelegramService : IEmailService
         {
             if (string.IsNullOrEmpty(_botToken) || string.IsNullOrEmpty(_chatId))
             {
-                Console.WriteLine("[TELEGRAM] Token o ChatId no configurado");
+                _logger.LogWarning("Telegram bot token or chat ID not configured");
                 return;
             }
 
@@ -65,17 +72,18 @@ public class TelegramService : IEmailService
             
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine($"[TELEGRAM] ✅ Mensaje enviado exitosamente");
+                _logger.LogInformation("Telegram message sent successfully to chat {ChatId}", _chatId);
             }
             else
             {
                 var error = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"[TELEGRAM] ❌ Error: {error}");
+                _logger.LogError("Failed to send Telegram message. Status: {StatusCode}, Error: {Error}", 
+                    response.StatusCode, error);
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[TELEGRAM] ❌ Excepción: {ex.Message}");
+            _logger.LogError(ex, "Exception occurred while sending Telegram message");
         }
     }
 }
