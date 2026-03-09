@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { DebtService } from '../../core/services/debt.service';
@@ -18,14 +19,12 @@ import { environment } from '../../../environments/environment';
 export class MyPaymentsComponent implements OnInit {
   activeTab = 'payment';
   currentUser = signal<any>(null);
-  payments = signal<any[]>([]);
   currentPage = signal(1);
   pageSize = 10;
   totalPages = signal(1);
-  loading = signal(false);
   submitting = signal(false);
   availableDebts = signal<any[]>([]);
-  allDebts: any[] = []; // Para almacenar todas las deudas y buscar por ID
+  allDebts: any[] = [];
   paymentConcepts = signal<any[]>([]);
   paymentForm: FormGroup;
   selectedFile: File | null = null;
@@ -40,6 +39,26 @@ export class MyPaymentsComponent implements OnInit {
   methodFilter = '';
   dateFromFilter = '';
   dateToFilter = '';
+  
+  // rxResource para cargar pagos automáticamente
+  paymentsResource = rxResource({
+    request: () => ({ ownerId: this.currentUser()?.ownerId }),
+    loader: ({ request }) => {
+      if (!request.ownerId) {
+        throw new Error('No owner ID available');
+      }
+      return this.paymentService.getPayments(request.ownerId);
+    }
+  });
+  
+  // Computed values derivados del resource
+  loading = computed(() => this.paymentsResource.isLoading());
+  paymentsError = computed(() => this.paymentsResource.error());
+  
+  // Procesar pagos cuando cambian
+  allPayments: any[] = [];
+  payments = signal<any[]>([]);
+  filteredPayments = signal<any[]>([]);
 
   constructor(
     private authService: AuthService,
@@ -54,6 +73,50 @@ export class MyPaymentsComponent implements OnInit {
       amount: ['', Validators.required],
       paymentDate: ['', Validators.required],
       paymentMethod: ['', Validators.required]
+    });
+    
+    // Effect para procesar pagos cuando el resource se actualice
+    effect(() => {
+      const response = this.paymentsResource.value();
+      
+      if (response?.success && response.data) {
+        const allPayments = response.data.map((payment: any) => {
+          let description = this.getConceptLabel(payment.concept);
+          
+          // Si es debt_payment, buscar la deuda asociada en allDebts
+          if (payment.concept === 'debt_payment' && payment.debtId) {
+            const associatedDebt = this.allDebts.find(debt => debt.id === payment.debtId);
+            if (associatedDebt && associatedDebt.concept) {
+              const monthMatch = associatedDebt.concept.match(/Mantenimiento (\w+) \d{4}/);
+              if (monthMatch) {
+                description = `Pago Mantenimiento ${monthMatch[1]}`;
+              }
+            }
+          }
+          
+          return {
+            id: payment.id,
+            description: description,
+            amount: payment.amount,
+            date: new Date(payment.paymentDate),
+            createdAt: new Date(payment.createdAt),
+            status: payment.status.toLowerCase(),
+            paymentMethod: payment.paymentMethod,
+            receiptUrl: payment.receiptUrl,
+            rejectionReason: payment.rejectionReason
+          };
+        });
+        
+        this.allPayments = allPayments;
+        this.applyFilters();
+      }
+      
+      // Manejar errores
+      const error = this.paymentsError();
+      if (error) {
+        console.error('Error cargando pagos:', error);
+        this.payments.set([]);
+      }
     });
   }
 
@@ -82,7 +145,7 @@ export class MyPaymentsComponent implements OnInit {
           }
         });
         
-        this.loadPayments();
+        // rxResource cargará los pagos automáticamente
       });
     } else {
       console.error('No owner ID found for user');
@@ -98,54 +161,6 @@ export class MyPaymentsComponent implements OnInit {
                hasFile);
     }
     return this.paymentForm.valid && hasFile;
-  }
-
-  loadPayments() {
-    const user = this.currentUser();
-    if (!user?.ownerId) return;
-    
-    this.loading.set(true);
-    this.paymentService.getPayments(user.ownerId).subscribe({
-      next: (response) => {
-        if (response.success) {
-          const allPayments = response.data.map((payment: any) => {
-            let description = this.getConceptLabel(payment.concept);
-            
-            // Si es debt_payment, buscar la deuda asociada en allDebts
-            if (payment.concept === 'debt_payment' && payment.debtId) {
-              const associatedDebt = this.allDebts.find(debt => debt.id === payment.debtId);
-              if (associatedDebt && associatedDebt.concept) {
-                const monthMatch = associatedDebt.concept.match(/Mantenimiento (\w+) \d{4}/);
-                if (monthMatch) {
-                  description = `Pago Mantenimiento ${monthMatch[1]}`;
-                }
-              }
-            }
-            
-            return {
-              id: payment.id,
-              description: description,
-              amount: payment.amount,
-              date: new Date(payment.paymentDate),
-              createdAt: new Date(payment.createdAt),
-              status: payment.status.toLowerCase(),
-              paymentMethod: payment.paymentMethod,
-              receiptUrl: payment.receiptUrl,
-              rejectionReason: payment.rejectionReason
-            };
-          });
-          
-          this.allPayments = allPayments;
-          this.applyFilters();
-        }
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error cargando pagos:', error);
-        this.payments.set([]);
-        this.loading.set(false);
-      }
-    });
   }
 
   loadPaymentConcepts() {
@@ -313,7 +328,8 @@ export class MyPaymentsComponent implements OnInit {
             const fileInput = document.getElementById('receipt') as HTMLInputElement;
             if (fileInput) fileInput.value = '';
             this.loadAvailableDebts().then(() => {
-              this.loadPayments();
+              // Recargar pagos usando rxResource
+              this.paymentsResource.reload();
             });
           } else {
             this.showErrorMessage(response.message);
@@ -428,20 +444,8 @@ export class MyPaymentsComponent implements OnInit {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  nextPage() {
-    if (this.currentPage() < this.totalPages()) {
-      this.currentPage.set(this.currentPage() + 1);
-      this.loadPayments();
-    }
-  }
-
-  prevPage() {
-    if (this.currentPage() > 1) {
-      this.currentPage.set(this.currentPage() - 1);
-      this.loadPayments();
-    }
-  }
-
+  Math = Math;
+  
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
@@ -451,11 +455,6 @@ export class MyPaymentsComponent implements OnInit {
       this.payments.set(paginatedPayments);
     }
   }
-
-  Math = Math;
-
-  filteredPayments = signal<any[]>([]);
-  allPayments: any[] = [];
 
   applyFilters() {
     let filtered = [...this.allPayments];
